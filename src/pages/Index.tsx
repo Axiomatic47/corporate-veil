@@ -56,19 +56,45 @@ const Index = () => {
             <Button
               onClick={() => setActiveSection("memorandum")}
               variant={activeSection === "memorandum" ? "default" : "outline"}
-              className="text-lg"
+              className={`text-lg ${
+                activeSection === "memorandum"
+                  ? "bg-sidebar-primary text-white"
+                  : "bg-transparent border-white text-white hover:bg-white/10"
+              }`}
             >
               Memorandum and Manifestation
             </Button>
             <Button
               onClick={() => setActiveSection("corrective")}
               variant={activeSection === "corrective" ? "default" : "outline"}
-              className="text-lg"
+              className={`text-lg ${
+                activeSection === "corrective"
+                  ? "bg-sidebar-primary text-white"
+                  : "bg-transparent border-white text-white hover:bg-white/10"
+              }`}
             >
               Corrective Measures
             </Button>
           </div>
         </div>
+
+        {/* Featured Section */}
+        <section className="mb-24">
+          <Card className="bg-[#222632] border-none p-8">
+            <CardContent className="text-gray-300">
+              <h2 className="text-2xl font-serif text-white mb-4">
+                {activeSection === "memorandum"
+                  ? "Understanding Corporate Personhood"
+                  : "Implementing Reform Measures"}
+              </h2>
+              <p className="leading-relaxed">
+                {activeSection === "memorandum"
+                  ? "Explore the foundational concepts and legal precedents that shape our understanding of corporate personhood in constitutional law. This section delves into the historical development, current interpretations, and implications for modern business practices."
+                  : "Discover proposed reforms and corrective measures designed to address the challenges and controversies surrounding corporate personhood. This section examines potential solutions and their impact on corporate governance and societal interests."}
+              </p>
+            </CardContent>
+          </Card>
+        </section>
 
         {/* Featured Work */}
         <section className="mt-24">
