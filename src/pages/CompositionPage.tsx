@@ -21,12 +21,8 @@ const CompositionPage = () => {
 
   const getCompositionTitle = () => {
     const collection = compositionId === "memorandum" ? compositionData.memorandum : compositionData.corrective;
-    const composition = collection.find(comp => comp.id === Number(sectionId));
-    return composition?.title ?? "Unknown Composition";
-  };
-
-  const getContent = (level: number) => {
-    return `This is the content for Section ${sectionId} of ${getCompositionTitle()} at literacy level ${level}. The content would adapt based on the selected literacy level.`;
+    // Always use the first composition as the main title for the collection
+    return collection[0]?.title ?? "Unknown Composition";
   };
 
   return (
@@ -60,7 +56,10 @@ const CompositionPage = () => {
           </div>
 
           <div className="bg-[#1A1F2C] rounded-lg p-8">
-            <p className="text-lg leading-relaxed">{getContent(literacyLevel)}</p>
+            <p className="text-lg leading-relaxed">
+              This is the content for Section {sectionId} of {getCompositionTitle()} at literacy level {literacyLevel}. 
+              The content would adapt based on the selected literacy level.
+            </p>
           </div>
         </div>
       </div>
