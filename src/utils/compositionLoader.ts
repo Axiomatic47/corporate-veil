@@ -1,6 +1,6 @@
 import { Composition } from './compositionData';
 
-const parseFrontMatter = (content: string) => {
+const parseFrontMatter = (content: string): { data: any; content: string } => {
   const frontMatterRegex = /^---\n([\s\S]*?)\n---\n([\s\S]*)$/;
   const match = content.match(frontMatterRegex);
   
@@ -33,12 +33,12 @@ export const loadCompositions = async (): Promise<Composition[]> => {
     const modules = import.meta.glob('/content/compositions/*.md', { 
       eager: true,
       import: 'default',
-      as: 'raw'
+      as: 'string'
     });
-    
+
     const compositions: Composition[] = [];
     let id = 1;
-    
+
     for (const path in modules) {
       const content = modules[path] as string;
       
