@@ -2,8 +2,8 @@ backend:
   name: github
   repo: Axiomatic47/corporate-veil
   branch: main
-  auth_endpoint: auth
   base_url: https://api.netlify.com
+  auth_endpoint: auth
 
 media_folder: "public/uploads"
 public_folder: "/uploads"
@@ -40,6 +40,6 @@ collections:
         pattern: "corrective"
 
 slug:
-  encoding: unicode
-  clean_accents: false
+  encoding: "ascii"
+  clean_accents: true
   sanitize_replacement: "-"

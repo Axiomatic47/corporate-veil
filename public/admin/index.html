@@ -38,25 +38,37 @@
     <!-- Initialize CMS -->
     <script>
       window.addEventListener('load', function() {
+        // Initialize CMS
         CMS.init();
 
-        // Add event listeners for content changes
-        if (window.CMS) {
-          CMS.registerEventListener({
-            name: 'preSave',
-            handler: function(entry) {
-              console.log('Content about to be saved:', entry);
-              return entry;
-            },
-          });
+        // Register preview template
+        const PreviewTemplate = createClass({
+          render: function() {
+            const entry = this.props.entry;
+            return h('div', {},
+              h('h1', {}, entry.getIn(['data', 'title'])),
+              h('div', {}, this.props.widgetFor('body'))
+            );
+          }
+        });
 
-          CMS.registerEventListener({
-            name: 'postSave',
-            handler: function(entry) {
-              console.log('Content was saved:', entry);
-            },
-          });
-        }
+        CMS.registerPreviewTemplate('compositions', PreviewTemplate);
+
+        // Register event listeners for content changes
+        CMS.registerEventListener({
+          name: 'preSave',
+          handler: function(entry) {
+            console.log('Content about to be saved:', entry);
+            return entry;
+          },
+        });
+
+        CMS.registerEventListener({
+          name: 'postSave',
+          handler: function(entry) {
+            console.log('Content was saved:', entry);
+          },
+        });
       });
     </script>
   </body>
