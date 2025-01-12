@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { compositionData } from "@/utils/compositionData";
@@ -11,13 +11,6 @@ const SectionsPage = () => {
   const compositions = compositionId === "memorandum" 
     ? compositionData.memorandum 
     : compositionData.corrective;
-
-  // Automatically navigate to the first section when the component mounts
-  useEffect(() => {
-    if (compositions && compositions.length > 0) {
-      navigate(`/composition/${compositionId}/section/${compositions[0].id}`);
-    }
-  }, [compositionId, compositions, navigate]);
 
   return (
     <div className="min-h-screen bg-[#0F1218] text-white">
