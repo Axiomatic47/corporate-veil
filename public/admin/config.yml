@@ -1,3 +1,4 @@
+# /public/admin/config.yml
 backend:
   name: github
   repo: Axiomatic47/corporate-veil
@@ -7,6 +8,14 @@ backend:
 
 media_folder: public/uploads
 public_folder: /uploads
+
+# Global slug settings
+slug:
+  encoding: unicode
+  clean_accents: false
+  sanitize_replacement: "-"
+
+publish_mode: simple
 
 collections:
   - name: compositions
@@ -29,8 +38,10 @@ collections:
         name: collection_type
         widget: select
         options:
-          - memorandum
-          - corrective
+          - label: Memorandum
+            value: memorandum
+          - label: Corrective
+            value: corrective
         required: true
       - label: Section
         name: section
@@ -43,20 +54,12 @@ collections:
     sortable_fields:
       - title
       - section
-    view_groups:
-      - label: Collection Type
+    filter:
+      field: collection_type
+    view_filters:
+      - label: Memorandum
         field: collection_type
-        groups:
-          - label: Memorandum
-            value: memorandum
-          - label: Corrective
-            value: corrective
-    preview: true
-    publish: true
-
-publish_mode: simple
-
-slug:
-  encoding: unicode
-  clean_accents: false
-  sanitize_replacement: "-"
+        pattern: memorandum
+      - label: Corrective
+        field: collection_type
+        pattern: corrective
