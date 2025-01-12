@@ -25,6 +25,7 @@ const App = () => (
           <Route path="/contact" element={<Contact />} />
           <Route path="/partners" element={<Partners />} />
           <Route path="/donate" element={<Donate />} />
+          <Route path="/admin/*" element={<div>Admin</div>} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
