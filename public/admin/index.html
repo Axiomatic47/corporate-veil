@@ -34,20 +34,17 @@
     <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
     <script>
       // Wait for CMS initialization
-      const waitForCMS = () => {
-        return new Promise((resolve) => {
-          const check = () => {
-            if (CMS.getBackend()) {
-              resolve();
-            } else {
-              setTimeout(check, 100);
-            }
-          };
-          check();
-        });
-      };
+      const waitForCMS = () => new Promise((resolve) => {
+        const checkCMS = () => {
+          if (CMS.getBackend()) {
+            resolve();
+          } else {
+            setTimeout(checkCMS, 100);
+          }
+        };
+        checkCMS();
+      });
 
-      // Component definition
       const PreviewComponent = createClass({
         getInitialState() {
           return {
@@ -60,15 +57,43 @@
           try {
             await waitForCMS();
             this.setState({ cmsReady: true });
+            // Force re-render after CMS is ready
+            this.forceUpdate();
           } catch (error) {
-            console.error('Error initializing CMS:', error);
+            console.error('Error in componentDidMount:', error);
           }
         },
 
-        shouldComponentUpdate(nextProps, nextState) {
-          return this.state.cmsReady !== nextState.cmsReady ||
-                 this.state.isCreating !== nextState.isCreating ||
-                 this.props.entry !== nextProps.entry;
+        async createNewSection(entry) {
+          if (!entry) throw new Error('No entry data');
+
+          const data = entry.get('data');
+          if (!data) throw new Error('No entry data');
+
+          const title = data.get('title');
+          const description = data.get('description');
+          const collectionType = data.get('collection_type');
+          const currentSection = parseInt(data.get('section') || '0', 10);
+
+          const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+          const safeTitle = title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+          const newSection = currentSection + 1;
+          const newSlug = `${timestamp}-${safeTitle}-section-${newSection}`;
+
+          const backend = CMS.getBackend();
+          await backend.createEntry('compositions', {
+            slug: newSlug,
+            path: `content/compositions/${newSlug}.md`,
+            raw: `---
+title: ${title} - Section ${newSection}
+description: ${description}
+collection_type: ${collectionType}
+section: ${newSection}
+---
+`
+          });
+
+          return newSlug;
         },
 
         handleNewSection: async function(e) {
@@ -76,41 +101,9 @@
           if (this.state.isCreating || !this.state.cmsReady) return;
 
           this.setState({ isCreating: true });
-
           try {
-            const entry = this.props.entry;
-            if (!entry) throw new Error('No entry data available');
-
-            const data = entry.get('data');
-            if (!data) throw new Error('No entry data found');
-
-            const title = data.get('title');
-            const description = data.get('description');
-            const collectionType = data.get('collection_type');
-            const currentSection = parseInt(data.get('section') || '0', 10);
-
-            // Generate new entry data
-            const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-            const safeTitle = title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-            const newSection = currentSection + 1;
-            const newSlug = `${timestamp}-${safeTitle}-section-${newSection}`;
-
-            const backend = CMS.getBackend();
-            if (!backend) throw new Error('CMS backend not available');
-
-            await backend.createEntry('compositions', {
-              slug: newSlug,
-              path: `content/compositions/${newSlug}.md`,
-              data: {
-                title: `${title} - Section ${newSection}`,
-                description,
-                collection_type: collectionType,
-                section: newSection
-              }
-            });
-
-            // Navigate to new entry
-            window.location.replace(`/admin/#/collections/compositions/entries/${newSlug}`);
+            const newSlug = await this.createNewSection(this.props.entry);
+            window.location.href = `/admin/#/collections/compositions/entries/${newSlug}`;
           } catch (error) {
             console.error('Error creating new section:', error);
             alert('Failed to create new section. Please try again.');
@@ -119,15 +112,16 @@
         },
 
         render() {
-          if (!this.state.cmsReady) return null;
-          if (!this.props.entry) return null;
+          if (!this.state.cmsReady || !this.props.entry) return null;
 
-          const data = this.props.entry.get('data');
+          const entry = this.props.entry;
+          const data = entry.get('data');
+
           if (!data) return null;
 
           return h('div', { className: 'preview-content' },
             h('h1', {}, data.get('title')),
-            h('div', {}, this.props.widgetFor('body')),
+            h('div', { className: 'content' }, this.props.widgetFor('body')),
             h('button', {
               className: 'new-section-button',
               onClick: this.handleNewSection,
@@ -137,13 +131,42 @@
         }
       });
 
-      // Initialize CMS
+      // Initialize CMS with complete config
       window.addEventListener('load', () => {
+        // Register preview template first
         CMS.registerPreviewTemplate('compositions', PreviewComponent);
+
+        // Initialize CMS with full config
         CMS.init({
           config: {
-            load_config_file: true,
-            local_backend: true,
+            backend: {
+              name: 'github',
+              repo: 'Axiomatic47/corporate-veil',
+              branch: 'main',
+              base_url: 'https://api.netlify.com',
+              auth_endpoint: 'auth'
+            },
+            media_folder: 'public/uploads',
+            public_folder: '/uploads',
+            collections: [{
+              name: 'compositions',
+              label: 'Compositions',
+              folder: 'content/compositions',
+              create: true,
+              fields: [
+                { label: 'Title', name: 'title', widget: 'string' },
+                { label: 'Description', name: 'description', widget: 'text' },
+                {
+                  label: 'Collection Type',
+                  name: 'collection_type',
+                  widget: 'select',
+                  options: ['memorandum', 'corrective']
+                },
+                { label: 'Section', name: 'section', widget: 'hidden', default: 1 },
+                { label: 'Content', name: 'body', widget: 'markdown' }
+              ]
+            }],
+            local_backend: true
           }
         });
       });
