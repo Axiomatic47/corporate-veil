@@ -50,13 +50,16 @@
           return h('div', {className: 'prose dark:prose-invert max-w-none'},
             h('h1', {className: 'text-4xl font-bold'}, entry.getIn(['data', 'title'])),
             h('div', {className: 'mt-4'}, entry.getIn(['data', 'description'])),
+            h('div', {className: 'mt-4'}, 
+              h('strong', {}, 'Collection: '), 
+              entry.getIn(['data', 'collection_type'])
+            ),
             h('div', {className: 'mt-8'}, this.props.widgetFor('body'))
           );
         }
       });
 
-      CMS.registerPreviewTemplate('memorandum', PreviewTemplate);
-      CMS.registerPreviewTemplate('corrective', PreviewTemplate);
+      CMS.registerPreviewTemplate('compositions', PreviewTemplate);
 
       // Configure CMS
       CMS.init({
@@ -73,25 +76,20 @@
           publish_mode: 'simple',
           collections: [
             {
-              name: 'memorandum',
-              label: 'Memorandum Compositions',
-              folder: 'content/memorandum',
+              name: 'compositions',
+              label: 'Compositions',
+              folder: 'content/compositions',
               create: true,
               fields: [
                 { label: 'Title', name: 'title', widget: 'string' },
                 { label: 'Description', name: 'description', widget: 'text' },
-                { label: 'Section', name: 'section', widget: 'number', default: 1 },
-                { label: 'Content', name: 'body', widget: 'markdown' }
-              ]
-            },
-            {
-              name: 'corrective',
-              label: 'Corrective Compositions',
-              folder: 'content/corrective',
-              create: true,
-              fields: [
-                { label: 'Title', name: 'title', widget: 'string' },
-                { label: 'Description', name: 'description', widget: 'text' },
+                {
+                  label: 'Collection Type',
+                  name: 'collection_type',
+                  widget: 'select',
+                  options: ['memorandum', 'corrective'],
+                  required: true
+                },
                 { label: 'Section', name: 'section', widget: 'number', default: 1 },
                 { label: 'Content', name: 'body', widget: 'markdown' }
               ]

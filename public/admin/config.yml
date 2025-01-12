@@ -10,37 +10,33 @@ public_folder: "/uploads"
 publish_mode: simple
 
 collections:
-  - name: "memorandum"
-    label: "Memorandum Compositions"
-    folder: "content/memorandum"
+  - name: "compositions"
+    label: "Compositions"
+    folder: "content/compositions"
     create: true
     slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
     fields:
       - { label: "Title", name: "title", widget: "string" }
       - { label: "Description", name: "description", widget: "text" }
+      - {
+          label: "Collection Type",
+          name: "collection_type",
+          widget: "select",
+          options: ["memorandum", "corrective"],
+          required: true
+        }
       - { label: "Section", name: "section", widget: "number", default: 1 }
       - { label: "Content", name: "body", widget: "markdown" }
     sortable_fields:
       - title
       - description
-    view_filters: []
-    view_groups: []
-
-  - name: "corrective"
-    label: "Corrective Compositions"
-    folder: "content/corrective"
-    create: true
-    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
-    fields:
-      - { label: "Title", name: "title", widget: "string" }
-      - { label: "Description", name: "description", widget: "text" }
-      - { label: "Section", name: "section", widget: "number", default: 1 }
-      - { label: "Content", name: "body", widget: "markdown" }
-    sortable_fields:
-      - title
-      - description
-    view_filters: []
-    view_groups: []
+    view_filters:
+      - label: "Memorandum"
+        field: collection_type
+        pattern: "memorandum"
+      - label: "Corrective"
+        field: collection_type
+        pattern: "corrective"
 
 slug:
   encoding: unicode
