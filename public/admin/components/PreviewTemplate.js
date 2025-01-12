@@ -9,15 +9,22 @@ const PreviewTemplate = createClass({
     const section = data.section || 1;
     const body = this.props.widgetFor('body');
 
-    // Safely handle entries
-    const allEntries = entries?.get?.('compositions') || [];
-    const relatedSections = allEntries
+    // Safely handle entries, checking if it's an Immutable.js collection
+    const allEntries = entries?.get?.('compositions')?.toJS?.() || entries?.get?.('compositions') || [];
+    
+    // Handle both Immutable.js collections and regular arrays
+    const relatedSections = Array.isArray(allEntries) 
       ? allEntries
-          .filter(e => e?.getIn?.(['data', 'title']) === title)
-          .map(e => e?.getIn?.(['data', 'section']))
+          .filter(e => {
+            const entryTitle = e?.data?.title || e?.getIn?.(['data', 'title']);
+            return entryTitle === title;
+          })
+          .map(e => {
+            const entrySection = e?.data?.section || e?.getIn?.(['data', 'section']);
+            return entrySection;
+          })
           .filter(Boolean)
-          .sort()
-          .toJS()
+          .sort((a, b) => a - b)
       : [];
 
     return h('div', {className: 'preview-container'},
@@ -30,10 +37,11 @@ const PreviewTemplate = createClass({
                 key: sectionNum,
                 className: `w-full p-2 text-left rounded ${section === sectionNum ? 'bg-white text-gray-800' : 'text-white hover:bg-gray-700'}`,
                 onClick: () => {
-                  const sectionEntry = allEntries.find(e => 
-                    e?.getIn?.(['data', 'title']) === title && 
-                    e?.getIn?.(['data', 'section']) === sectionNum
-                  );
+                  const sectionEntry = allEntries.find(e => {
+                    const entryTitle = e?.data?.title || e?.getIn?.(['data', 'title']);
+                    const entrySection = e?.data?.section || e?.getIn?.(['data', 'section']);
+                    return entryTitle === title && entrySection === sectionNum;
+                  });
                   if (sectionEntry) {
                     CMS.entry.set(sectionEntry);
                   }
