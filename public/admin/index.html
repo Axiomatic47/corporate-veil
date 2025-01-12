@@ -75,9 +75,6 @@
   <body>
     <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
     <script>
-      // Initialize CMS first
-      CMS.init();
-
       const PreviewComponent = createClass({
         getInitialState() {
           return {
@@ -93,39 +90,41 @@
           }
         },
 
-        componentDidUpdate(prevProps) {
-          if (this.props.entry && !prevProps.entry) {
-            this.loadSections();
-          }
-        },
-
         componentWillUnmount() {
           this.mounted = false;
         },
 
         loadSections() {
           const entry = this.props.entry;
+          if (!entry) return;
+
           const data = entry.get('data');
           const collectionType = data.get('collection_type');
 
-          // Get all entries
-          const entries = window.repoFiles?.entries || [];
-          const sections = entries
-            .filter(entry => entry.data?.collection_type === collectionType)
-            .map(entry => ({
-              section: entry.data?.section,
-              title: entry.data?.title,
-              slug: entry.slug
-            }))
-            .sort((a, b) => a.section - b.section);
+          // Access entries through the registry
+          const registry = CMS.getWidgetValueSerializer();
+          registry.getEntries('compositions').then(entries => {
+            if (!this.mounted) return;
 
-          if (this.mounted) {
+            const sections = entries
+              .filter(entry => entry.data?.collection_type === collectionType)
+              .map(entry => ({
+                section: entry.data?.section,
+                title: entry.data?.title,
+                slug: entry.slug
+              }))
+              .sort((a, b) => a.section - b.section);
+
             this.setState({ sections });
-          }
+          }).catch(error => {
+            console.error('Error loading sections:', error);
+          });
         },
 
-        handleNewSection() {
+        handleNewSection(e) {
+          e.preventDefault();
           if (this.state.isCreating) return;
+
           this.setState({ isCreating: true });
 
           const entry = this.props.entry;
@@ -141,38 +140,25 @@
           const safeTitle = title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
           const newSlug = timestamp + '-' + safeTitle + '-section-' + newSection;
 
-          const newEntryData = {
-            title: title + ' - Section ' + newSection,
-            description: description,
-            collection_type: collectionType,
-            section: newSection
-          };
-
-          // Use the CMS Registry to create a new entry
-          CMS.getBackend()
-            .persistEntry({
-              dataFiles: [{
-                slug: newSlug,
-                path: 'content/compositions/' + newSlug + '.md',
-                raw: `---
-title: ${title} - Section ${newSection}
-description: ${description}
-collection_type: ${collectionType}
-section: ${newSection}
----`
-              }],
-              assets: []
-            })
-            .then(() => {
-              window.location.href = '/admin/#/collections/compositions/entries/' + newSlug;
-            })
-            .catch((error) => {
-              console.error('Error creating new section:', error);
-              alert('Failed to create new section. Please try again.');
-              if (this.mounted) {
-                this.setState({ isCreating: false });
-              }
-            });
+          const collection = this.props.collection;
+          collection.newEntry({
+            slug: newSlug,
+            path: 'content/compositions/' + newSlug + '.md',
+            data: {
+              title: title + ' - Section ' + newSection,
+              description: description,
+              collection_type: collectionType,
+              section: newSection
+            }
+          }).then(() => {
+            window.location.href = '/admin/#/collections/compositions/entries/' + newSlug;
+          }).catch(error => {
+            console.error('Error creating new section:', error);
+            alert('Failed to create new section. Please try again.');
+            if (this.mounted) {
+              this.setState({ isCreating: false });
+            }
+          });
         },
 
         render() {
@@ -217,8 +203,9 @@ section: ${newSection}
         }
       });
 
-      // Register preview template after CMS initialization
+      // Register preview after init
       CMS.registerPreviewTemplate('compositions', PreviewComponent);
+      CMS.init();
     </script>
   </body>
 </html>
