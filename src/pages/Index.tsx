@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Home } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import CompositionCard from "@/components/CompositionCard";
+import { Footer } from "@/components/Footer";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -29,7 +30,7 @@ const Index = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#1A1F2C] text-white">
+    <div className="min-h-screen bg-[#1A1F2C] text-white flex flex-col">
       <header className="py-6 px-8 flex justify-between items-center bg-[#0F1218]">
         <h1 className="text-2xl font-serif">Corporate Veil</h1>
         <div className="flex space-x-4">
@@ -53,7 +54,7 @@ const Index = () => {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-12">
+      <main className="container mx-auto px-4 py-12 flex-grow">
         <div className="text-center mb-16">
           <h1 className="text-5xl font-serif mb-6">
             A Constitutional Analysis of Corporate Personhood
@@ -80,6 +81,7 @@ const Index = () => {
           </div>
         </section>
       </main>
+      <Footer />
     </div>
   );
 };
