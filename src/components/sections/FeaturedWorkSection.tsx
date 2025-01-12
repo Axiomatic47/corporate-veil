@@ -1,25 +1,16 @@
 import CompositionCard from "@/components/CompositionCard";
+import { compositionData } from "@/utils/compositionData";
 
-const featuredWorks = [
-  {
-    id: 1,
-    title: "The Nature of Corporate Personhood",
-    description: "An analysis of the fundamental principles underlying corporate personhood in constitutional law.",
-    content: "This is the content for Section 1 of The Nature of Corporate Personhood at reading level 3. The content would adapt based on the selected reading level."
-  },
-  {
-    id: 2,
-    title: "Corporate Rights and Responsibilities",
-    description: "Examining the balance between corporate rights and societal obligations.",
-    content: "This is the content for Section 1 of Corporate Rights and Responsibilities at reading level 3. The content would adapt based on the selected reading level."
-  },
-  {
-    id: 3,
-    title: "Future of Corporate Law",
-    description: "Exploring emerging trends and potential reforms in corporate constitutional law.",
-    content: "This is the content for Section 1 of Future of Corporate Law at reading level 3. The content would adapt based on the selected reading level."
-  },
-];
+// Combine memorandum and corrective compositions
+const allCompositions = [...compositionData.memorandum, ...compositionData.corrective];
+
+// Select the first three compositions for featured work
+const featuredWorks = allCompositions.slice(0, 3).map(composition => ({
+  id: composition.id,
+  title: composition.title,
+  description: composition.description,
+  content: `This is the content for Section 1 of ${composition.title} at reading level 3. The content would adapt based on the selected reading level.`
+}));
 
 export const FeaturedWorkSection = () => {
   return (
