@@ -34,21 +34,28 @@
 
         return h('div', {className: 'preview-container'},
           h('div', {className: 'flex'},
-            h('div', {className: 'w-64 bg-gray-800 p-4 min-h-screen'},
-              h('h3', {className: 'text-white mb-4'}, 'Sections'),
+            h('nav', {className: 'w-64 bg-gray-800 p-4 min-h-screen'},
+              h('h3', {className: 'text-white mb-4'}, 'Navigation'),
               h('div', {className: 'space-y-2'},
                 relatedSections.map(sectionNum =>
-                  h('div', {
+                  h('button', {
                     key: sectionNum,
-                    className: `p-2 rounded ${section === sectionNum ? 'bg-white text-gray-800' : 'text-white'}`
+                    className: `w-full p-2 text-left rounded ${section === sectionNum ? 'bg-white text-gray-800' : 'text-white hover:bg-gray-700'}`,
+                    onClick: () => {
+                      const sectionEntry = allEntries.find(e => 
+                        e.data.title === title && e.data.section === sectionNum
+                      );
+                      if (sectionEntry) {
+                        CMS.entry.set(sectionEntry);
+                      }
+                    }
                   }, `Section ${sectionNum}`)
                 ),
                 h('button', {
                   className: 'w-full mt-4 bg-blue-500 text-white p-2 rounded hover:bg-blue-600',
                   onClick: () => {
                     const newSection = Math.max(...relatedSections, 0) + 1;
-                    const newData = entry && entry.get ? {...entry.get('data').toJS()} : {...data};
-                    newData.section = newSection;
+                    const newData = {...data, section: newSection};
                     CMS.entry.set('data', newData);
                   }
                 }, 'New Section')
@@ -78,17 +85,16 @@
         if (!entry) return entry;
         
         try {
-          const data = entry.get ? entry.get('data') : entry.data;
-          const title = data.get ? data.get('title') : data.title;
-          
+          const data = entry.get ? entry.get('data').toJS() : entry.data;
+          if (!data) return entry;
+
+          const title = data.title;
           if (!title) return entry;
 
           const entries = await CMS.getEntries({ collection_name: 'compositions' });
           const existingEntry = entries.find(e => {
-            const entryData = e.get ? e.get('data') : e.data;
-            const entryTitle = entryData.get ? entryData.get('title') : entryData.title;
-            const entrySection = entryData.get ? entryData.get('section') : entryData.section;
-            return entryTitle === title && entrySection === 1;
+            const entryData = e.get ? e.get('data').toJS() : e.data;
+            return entryData.title === title && entryData.section === 1;
           });
           
           if (existingEntry) {

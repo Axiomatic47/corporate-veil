@@ -43,11 +43,8 @@ collections:
       - { 
           label: "Section",
           name: "section",
-          widget: "number",
-          default: 1,
-          required: true,
-          min: 1,
-          hint: "Section number is automatically assigned"
+          widget: "hidden",
+          default: 1
         }
       - { 
           label: "Content", 
@@ -58,7 +55,6 @@ collections:
     sortable_fields:
       - title
       - description
-      - section
     view_filters:
       - label: "Memorandum"
         field: collection_type
@@ -69,5 +65,3 @@ collections:
     view_groups:
       - label: "By Collection Type"
         field: collection_type
-      - label: "By Section"
-        field: section
