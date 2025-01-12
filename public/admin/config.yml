@@ -1,65 +1,43 @@
 backend:
-  name: git-gateway
+  name: proxy
   branch: main
-  commit_messages:
-    create: 'Create {{collection}} "{{slug}}"'
-    update: 'Update {{collection}} "{{slug}}"'
-    delete: 'Delete {{collection}} "{{slug}}"'
-    uploadMedia: 'Upload "{{path}}"'
-    deleteMedia: 'Delete "{{path}}"'
+  proxy_url: http://localhost:8081/api/v1
 
-# When using local development
 local_backend: true
-local_backend_url: http://localhost:8082/api/v1
-
 media_folder: "public/uploads"
 public_folder: "/uploads"
 
-# Enable editorial workflow for better content management
-publish_mode: editorial_workflow
-
-# Authentication settings
-auth_scope: repo
+publish_mode: simple
 
 collections:
   - name: "memorandum"
     label: "Memorandum Compositions"
     folder: "content/memorandum"
     create: true
-    slug: "{{slug}}"
-    editor:
-      preview: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
     fields:
       - { label: "Title", name: "title", widget: "string" }
       - { label: "Description", name: "description", widget: "text" }
+      - { label: "Section", name: "section", widget: "number", default: 1 }
       - { label: "Content", name: "body", widget: "markdown" }
-    publish: true
-    type: folder_based_collection
     sortable_fields:
-      - commit_date
       - title
-      - commit_author
       - description
     view_filters: []
     view_groups: []
-      
+
   - name: "corrective"
     label: "Corrective Compositions"
     folder: "content/corrective"
     create: true
-    slug: "{{slug}}"
-    editor:
-      preview: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
     fields:
       - { label: "Title", name: "title", widget: "string" }
       - { label: "Description", name: "description", widget: "text" }
+      - { label: "Section", name: "section", widget: "number", default: 1 }
       - { label: "Content", name: "body", widget: "markdown" }
-    publish: true
-    type: folder_based_collection
     sortable_fields:
-      - commit_date
       - title
-      - commit_author
       - description
     view_filters: []
     view_groups: []

@@ -43,23 +43,6 @@
   <body>
     <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
     <script>
-      // Enable authentication
-      if (window.netlifyIdentity) {
-        window.netlifyIdentity.on("init", user => {
-          if (!user) {
-            window.netlifyIdentity.on("login", () => {
-              document.location.href = "/admin/";
-            });
-          }
-        });
-      }
-
-      // Enable console logging for debugging
-      window.CMS_DEBUG = true;
-      
-      // Register preview styles
-      CMS.registerPreviewStyle('/src/index.css');
-      
       // Basic preview template for all content types
       const PreviewTemplate = createClass({
         render: function() {
@@ -75,17 +58,19 @@
       CMS.registerPreviewTemplate('memorandum', PreviewTemplate);
       CMS.registerPreviewTemplate('corrective', PreviewTemplate);
 
-      // Configure CMS with authentication
+      // Configure CMS
       CMS.init({
         config: {
           load_config_file: false,
           backend: {
-            name: 'git-gateway',
+            name: 'proxy',
             branch: 'main',
+            proxy_url: 'http://localhost:8081/api/v1'
           },
           local_backend: true,
           media_folder: 'public/uploads',
           public_folder: '/uploads',
+          publish_mode: 'simple',
           collections: [
             {
               name: 'memorandum',
@@ -95,6 +80,7 @@
               fields: [
                 { label: 'Title', name: 'title', widget: 'string' },
                 { label: 'Description', name: 'description', widget: 'text' },
+                { label: 'Section', name: 'section', widget: 'number', default: 1 },
                 { label: 'Content', name: 'body', widget: 'markdown' }
               ]
             },
@@ -106,6 +92,7 @@
               fields: [
                 { label: 'Title', name: 'title', widget: 'string' },
                 { label: 'Description', name: 'description', widget: 'text' },
+                { label: 'Section', name: 'section', widget: 'number', default: 1 },
                 { label: 'Content', name: 'body', widget: 'markdown' }
               ]
             }
