@@ -33,6 +33,7 @@ collections:
     sortable_fields:
       - title
       - description
+      - section
     view_filters:
       - label: "Memorandum"
         field: collection_type

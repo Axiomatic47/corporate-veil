@@ -21,13 +21,15 @@
             const title = entry.getIn(['data', 'title']);
             const description = entry.getIn(['data', 'description']);
             const collectionType = entry.getIn(['data', 'collection_type']);
+            const section = entry.getIn(['data', 'section']);
             
             return h('div', { className: 'preview-container' },
               h('div', { className: 'composition-card' },
                 h('h2', {}, title),
                 h('p', {}, description),
                 h('div', { className: 'meta' },
-                  h('span', {}, `Type: ${collectionType}`)
+                  h('span', {}, `Type: ${collectionType}`),
+                  h('span', {}, `Section: ${section}`)
                 )
               )
             );
@@ -56,8 +58,9 @@
           }
         });
 
-        // Register both preview templates
+        // Register preview templates
         CMS.registerPreviewTemplate('compositions', CompositionListPreview);
+        CMS.registerPreviewTemplate('sections', SectionPreview);
         CMS.registerPreviewStyle('/admin/styles/preview.css');
       });
     </script>

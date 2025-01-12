@@ -10,11 +10,19 @@
   padding: 1.5rem;
   border-radius: 0.5rem;
   color: white;
+  margin-bottom: 1.5rem;
 }
 
 .composition-card h2 {
   font-size: 1.5rem;
   margin-bottom: 1rem;
+  font-weight: bold;
+}
+
+.composition-card p {
+  color: #94a3b8;
+  margin-bottom: 1rem;
+  line-height: 1.5;
 }
 
 .section-content {
@@ -27,11 +35,13 @@
 .section-content h1 {
   font-size: 2rem;
   margin-bottom: 1rem;
+  font-weight: bold;
 }
 
 .description {
   color: #94a3b8;
   margin-bottom: 1.5rem;
+  line-height: 1.5;
 }
 
 .section-number {
@@ -40,6 +50,7 @@
   padding: 0.5rem 1rem;
   border-radius: 0.25rem;
   margin-bottom: 2rem;
+  font-size: 0.875rem;
 }
 
 .content {
@@ -49,4 +60,7 @@
 .meta {
   margin-top: 1rem;
   color: #94a3b8;
+  display: flex;
+  gap: 1rem;
+  font-size: 0.875rem;
 }
