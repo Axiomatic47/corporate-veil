@@ -16,6 +16,7 @@ collections:
     folder: "content/compositions"
     create: true
     format: "frontmatter"
+    identifier_field: "title"
     slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
     preview_path: "composition/{{fields.collection_type}}/section/{{fields.section}}"
     fields:

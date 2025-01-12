@@ -14,7 +14,6 @@
     
     const PreviewTemplate = createClass({
       render: function() {
-        // Safely handle both Immutable.js and regular objects
         const entry = this.props.entry;
         const data = entry && entry.toJS ? entry.toJS().data : (entry?.data || {});
         
@@ -24,7 +23,6 @@
         const section = data.section || 1;
         const body = this.props.widgetFor('body');
 
-        // Safely get entries
         const entries = this.props.entries;
         const allEntries = entries && entries.toJS ? entries.toJS().compositions : [];
         const relatedSections = Array.isArray(allEntries) 
@@ -36,7 +34,6 @@
 
         return h('div', {className: 'preview-container'},
           h('div', {className: 'flex'},
-            // Sections sidebar
             h('div', {className: 'w-64 bg-gray-800 p-4 min-h-screen'},
               h('h3', {className: 'text-white mb-4'}, 'Sections'),
               h('div', {className: 'space-y-2'},
@@ -50,16 +47,13 @@
                   className: 'w-full mt-4 bg-blue-500 text-white p-2 rounded hover:bg-blue-600',
                   onClick: () => {
                     const newSection = Math.max(...relatedSections, 0) + 1;
-                    if (entry && entry.get) {
-                      const newData = {...entry.get('data').toJS()};
-                      newData.section = newSection;
-                      CMS.entry.set('data', newData);
-                    }
+                    const newData = entry && entry.get ? {...entry.get('data').toJS()} : {...data};
+                    newData.section = newSection;
+                    CMS.entry.set('data', newData);
                   }
                 }, 'New Section')
               )
             ),
-            // Main content
             h('div', {className: 'flex-1 p-8'},
               h('h1', {className: 'text-4xl font-bold mb-4'}, title),
               h('div', {className: 'meta-info mb-6'},
@@ -81,18 +75,20 @@
     CMS.registerEventListener({
       name: 'preSave',
       handler: async function(entry) {
-        if (!entry || !entry.get) return entry;
+        if (!entry) return entry;
         
         try {
-          const data = entry.get('data');
-          const title = data.get('title');
+          const data = entry.get ? entry.get('data') : entry.data;
+          const title = data.get ? data.get('title') : data.title;
           
           if (!title) return entry;
 
           const entries = await CMS.getEntries({ collection_name: 'compositions' });
           const existingEntry = entries.find(e => {
-            const entryData = e.get('data');
-            return entryData.get('title') === title && entryData.get('section') === 1;
+            const entryData = e.get ? e.get('data') : e.data;
+            const entryTitle = entryData.get ? entryData.get('title') : entryData.title;
+            const entrySection = entryData.get ? entryData.get('section') : entryData.section;
+            return entryTitle === title && entrySection === 1;
           });
           
           if (existingEntry) {
