@@ -28,7 +28,14 @@ collections:
           options: ["memorandum", "corrective"],
           required: true
         }
-      - { label: "Section", name: "section", widget: "number", default: 1 }
+      - { 
+          label: "Section", 
+          name: "section", 
+          widget: "number", 
+          default: 1,
+          required: true,
+          min: 1
+        }
       - { label: "Content", name: "body", widget: "markdown" }
     sortable_fields:
       - title
@@ -41,8 +48,45 @@ collections:
       - label: "Corrective"
         field: collection_type
         pattern: "corrective"
+    view_groups:
+      - label: "By Collection Type"
+        field: collection_type
+      - label: "By Section"
+        field: section
 
-slug:
-  encoding: "ascii"
-  clean_accents: true
-  sanitize_replacement: "-"
+Now let's update the SidebarSections component to only show created sections:
+
+<lov-write file_path="src/components/sidebar/SidebarSections.tsx">
+interface SidebarSectionsProps {
+  sections: Array<{ id: number; title: string }>;
+  currentSectionId: string;
+  compositionId: string;
+  onSectionClick: (sectionId: number) => void;
+}
+
+export const SidebarSections = ({ 
+  sections, 
+  currentSectionId, 
+  onSectionClick 
+}: SidebarSectionsProps) => {
+  // Sort sections by ID to ensure they appear in order
+  const sortedSections = [...sections].sort((a, b) => a.id - b.id);
+
+  return (
+    <div className="space-y-2">
+      {sortedSections.map((section) => (
+        <button
+          key={section.id}
+          onClick={() => onSectionClick(section.id)}
+          className={`w-full text-left py-2 px-4 rounded transition-colors ${
+            Number(currentSectionId) === section.id
+              ? "bg-white text-[#1A1F2C] font-medium"
+              : "text-gray-300 hover:bg-[#2A2F3C] hover:text-white"
+          }`}
+        >
+          Section {section.id}
+        </button>
+      ))}
+    </div>
+  );
+};

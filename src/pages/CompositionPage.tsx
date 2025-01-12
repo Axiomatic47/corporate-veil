@@ -18,11 +18,13 @@ const CompositionPage = () => {
     comp => comp.section === parseInt(sectionId)
   );
 
-  // Mock sections data - in a real app this would come from an API
-  const sections = Array.from({ length: 10 }, (_, i) => ({
-    id: i + 1,
-    title: `Section ${i + 1}`,
-  }));
+  // Get only the sections that exist in the compositions
+  const existingSections = compositions
+    .map(comp => ({
+      id: comp.section,
+      title: `Section ${comp.section}`
+    }))
+    .sort((a, b) => a.id - b.id);
 
   const getCollectionName = () => {
     return compositionId === "memorandum" ? "Memorandum and Manifestation" : "Corrective Measures";
@@ -33,7 +35,7 @@ const CompositionPage = () => {
       <Header />
       <div className="flex">
         <Sidebar
-          sections={sections}
+          sections={existingSections}
           collectionName={getCollectionName()}
           compositionId={compositionId}
           currentSectionId={sectionId}
@@ -60,7 +62,7 @@ const CompositionPage = () => {
 
           <div className="bg-[#1A1F2C] rounded-lg p-8">
             <p className="text-lg leading-relaxed">
-              {currentComposition?.content || `This is the content for Section ${sectionId} at literacy level ${literacyLevel}. The content would adapt based on the selected literacy level.`}
+              {currentComposition?.content || `No content available for Section ${sectionId}.`}
             </p>
           </div>
         </div>
