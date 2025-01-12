@@ -15,9 +15,14 @@ const CompositionPage = () => {
     title: `Section ${i + 1}`,
   }));
 
+  // Get composition title based on the ID
+  const getCompositionTitle = () => {
+    return compositionId === "memorandum" ? "Memorandum and Manifestation" : "Corrective Measures";
+  };
+
   // This would be replaced with actual content based on the literacy level
   const getContent = (level: number) => {
-    return `This is the content for Section ${sectionId} of Composition ${compositionId} at literacy level ${level}. The content would adapt based on the selected literacy level.`;
+    return `This is the content for Section ${sectionId} of ${getCompositionTitle()} at literacy level ${level}. The content would adapt based on the selected literacy level.`;
   };
 
   return (
@@ -59,7 +64,7 @@ const CompositionPage = () => {
       <div className="flex">
         {/* Sidebar */}
         <div className="w-64 min-h-[calc(100vh-4rem)] bg-[#1A1F2C] text-white p-6">
-          <h2 className="text-xl font-serif mb-6">Composition {compositionId}</h2>
+          <h2 className="text-xl font-serif mb-6">{getCompositionTitle()}</h2>
           <div className="space-y-2">
             {sections.map((section) => (
               <button
@@ -82,7 +87,8 @@ const CompositionPage = () => {
         {/* Main Content */}
         <div className="flex-1 p-8 text-white">
           <div className="mb-8">
-            <h1 className="text-4xl font-serif mb-4">Section {sectionId}</h1>
+            <h1 className="text-4xl font-serif mb-2">{getCompositionTitle()}</h1>
+            <h2 className="text-3xl font-serif text-gray-300">Section {sectionId}</h2>
           </div>
 
           <div className="mb-8 flex items-center space-x-4">
