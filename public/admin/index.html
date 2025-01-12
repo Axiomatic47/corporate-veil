@@ -5,12 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Content Manager</title>
     <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
-    <!-- Include the site's stylesheet -->
-    <link href="/src/index.css" rel="stylesheet" />
   </head>
   <body>
     <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
     <script>
+      if (window.netlifyIdentity) {
+        window.netlifyIdentity.on("init", user => {
+          if (!user) {
+            window.netlifyIdentity.on("login", () => {
+              document.location.href = "/admin/";
+            });
+          }
+        });
+      }
+
       // Enable console logging for debugging
       window.CMS_DEBUG = true;
       
@@ -20,7 +28,6 @@
       // Basic preview template for all content types
       const PreviewTemplate = createClass({
         render: function() {
-          console.log('Preview data:', this.props);
           const {entry} = this.props;
           return h('div', {className: 'prose dark:prose-invert max-w-none'},
             h('h1', {className: 'text-4xl font-bold'}, entry.getIn(['data', 'title'])),
@@ -32,14 +39,6 @@
 
       CMS.registerPreviewTemplate('memorandum', PreviewTemplate);
       CMS.registerPreviewTemplate('corrective', PreviewTemplate);
-
-      // Log when CMS is ready
-      CMS.registerEventListener({
-        name: 'preSave',
-        handler: function(entry) {
-          console.log('Pre-save event:', entry);
-        },
-      });
     </script>
   </body>
 </html>
