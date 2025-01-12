@@ -16,7 +16,7 @@ collections:
     format: "frontmatter"
     extension: "md"
     identifier_field: "title"
-    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}-section-{{section}}"
     fields:
       - { 
           label: "Title", 
@@ -43,7 +43,8 @@ collections:
           widget: "number",
           default: 1,
           value_type: "int",
-          min: 1
+          min: 1,
+          required: true
         }
       - { 
           label: "Content", 
@@ -51,7 +52,7 @@ collections:
           widget: "markdown",
           required: true 
         }
-    sortable_fields: ["title", "description"]
+    sortable_fields: ["title", "section"]
     view_filters:
       - label: "Memorandum"
         field: collection_type

@@ -13,20 +13,21 @@
     
     const PreviewComponent = createClass({
       render: function() {
-        const {entry, entries, getAsset} = this.props;
+        const {entry, entries} = this.props;
         
         // Safely access data with null checks
         const data = entry?.get?.('data')?.toJS?.() || {};
         const title = data.title || '';
         const description = data.description || '';
-        const section = data.section || 1;
+        const section = parseInt(data.section) || 1;
         const body = this.props.widgetFor('body');
 
-        // Get all entries for the same title to manage sections
+        // Get all entries for the same title
         const allEntries = entries?.get?.('compositions') || [];
-        const relatedSections = allEntries
+        const relatedSections = Array.from(allEntries)
           .filter(e => e?.getIn?.(['data', 'title']) === title)
           .map(e => parseInt(e?.getIn?.(['data', 'section']) || 1))
+          .filter(Boolean)
           .sort((a, b) => a - b);
 
         return h('div', {className: 'preview-container'},
@@ -39,12 +40,20 @@
                     key: sectionNum,
                     className: `w-full p-2 text-left rounded ${section === sectionNum ? 'bg-white text-gray-800' : 'text-white hover:bg-gray-700'}`,
                     onClick: () => {
-                      const sectionEntry = allEntries.find(e => 
+                      const sectionEntry = Array.from(allEntries).find(e => 
                         e?.getIn?.(['data', 'title']) === title && 
                         parseInt(e?.getIn?.(['data', 'section'])) === sectionNum
                       );
                       if (sectionEntry) {
-                        CMS.entry.set(sectionEntry);
+                        // Create a new entry with the selected section's data
+                        const newData = {
+                          title: sectionEntry.getIn(['data', 'title']),
+                          description: sectionEntry.getIn(['data', 'description']),
+                          collection_type: sectionEntry.getIn(['data', 'collection_type']),
+                          section: sectionNum,
+                          body: sectionEntry.getIn(['data', 'body'])
+                        };
+                        CMS.entry.set({data: newData});
                       }
                     }
                   }, `Section ${sectionNum}`)
@@ -53,7 +62,14 @@
                   className: 'w-full mt-4 bg-blue-500 text-white p-2 rounded hover:bg-blue-600',
                   onClick: () => {
                     const newSection = Math.max(...relatedSections, 0) + 1;
-                    const newData = {...data, section: newSection};
+                    // Create a new entry with incremented section number
+                    const newData = {
+                      title: data.title,
+                      description: data.description,
+                      collection_type: data.collection_type,
+                      section: newSection,
+                      body: '' // Start with empty content for new section
+                    };
                     CMS.entry.set({data: newData});
                   }
                 }, 'New Section')
