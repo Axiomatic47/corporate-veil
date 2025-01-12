@@ -94,18 +94,29 @@
         },
 
         componentWillUnmount() {
-          this.setState = () => {};
+          this._isMounted = false;
         },
 
         loadSections: async function() {
-          const backend = await CMS.getBackend();
-          const entries = await backend.implementation.entries({ collection: 'compositions' });
-          const currentTitle = this.props.entry.getIn(['data', 'title']);
-          const sections = entries.filter(entry => 
-            entry.data.title.startsWith(currentTitle.split(' - ')[0])
-          ).sort((a, b) => a.data.section - b.data.section);
+          if (!this._isMounted) return;
           
-          this.setState({ sections });
+          try {
+            const backend = await CMS.getBackend();
+            const entries = await backend.implementation.entries({ collection: 'compositions' });
+            const currentTitle = this.props.entry.getIn(['data', 'title']);
+            const sections = entries.filter(entry => 
+              entry.data.title.startsWith(currentTitle.split(' - ')[0])
+            ).sort((a, b) => a.data.section - b.data.section);
+            
+            if (this._isMounted) {
+              this.setState({ sections });
+            }
+          } catch (error) {
+            console.error('Error loading sections:', error);
+            if (this._isMounted) {
+              this.setState({ error: 'Failed to load sections' });
+            }
+          }
         },
 
         handleNewSection: async function(e) {
@@ -116,13 +127,17 @@
 
           try {
             const newSlug = await createNewSection(this.props.entry);
-            window.location.replace(`/admin/#/collections/compositions/entries/${newSlug}`);
+            if (this._isMounted) {
+              window.location.replace(`/admin/#/collections/compositions/entries/${newSlug}`);
+            }
           } catch (error) {
             console.error('Error creating section:', error);
-            this.setState({
-              error: 'Failed to create new section. Please try again.',
-              isCreatingSection: false
-            });
+            if (this._isMounted) {
+              this.setState({
+                error: 'Failed to create new section. Please try again.',
+                isCreatingSection: false
+              });
+            }
           }
         },
 
