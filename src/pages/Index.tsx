@@ -65,17 +65,14 @@ const Index = () => {
             {featuredWorks.map((work) => (
               <div
                 key={work.id}
-                className="bg-[#1A1F2C] rounded-lg p-8 border border-[#2A2F3C]"
+                onClick={() => navigate(`/composition/memorandum/section/1`)}
+                className="bg-[#1A1F2C] rounded-lg p-8 border border-[#2A2F3C] cursor-pointer transition-all hover:bg-[#252A37]"
               >
                 <h2 className="text-2xl font-serif mb-4">{work.title}</h2>
                 <p className="text-gray-300 mb-6">{work.description}</p>
-                <Button
-                  onClick={() => navigate(`/composition/memorandum/section/1`)}
-                  variant="outline"
-                  className="bg-transparent border-white text-white hover:bg-white hover:text-[#1A1F2C]"
-                >
-                  Read More
-                </Button>
+                <p className="text-gray-300 line-clamp-3">
+                  This composition explores the fundamental principles of corporate personhood, examining how legal frameworks have evolved to grant corporations certain constitutional rights while balancing these with societal responsibilities.
+                </p>
               </div>
             ))}
           </div>
