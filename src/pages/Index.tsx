@@ -12,6 +12,43 @@ const Index = () => {
     comp3: 3,
   });
 
+  const featuredWorks = {
+    memorandum: [
+      {
+        id: 1,
+        title: "The Nature of Corporate Personhood",
+        description: "An analysis of the fundamental principles underlying corporate personhood in constitutional law.",
+      },
+      {
+        id: 2,
+        title: "Corporate Rights and Responsibilities",
+        description: "Examining the balance between corporate rights and societal obligations.",
+      },
+      {
+        id: 3,
+        title: "Future of Corporate Law",
+        description: "Exploring emerging trends and potential reforms in corporate constitutional law.",
+      },
+    ],
+    corrective: [
+      {
+        id: 4,
+        title: "Reform Measures in Corporate Governance",
+        description: "A comprehensive study of proposed reforms in corporate governance structures.",
+      },
+      {
+        id: 5,
+        title: "Regulatory Framework Analysis",
+        description: "Evaluating current and proposed regulatory measures for corporate entities.",
+      },
+      {
+        id: 6,
+        title: "Stakeholder Protection Mechanisms",
+        description: "Examining methods to enhance stakeholder protection in corporate structures.",
+      },
+    ],
+  };
+
   const handleLiteracyChange = (composition: string) => (value: number[]) => {
     setLiteracyLevels((prev) => ({
       ...prev,
@@ -21,7 +58,6 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-[#1A1F2C] text-white">
-      {/* Header */}
       <header className="py-6 px-8 flex justify-between items-center">
         <h1 className="text-2xl font-serif">Corporate Veil</h1>
         <Button variant="ghost" className="text-white">
@@ -29,7 +65,6 @@ const Index = () => {
         </Button>
       </header>
 
-      {/* Main Content */}
       <main className="container mx-auto px-4 py-12">
         <div className="text-center mb-16">
           <h1 className="text-5xl font-serif mb-6">
@@ -39,26 +74,23 @@ const Index = () => {
             Explore the legal framework and implications of corporate personhood in constitutional law.
           </p>
 
-          {/* Navigation Buttons */}
           <div className="flex justify-center gap-4 mt-8">
             <Button
               onClick={() => setActiveSection("memorandum")}
-              variant={activeSection === "memorandum" ? "default" : "outline"}
-              className={`text-lg ${
+              className={`text-lg px-6 py-3 ${
                 activeSection === "memorandum"
                   ? "bg-sidebar-primary text-white"
-                  : "bg-transparent border-white text-white hover:bg-white/10"
+                  : "bg-[#2A2F3C] text-white hover:bg-[#3A3F4C]"
               }`}
             >
               Memorandum and Manifestation
             </Button>
             <Button
               onClick={() => setActiveSection("corrective")}
-              variant={activeSection === "corrective" ? "default" : "outline"}
-              className={`text-lg ${
+              className={`text-lg px-6 py-3 ${
                 activeSection === "corrective"
                   ? "bg-sidebar-primary text-white"
-                  : "bg-transparent border-white text-white hover:bg-white/10"
+                  : "bg-[#2A2F3C] text-white hover:bg-[#3A3F4C]"
               }`}
             >
               Corrective Measures
@@ -66,7 +98,6 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Featured Section */}
         <section className="mb-24">
           <Card className="bg-[#222632] border-none p-8">
             <CardContent className="text-gray-300">
@@ -84,31 +115,19 @@ const Index = () => {
           </Card>
         </section>
 
-        {/* Featured Work */}
         <section className="mt-24">
           <h2 className="text-4xl font-serif mb-12">Featured Work</h2>
           <div className="grid gap-8">
-            <CompositionCard
-              id={1}
-              title="The Nature of Corporate Personhood"
-              description="An analysis of the fundamental principles underlying corporate personhood in constitutional law."
-              literacyLevel={literacyLevels.comp1}
-              onLiteracyChange={handleLiteracyChange("comp1")}
-            />
-            <CompositionCard
-              id={2}
-              title="Corporate Rights and Responsibilities"
-              description="Examining the balance between corporate rights and societal obligations."
-              literacyLevel={literacyLevels.comp2}
-              onLiteracyChange={handleLiteracyChange("comp2")}
-            />
-            <CompositionCard
-              id={3}
-              title="Future of Corporate Law"
-              description="Exploring emerging trends and potential reforms in corporate constitutional law."
-              literacyLevel={literacyLevels.comp3}
-              onLiteracyChange={handleLiteracyChange("comp3")}
-            />
+            {featuredWorks[activeSection].map((work) => (
+              <CompositionCard
+                key={work.id}
+                id={work.id}
+                title={work.title}
+                description={work.description}
+                literacyLevel={literacyLevels[`comp${work.id}` as keyof typeof literacyLevels]}
+                onLiteracyChange={handleLiteracyChange(`comp${work.id}`)}
+              />
+            ))}
           </div>
         </section>
       </main>
