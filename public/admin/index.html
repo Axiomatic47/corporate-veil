@@ -6,6 +6,14 @@
     <title>Content Manager</title>
     <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
     <style>
+      .preview-content {
+        padding: 2rem;
+        max-width: 800px;
+        margin: 0 auto;
+      }
+      .content-preview {
+        margin: 2rem 0;
+      }
       .new-section-button {
         display: inline-block;
         background-color: #2563eb;
@@ -29,7 +37,32 @@
   <body>
     <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
     <script>
-      // Create preview component before initialization
+      // Utility function to create a new section
+      const createNewSection = async (entry) => {
+        const data = entry.get('data').toJS();
+        const collectionType = data.collection_type;
+        const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+        const baseTitle = data.title.toLowerCase().replace(/\s+/g, '-');
+        const newSlug = `${timestamp}-${baseTitle}-section-${data.section + 1}`;
+
+        const entryData = {
+          slug: newSlug,
+          path: `content/compositions/${newSlug}.md`,
+          data: {
+            title: `${data.title} - Section ${data.section + 1}`,
+            description: data.description,
+            collection_type: collectionType,
+            section: data.section + 1,
+            body: ''
+          }
+        };
+
+        const backend = await CMS.getBackend();
+        await backend.implementation.persistEntry(entryData, { collection: 'compositions' });
+        return newSlug;
+      };
+
+      // Preview Component
       const PreviewComponent = createClass({
         getInitialState() {
           return { isCreatingSection: false };
@@ -39,59 +72,23 @@
           e.preventDefault();
           if (this.state.isCreatingSection) return;
 
-          const {entry} = this.props;
-          const data = entry.get('data').toJS();
-          const collectionName = entry.get('collection');
-
           this.setState({ isCreatingSection: true });
-
+          
           try {
-            // Get backend instance
-            const backend = await CMS.getBackend();
-            if (!backend) {
-              throw new Error('CMS backend not available');
-            }
-
-            // Generate unique slug
-            const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-            const baseTitle = data.title.toLowerCase().replace(/\s+/g, '-');
-            const newSlug = `${timestamp}-${baseTitle}-new-section`;
-
-            // Get existing entries to determine section number
-            const entries = await backend.entries({ collection: collectionName });
-            const existingSections = entries.filter(entry => 
-              entry.slug.includes(baseTitle)
-            ).length;
-
-            const newSection = existingSections + 1;
-
-            // Create new entry
-            await backend.createEntry(collectionName, {
-              slug: newSlug,
-              path: `content/${collectionName}/${newSlug}.md`,
-              data: {
-                title: `${data.title} - Section ${newSection}`,
-                description: data.description,
-                section: newSection,
-                body: ''
-              }
-            });
-
-            // Navigate to the new entry
-            window.location.href = `/admin/#/collections/${collectionName}/entries/${newSlug}`;
+            const newSlug = await createNewSection(this.props.entry);
+            window.location.href = `/admin/#/collections/compositions/entries/${newSlug}`;
           } catch (error) {
-            console.error('Error creating new section:', error);
+            console.error('Error creating section:', error);
             alert('Failed to create new section. Please try again.');
             this.setState({ isCreatingSection: false });
           }
         },
 
         render: function() {
-          const {entry, widgetFor} = this.props;
-          const data = entry.get('data').toJS();
-
+          const { entry, widgetFor } = this.props;
+          
           return h('div', { className: 'preview-content' },
-            h('h1', {}, data.title),
+            h('h1', {}, entry.getIn(['data', 'title'])),
             h('div', { className: 'content-preview' }, widgetFor('body')),
             h('button', {
               className: 'new-section-button',
@@ -102,27 +99,10 @@
         }
       });
 
-      // Initialize CMS after component definition
-      window.addEventListener('load', async function() {
-        try {
-          // Register preview templates first
-          CMS.registerPreviewTemplate('memorandum', PreviewComponent);
-          CMS.registerPreviewTemplate('corrective', PreviewComponent);
-          
-          // Initialize CMS with proper configuration
-          await CMS.init({
-            config: {
-              load_config_file: true,
-              local_backend: true,
-              backend: {
-                name: 'git-gateway',
-                branch: 'main',
-              }
-            }
-          });
-        } catch (error) {
-          console.error('Failed to initialize CMS:', error);
-        }
+      // Initialize CMS
+      window.addEventListener('load', () => {
+        CMS.registerPreviewTemplate('compositions', PreviewComponent);
+        CMS.init();
       });
     </script>
   </body>
