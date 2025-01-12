@@ -79,20 +79,13 @@
         getInitialState() {
           return {
             sections: [],
-            isCreating: false,
-            cmsReady: false
+            isCreating: false
           };
         },
 
         componentDidMount() {
           this.mounted = true;
-          // Wait for CMS to be ready
-          CMS.getBackend().status().then(() => {
-            if (this.mounted) {
-              this.setState({ cmsReady: true });
-              this.loadSections();
-            }
-          });
+          this.loadSections();
         },
 
         componentWillUnmount() {
@@ -102,6 +95,8 @@
         async loadSections() {
           try {
             const entry = this.props.entry;
+            if (!entry) return;
+
             const data = entry.get('data');
             const collectionType = data.get('collection_type');
 
@@ -124,12 +119,13 @@
         },
 
         async handleNewSection() {
-          if (!this.state.cmsReady || this.state.isCreating) return;
-
+          if (this.state.isCreating) return;
           this.setState({ isCreating: true });
+
           try {
             const entry = this.props.entry;
             const data = entry.get('data');
+            const collection = this.props.collection;
 
             const title = data.get('title');
             const description = data.get('description');
@@ -141,11 +137,10 @@
             const safeTitle = title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
             const newSlug = timestamp + '-' + safeTitle + '-section-' + newSection;
 
-            const backend = CMS.getBackend();
-            await backend.createEntry('compositions', {
-              slug: newSlug,
+            await this.props.createNewEntry(collection.get('name'), {
               path: 'content/compositions/' + newSlug + '.md',
-              raw: [
+              slug: newSlug,
+              content: [
                 '---',
                 'title: ' + title + ' - Section ' + newSection,
                 'description: ' + description,
@@ -195,7 +190,7 @@
               h('button', {
                 className: 'new-section-button',
                 onClick: this.handleNewSection,
-                disabled: !this.state.cmsReady || this.state.isCreating
+                disabled: this.state.isCreating
               }, this.state.isCreating ? 'Creating...' : 'New Section')
             ),
             // Preview Content
@@ -207,8 +202,11 @@
         }
       });
 
-      CMS.registerPreviewTemplate('compositions', PreviewComponent);
+      // Initialize CMS
       CMS.init();
+
+      // Register preview template after CMS initialization
+      CMS.registerPreviewTemplate('compositions', PreviewComponent);
     </script>
   </body>
 </html>
