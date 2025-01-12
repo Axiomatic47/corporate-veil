@@ -27,6 +27,16 @@ export const useCompositionStore = create<CompositionStore>((set) => ({
   },
 }));
 
+// Export compositionData as a computed value from the store
+export const compositionData = {
+  get memorandum() {
+    return useCompositionStore.getState().memorandum;
+  },
+  get corrective() {
+    return useCompositionStore.getState().corrective;
+  }
+};
+
 export const initializeCompositionData = async (): Promise<void> => {
   const { loadCompositions } = await import('./compositionLoader');
   const compositions = await loadCompositions();

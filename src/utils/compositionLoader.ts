@@ -4,14 +4,14 @@ import matter from 'gray-matter';
 export const loadCompositions = async (): Promise<Composition[]> => {
   try {
     const modules = import.meta.glob('/content/compositions/*.md', { 
-      eager: true,
-      as: 'raw'
+      query: '?raw',
+      import: 'default'
     });
     
     const compositions: Composition[] = [];
     
     for (const path in modules) {
-      const content = modules[path] as string;
+      const content = await modules[path]() as string;
       const { data: frontmatter, content: body } = matter(content);
       
       compositions.push({
