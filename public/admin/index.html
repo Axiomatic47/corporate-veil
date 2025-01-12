@@ -15,14 +15,12 @@
       render: function() {
         const {entry, entries} = this.props;
         
-        // Safely access data with null checks
         const data = entry?.get?.('data')?.toJS?.() || {};
         const title = data.title || '';
         const description = data.description || '';
         const section = parseInt(data.section) || 1;
         const body = this.props.widgetFor('body');
 
-        // Get all entries for the same title
         const allEntries = entries?.get?.('compositions') || [];
         const relatedSections = Array.from(allEntries)
           .filter(e => e?.getIn?.(['data', 'title']) === title)
@@ -54,17 +52,20 @@
                   className: 'w-full mt-4 bg-blue-500 text-white p-2 rounded hover:bg-blue-600',
                   onClick: () => {
                     const newSection = Math.max(...relatedSections, 0) + 1;
-                    // Create new entry using the proper CMS API
+                    const slug = `${title.toLowerCase().replace(/\s+/g, '-')}-section-${newSection}`;
+                    
                     CMS.getBackend()
                       .createEntry('compositions', {
-                        title: data.title,
-                        description: data.description,
-                        collection_type: data.collection_type,
-                        section: newSection,
-                        body: ''
+                        data: {
+                          title: data.title,
+                          description: data.description,
+                          collection_type: data.collection_type,
+                          section: newSection,
+                          body: ''
+                        },
+                        slug: slug
                       })
                       .then(() => {
-                        // Refresh the page to show the new section
                         window.location.reload();
                       })
                       .catch(error => {
