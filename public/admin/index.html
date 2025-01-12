@@ -14,18 +14,19 @@
     
     const PreviewTemplate = createClass({
       render: function() {
-        const {entry, getAsset} = this.props;
-        const data = entry.get('data').toJS();
-        const title = data.title;
-        const description = data.description;
-        const collectionType = data.collection_type;
-        const section = data.section;
+        const entry = this.props.entry || {};
+        const data = entry.get ? entry.get('data').toJS() : {};
+        const title = data.title || '';
+        const description = data.description || '';
+        const collectionType = data.collection_type || '';
+        const section = data.section || 1;
         const body = this.props.widgetFor('body');
 
-        // Get all entries for the same title to show sections list
-        const entries = this.props.entries.getIn(['compositions']);
-        const relatedSections = entries 
-          ? entries
+        // Get all entries for the same title
+        const entries = this.props.entries || {};
+        const allEntries = entries.getIn ? entries.getIn(['compositions']) : [];
+        const relatedSections = allEntries 
+          ? allEntries
               .filter(e => e.getIn(['data', 'title']) === title)
               .map(e => e.getIn(['data', 'section']))
               .toJS()
@@ -46,13 +47,12 @@
                 h('button', {
                   className: 'w-full mt-4 bg-blue-500 text-white p-2 rounded hover:bg-blue-600',
                   onClick: () => {
-                    // Create new section
                     const newSection = Math.max(...relatedSections, 0) + 1;
-                    CMS.entry.get().then(entry => {
-                      const newData = {...entry.get('data').toJS()};
+                    if (this.props.entry) {
+                      const newData = {...this.props.entry.get('data').toJS()};
                       newData.section = newSection;
                       CMS.entry.set('data', newData);
-                    });
+                    }
                   }
                 }, 'New Section')
               )
@@ -80,18 +80,26 @@
     CMS.registerEventListener({
       name: 'preSave',
       handler: async function(entry) {
-        const title = entry.get('data').get('title');
-        const entries = await CMS.getEntries({ collection_name: 'compositions' });
-        const existingEntry = entries.find(e => 
-          e.get('data').get('title') === title && 
-          e.get('data').get('section') === 1
-        );
+        if (!entry) return entry;
         
-        if (existingEntry) {
-          // Lock title if section 1 exists
-          const titleField = document.querySelector('[name="title"]');
-          if (titleField) titleField.setAttribute('readonly', true);
+        const title = entry.get('data').get('title');
+        if (!title) return entry;
+
+        try {
+          const entries = await CMS.getEntries({ collection_name: 'compositions' });
+          const existingEntry = entries.find(e => 
+            e.get('data').get('title') === title && 
+            e.get('data').get('section') === 1
+          );
+          
+          if (existingEntry) {
+            const titleField = document.querySelector('[name="title"]');
+            if (titleField) titleField.setAttribute('readonly', true);
+          }
+        } catch (error) {
+          console.error('Error checking for existing entries:', error);
         }
+        
         return entry;
       }
     });
