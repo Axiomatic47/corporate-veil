@@ -9,6 +9,10 @@
       /* Fix dropdown positioning */
       .css-1hvrgvd-CollectionTopBar {
         z-index: 100;
+        position: fixed;
+        top: 0;
+        width: 100%;
+        background: white;
       }
       .css-1j73xvq-ToolbarSubSectionFirst {
         z-index: 200;
@@ -18,25 +22,36 @@
         margin-top: 60px;
       }
       /* Fix dropdown menu positioning */
-      .css-1hvrgvd-CollectionTopBar {
-        position: fixed;
-        top: 0;
-        width: 100%;
-        background: white;
-      }
-      /* Additional fixes for editor layout */
       .css-2oej7z-ToolbarContainer {
         position: sticky;
         top: 0;
         z-index: 300;
         background: white;
       }
+      /* Additional fixes for editor layout */
       .css-1f7nhiq-CollectionMain {
         padding-top: 20px;
       }
       /* Ensure proper z-indexing for dropdowns */
       .css-1hvrgvd-CollectionTopBar > div {
         z-index: 150;
+      }
+      /* Fix publish button visibility */
+      .css-1a7rmj4-ToolbarSectionMain-ToolbarSection {
+        display: flex !important;
+        visibility: visible !important;
+      }
+      /* Fix collection dropdown */
+      .css-1hvrgvd-CollectionTopBar .dropdown {
+        position: relative;
+      }
+      .css-1hvrgvd-CollectionTopBar .dropdown-menu {
+        position: absolute;
+        top: 100%;
+        display: none;
+      }
+      .css-1hvrgvd-CollectionTopBar .dropdown.open .dropdown-menu {
+        display: block;
       }
     </style>
   </head>
@@ -51,8 +66,12 @@
             h('h1', {className: 'text-4xl font-bold'}, entry.getIn(['data', 'title'])),
             h('div', {className: 'mt-4'}, entry.getIn(['data', 'description'])),
             h('div', {className: 'mt-4'}, 
-              h('strong', {}, 'Collection: '), 
+              h('strong', {}, 'Collection Type: '), 
               entry.getIn(['data', 'collection_type'])
+            ),
+            h('div', {className: 'mt-4'}, 
+              h('strong', {}, 'Section: '), 
+              entry.getIn(['data', 'section'])
             ),
             h('div', {className: 'mt-8'}, this.props.widgetFor('body'))
           );
@@ -80,6 +99,7 @@
               label: 'Compositions',
               folder: 'content/compositions',
               create: true,
+              slug: '{{year}}-{{month}}-{{day}}-{{slug}}',
               fields: [
                 { label: 'Title', name: 'title', widget: 'string' },
                 { label: 'Description', name: 'description', widget: 'text' },
@@ -92,6 +112,19 @@
                 },
                 { label: 'Section', name: 'section', widget: 'number', default: 1 },
                 { label: 'Content', name: 'body', widget: 'markdown' }
+              ],
+              sortable_fields: ['title', 'description'],
+              view_filters: [
+                {
+                  label: 'Memorandum',
+                  field: 'collection_type',
+                  pattern: 'memorandum'
+                },
+                {
+                  label: 'Corrective',
+                  field: 'collection_type',
+                  pattern: 'corrective'
+                }
               ]
             }
           ]
