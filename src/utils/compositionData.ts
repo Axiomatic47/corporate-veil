@@ -14,6 +14,7 @@ interface CompositionStore {
   corrective: Composition[];
   initialized: boolean;
   setCompositions: (compositions: Composition[]) => void;
+  refreshCompositions: () => Promise<void>;
 }
 
 export const useCompositionStore = create<CompositionStore>((set) => ({
@@ -25,6 +26,15 @@ export const useCompositionStore = create<CompositionStore>((set) => ({
     const corrective = compositions.filter(comp => comp.collection_type === 'corrective');
     set({ memorandum, corrective, initialized: true });
   },
+  refreshCompositions: async () => {
+    const { loadCompositions } = await import('./compositionLoader');
+    const compositions = await loadCompositions();
+    set(state => ({
+      ...state,
+      memorandum: compositions.filter(comp => comp.collection_type === 'memorandum'),
+      corrective: compositions.filter(comp => comp.collection_type === 'corrective'),
+    }));
+  }
 }));
 
 // Export compositionData as a computed value from the store
