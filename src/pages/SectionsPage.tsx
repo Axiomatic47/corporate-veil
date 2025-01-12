@@ -1,7 +1,7 @@
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Home } from "lucide-react";
+import { Home, ArrowLeft } from "lucide-react";
 
 const SectionsPage = () => {
   const { compositionId } = useParams();
@@ -15,8 +15,21 @@ const SectionsPage = () => {
   return (
     <div className="min-h-screen bg-[#0F1218] text-white">
       <header className="py-6 px-8 flex justify-between items-center">
-        <h1 className="text-2xl font-serif">Corporate Veil</h1>
-        <Button variant="ghost" className="text-white" onClick={() => navigate("/")}>
+        <div className="flex items-center space-x-4">
+          <Button 
+            variant="ghost" 
+            className="text-white" 
+            onClick={() => navigate(-1)}
+          >
+            <ArrowLeft className="w-6 h-6" />
+          </Button>
+          <h1 className="text-2xl font-serif">Corporate Veil</h1>
+        </div>
+        <Button 
+          variant="ghost" 
+          className="text-white" 
+          onClick={() => navigate("/")}
+        >
           <Home className="w-6 h-6" />
         </Button>
       </header>
