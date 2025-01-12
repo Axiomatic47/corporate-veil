@@ -34,7 +34,7 @@ collections:
         required: true
       - label: Section
         name: section
-        widget: hidden
+        widget: number
         default: 1
       - label: Content
         name: body
@@ -43,15 +43,15 @@ collections:
     sortable_fields:
       - title
       - section
-    view_filters:
-      - label: Memorandum
+    view_groups:
+      - label: Collection Type
         field: collection_type
-        pattern: memorandum
-        id: collection_type__memorandum
-      - label: Corrective
-        field: collection_type
-        pattern: corrective
-        id: collection_type__corrective
+        groups:
+          - label: Memorandum
+            value: memorandum
+          - label: Corrective
+            value: corrective
+    preview: true
     publish: true
 
 publish_mode: simple

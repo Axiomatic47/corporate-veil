@@ -31,16 +31,14 @@ const cmsConfig = {
           { label: 'Content', name: 'body', widget: 'markdown' }
         ],
         sortable_fields: ['title', 'description'],
-        view_filters: [
+        view_groups: [
           {
-            label: 'Memorandum',
+            label: 'Collection Type',
             field: 'collection_type',
-            pattern: 'memorandum'
-          },
-          {
-            label: 'Corrective',
-            field: 'collection_type',
-            pattern: 'corrective'
+            groups: [
+              { label: 'Memorandum', value: 'memorandum' },
+              { label: 'Corrective', value: 'corrective' }
+            ]
           }
         ],
         preview: true,
@@ -51,3 +49,5 @@ const cmsConfig = {
     site_url: window.location.origin
   }
 };
+
+export default cmsConfig;
