@@ -35,9 +35,12 @@ const SectionsPage = () => {
     <div className="min-h-screen bg-[#0F1218] text-white">
       {/* Header */}
       <header className="w-full bg-[#1A1F2C] py-4 px-8 flex justify-between items-center border-b border-[#2A2F3C]">
-        <h1 className="text-2xl font-serif">
-          {compositionId === "memorandum" ? "Memorandum and Manifestation" : "Corrective Measures"}
-        </h1>
+        <button 
+          onClick={() => navigate("/")} 
+          className="text-2xl font-serif hover:text-gray-300 transition-colors"
+        >
+          Corporate Veil
+        </button>
         <div className="flex space-x-4">
           <Button
             variant="ghost"
