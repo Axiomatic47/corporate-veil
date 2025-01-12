@@ -1,23 +1,26 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 
 interface CompositionCardProps {
+  id: number;
   title: string;
   description: string;
-  onReadMore: () => void;
   literacyLevel: number;
   onLiteracyChange: (value: number[]) => void;
 }
 
 const CompositionCard = ({
+  id,
   title,
   description,
-  onReadMore,
   literacyLevel,
   onLiteracyChange,
 }: CompositionCardProps) => {
+  const navigate = useNavigate();
+
   return (
     <Card className="bg-[#1A1F2C] text-white border-none mb-6">
       <CardHeader>
@@ -38,7 +41,7 @@ const CompositionCard = ({
           <span className="text-sm text-gray-300">{literacyLevel}</span>
         </div>
         <Button
-          onClick={onReadMore}
+          onClick={() => navigate(`/composition/${id}`)}
           variant="outline"
           className="bg-transparent border-white text-white hover:bg-white hover:text-[#1A1F2C]"
         >

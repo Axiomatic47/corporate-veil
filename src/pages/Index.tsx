@@ -101,23 +101,23 @@ const Index = () => {
           <h2 className="text-4xl font-serif mb-12">Featured Work</h2>
           <div className="grid gap-8">
             <CompositionCard
+              id={1}
               title="The Nature of Corporate Personhood"
               description="An analysis of the fundamental principles underlying corporate personhood in constitutional law."
-              onReadMore={() => console.log("Navigate to composition 1")}
               literacyLevel={literacyLevels.comp1}
               onLiteracyChange={handleLiteracyChange("comp1")}
             />
             <CompositionCard
+              id={2}
               title="Corporate Rights and Responsibilities"
               description="Examining the balance between corporate rights and societal obligations."
-              onReadMore={() => console.log("Navigate to composition 2")}
               literacyLevel={literacyLevels.comp2}
               onLiteracyChange={handleLiteracyChange("comp2")}
             />
             <CompositionCard
+              id={3}
               title="Future of Corporate Law"
               description="Exploring emerging trends and potential reforms in corporate constitutional law."
-              onReadMore={() => console.log("Navigate to composition 3")}
               literacyLevel={literacyLevels.comp3}
               onLiteracyChange={handleLiteracyChange("comp3")}
             />
