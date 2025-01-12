@@ -1,7 +1,5 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import CompositionCard from "@/components/CompositionCard";
 import { Home } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -65,14 +63,20 @@ const Index = () => {
           <h2 className="text-4xl font-serif mb-12">Featured Work</h2>
           <div className="grid gap-8">
             {featuredWorks.map((work) => (
-              <CompositionCard
+              <div
                 key={work.id}
-                id={work.id}
-                title={work.title}
-                description={work.description}
-                literacyLevel={3}
-                onLiteracyChange={(value) => console.log(value)}
-              />
+                className="bg-[#1A1F2C] rounded-lg p-8 border border-[#2A2F3C]"
+              >
+                <h2 className="text-2xl font-serif mb-4">{work.title}</h2>
+                <p className="text-gray-300 mb-6">{work.description}</p>
+                <Button
+                  onClick={() => navigate(`/composition/memorandum/section/1`)}
+                  variant="outline"
+                  className="bg-transparent border-white text-white hover:bg-white hover:text-[#1A1F2C]"
+                >
+                  Read More
+                </Button>
+              </div>
             ))}
           </div>
         </section>
