@@ -35,7 +35,7 @@ const SectionsPage = () => {
             <div
               key={composition.id}
               className="bg-[#1A1F2C] rounded-lg p-8 border border-[#2A2F3C] cursor-pointer transition-all hover:bg-[#252A37]"
-              onClick={() => navigate(`/composition/${compositionId}/section/${composition.id}`)}
+              onClick={() => navigate(`/composition/${compositionId}/section/1`)}
             >
               <h2 className="text-2xl font-serif mb-4">{composition.title}</h2>
               <div className="prose prose-invert max-w-none">
