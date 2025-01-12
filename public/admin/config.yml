@@ -15,7 +15,11 @@ local_backend_url: http://localhost:8082/api/v1
 media_folder: "public/uploads"
 public_folder: "/uploads"
 
+# Enable editorial workflow for better content management
 publish_mode: editorial_workflow
+
+# Authentication settings
+auth_scope: repo
 
 collections:
   - name: "memorandum"
@@ -23,6 +27,8 @@ collections:
     folder: "content/memorandum"
     create: true
     slug: "{{slug}}"
+    editor:
+      preview: true
     fields:
       - { label: "Title", name: "title", widget: "string" }
       - { label: "Description", name: "description", widget: "text" }
@@ -33,6 +39,8 @@ collections:
     folder: "content/corrective"
     create: true
     slug: "{{slug}}"
+    editor:
+      preview: true
     fields:
       - { label: "Title", name: "title", widget: "string" }
       - { label: "Description", name: "description", widget: "text" }

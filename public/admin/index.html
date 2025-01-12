@@ -5,10 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Content Manager</title>
     <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+    <style>
+      /* Fix dropdown positioning */
+      .css-1hvrgvd-CollectionTopBar {
+        z-index: 100;
+      }
+      .css-1j73xvq-ToolbarSubSectionFirst {
+        z-index: 200;
+      }
+      /* Ensure editor has proper spacing */
+      .css-1q6r8f2-StyledWrapper {
+        margin-top: 60px;
+      }
+      /* Fix dropdown menu positioning */
+      .css-1hvrgvd-CollectionTopBar {
+        position: fixed;
+        top: 0;
+        width: 100%;
+        background: white;
+      }
+    </style>
   </head>
   <body>
     <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
     <script>
+      // Enable authentication
       if (window.netlifyIdentity) {
         window.netlifyIdentity.on("init", user => {
           if (!user) {
@@ -39,6 +60,9 @@
 
       CMS.registerPreviewTemplate('memorandum', PreviewTemplate);
       CMS.registerPreviewTemplate('corrective', PreviewTemplate);
+
+      // Configure CMS
+      CMS.init();
     </script>
   </body>
 </html>
