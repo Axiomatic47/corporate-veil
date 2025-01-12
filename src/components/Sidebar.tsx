@@ -11,12 +11,11 @@ interface SidebarProps {
 export const Sidebar = ({ sections, collectionName, compositionId, currentSectionId }: SidebarProps) => {
   const navigate = useNavigate();
 
-  // Get the composition title based on the compositionId and first section
+  // Get the composition title based on the compositionId only
   const getCompositionTitle = () => {
     const collection = compositionId === "memorandum" ? compositionData.memorandum : compositionData.corrective;
-    // Find the composition that matches the first section ID (1)
-    const mainComposition = collection.find(comp => comp.id === 1);
-    return mainComposition?.title || "";
+    // Always use the first composition as the main title for the collection
+    return collection[0]?.title || "";
   };
 
   const compositionTitle = getCompositionTitle();
