@@ -38,9 +38,8 @@ const SectionsPage = () => {
               onClick={() => navigate(`/composition/${compositionId}/section/${composition.id}`)}
             >
               <h2 className="text-2xl font-serif mb-4">{composition.title}</h2>
-              <p className="text-gray-300 mb-6">{composition.description}</p>
               <div className="prose prose-invert max-w-none">
-                <p className="text-gray-300 line-clamp-3">
+                <p className="text-gray-300 line-clamp-4">
                   {`This is the content for Section 1 of ${composition.title} at literacy level 3. The content would adapt based on the selected literacy level.`}
                 </p>
               </div>
