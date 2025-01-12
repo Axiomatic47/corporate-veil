@@ -1,4 +1,3 @@
-// /public/admin/index.html
 <!DOCTYPE html>
 <html>
   <head>
@@ -17,6 +16,7 @@
         cursor: pointer;
         margin-top: 16px;
         font-size: 14px;
+        transition: background-color 0.2s;
       }
       .new-section-button:hover:not(:disabled) {
         background-color: #1d4ed8;
@@ -51,7 +51,6 @@
   <body>
     <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
     <script>
-      // Preview Component
       const PreviewComponent = createClass({
         getInitialState() {
           return {
@@ -167,11 +166,53 @@
         }
       });
 
-      // Register preview
+      // CMS Configuration
+      const config = {
+        backend: {
+          name: window.location.hostname === 'localhost' ? 'proxy' : 'github',
+          branch: 'main',
+          repo: 'Axiomatic47/corporate-veil'
+        },
+        local_backend: window.location.hostname === 'localhost',
+        media_folder: 'public/uploads',
+        public_folder: '/uploads',
+        collections: [
+          {
+            name: 'compositions',
+            label: 'Compositions',
+            label_singular: 'Composition',
+            folder: 'content/compositions',
+            create: true,
+            slug: '{{year}}{{month}}{{day}}-{{slug}}',
+            fields: [
+              { label: 'Title', name: 'title', widget: 'string' },
+              { label: 'Description', name: 'description', widget: 'text' },
+              {
+                label: 'Collection Type',
+                name: 'collection_type',
+                widget: 'select',
+                options: [
+                  { label: 'Memorandum', value: 'memorandum' },
+                  { label: 'Corrective', value: 'corrective' }
+                ],
+                required: true
+              },
+              { label: 'Section', name: 'section', widget: 'number', default: 1 },
+              { label: 'Content', name: 'body', widget: 'markdown' }
+            ],
+            sortable_fields: ['title', 'section'],
+            editor: {
+              preview: true
+            }
+          }
+        ]
+      };
+
+      // Register the preview template
       CMS.registerPreviewTemplate('compositions', PreviewComponent);
 
-      // Start CMS
-      CMS.init();
+      // Initialize the CMS
+      CMS.init({ config });
     </script>
   </body>
 </html>
