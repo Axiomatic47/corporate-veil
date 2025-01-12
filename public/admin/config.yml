@@ -1,10 +1,7 @@
 backend:
-  name: github
-  repo: axiomatic47/corporate-veil
+  name: proxy
   branch: main
-  auth_type: oauth
-  app_id: Ov23liAKv2NEFlD8awLo
-  client_secret: d9fa24182db927e76e66978eea1a3dbfb081ee40
+  proxy_url: http://localhost:8081/api/v1
 
 local_backend: true
 media_folder: "public/uploads"
