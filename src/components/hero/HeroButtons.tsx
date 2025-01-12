@@ -11,7 +11,7 @@ export const HeroButtons = () => {
         className="min-w-[180px] bg-white/10 backdrop-blur-sm border-2 border-white/30 text-white hover:bg-white/20 hover:border-white/50 transition-all duration-300 py-7 text-lg font-medium rounded-lg shadow-lg"
         onClick={() => navigate("/composition/memorandum")}
       >
-        Law
+        Memorandum and Manifestation
       </Button>
       
       <Button
@@ -19,7 +19,7 @@ export const HeroButtons = () => {
         className="min-w-[180px] bg-transparent border-2 border-white/30 text-white hover:bg-white/10 hover:border-white/50 transition-all duration-300 py-7 text-lg font-medium rounded-lg shadow-lg"
         onClick={() => navigate("/composition/corrective")}
       >
-        Philosophy
+        Corrective Measures
       </Button>
     </div>
   );
