@@ -13,29 +13,13 @@ export const Header = () => {
       >
         Corporate Veil
       </button>
-      <div className="flex space-x-4">
-        <Button
-          variant="ghost"
-          className="text-white hover:bg-[#2A2F3C] px-6"
-          onClick={() => navigate("/composition/memorandum")}
-        >
-          Memorandum and Manifestation
-        </Button>
-        <Button
-          variant="ghost"
-          className="text-white hover:bg-[#2A2F3C] px-6"
-          onClick={() => navigate("/composition/corrective")}
-        >
-          Corrective Measures
-        </Button>
-        <Button 
-          variant="ghost" 
-          className="text-white hover:bg-[#2A2F3C]"
-          onClick={() => navigate("/")}
-        >
-          <Home className="w-6 h-6" />
-        </Button>
-      </div>
+      <Button 
+        variant="ghost" 
+        className="text-white hover:bg-[#2A2F3C]"
+        onClick={() => navigate("/")}
+      >
+        <Home className="w-6 h-6" />
+      </Button>
     </header>
   );
 };

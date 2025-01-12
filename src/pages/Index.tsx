@@ -33,25 +33,9 @@ const Index = () => {
     <div className="min-h-screen bg-[#1A1F2C] text-white flex flex-col">
       <header className="py-6 px-8 flex justify-between items-center bg-[#0F1218]">
         <h1 className="text-2xl font-serif">Corporate Veil</h1>
-        <div className="flex space-x-4">
-          <Button
-            variant="ghost"
-            className="text-white hover:bg-[#2A2F3C] px-6"
-            onClick={() => navigate("/composition/memorandum")}
-          >
-            Memorandum and Manifestation
-          </Button>
-          <Button
-            variant="ghost"
-            className="text-white hover:bg-[#2A2F3C] px-6"
-            onClick={() => navigate("/composition/corrective")}
-          >
-            Corrective Measures
-          </Button>
-          <Button variant="ghost" className="text-white">
-            <Home className="w-6 h-6" />
-          </Button>
-        </div>
+        <Button variant="ghost" className="text-white">
+          <Home className="w-6 h-6" />
+        </Button>
       </header>
 
       <main className="container mx-auto px-4 py-16 flex-grow">
@@ -59,9 +43,26 @@ const Index = () => {
           <h1 className="text-5xl font-serif mb-8">
             A Constitutional Analysis of Corporate Personhood
           </h1>
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+          <p className="text-xl text-gray-300 max-w-3xl mx-auto mb-12">
             Explore the legal framework and implications of corporate personhood in constitutional law.
           </p>
+          
+          <div className="flex justify-center space-x-4 mb-24">
+            <Button
+              variant="ghost"
+              className="text-white hover:bg-[#2A2F3C] px-6"
+              onClick={() => navigate("/composition/memorandum")}
+            >
+              Memorandum and Manifestation
+            </Button>
+            <Button
+              variant="ghost"
+              className="text-white hover:bg-[#2A2F3C] px-6"
+              onClick={() => navigate("/composition/corrective")}
+            >
+              Corrective Measures
+            </Button>
+          </div>
         </div>
 
         <section className="mb-32">
