@@ -14,22 +14,24 @@
     
     const PreviewTemplate = createClass({
       render: function() {
-        const entry = this.props.entry || {};
-        const data = entry.get ? entry.get('data').toJS() : {};
+        // Safely handle both Immutable.js and regular objects
+        const entry = this.props.entry;
+        const data = entry && entry.toJS ? entry.toJS().data : (entry?.data || {});
+        
         const title = data.title || '';
         const description = data.description || '';
         const collectionType = data.collection_type || '';
         const section = data.section || 1;
         const body = this.props.widgetFor('body');
 
-        // Get all entries for the same title
-        const entries = this.props.entries || {};
-        const allEntries = entries.getIn ? entries.getIn(['compositions']) : [];
-        const relatedSections = allEntries 
+        // Safely get entries
+        const entries = this.props.entries;
+        const allEntries = entries && entries.toJS ? entries.toJS().compositions : [];
+        const relatedSections = Array.isArray(allEntries) 
           ? allEntries
-              .filter(e => e.getIn(['data', 'title']) === title)
-              .map(e => e.getIn(['data', 'section']))
-              .toJS()
+              .filter(e => e.data.title === title)
+              .map(e => e.data.section)
+              .sort((a, b) => a - b)
           : [];
 
         return h('div', {className: 'preview-container'},
@@ -48,8 +50,8 @@
                   className: 'w-full mt-4 bg-blue-500 text-white p-2 rounded hover:bg-blue-600',
                   onClick: () => {
                     const newSection = Math.max(...relatedSections, 0) + 1;
-                    if (this.props.entry) {
-                      const newData = {...this.props.entry.get('data').toJS()};
+                    if (entry && entry.get) {
+                      const newData = {...entry.get('data').toJS()};
                       newData.section = newSection;
                       CMS.entry.set('data', newData);
                     }
@@ -76,28 +78,29 @@
 
     CMS.registerPreviewTemplate('compositions', PreviewTemplate);
 
-    // Lock title field after first section is created
     CMS.registerEventListener({
       name: 'preSave',
       handler: async function(entry) {
-        if (!entry) return entry;
+        if (!entry || !entry.get) return entry;
         
-        const title = entry.get('data').get('title');
-        if (!title) return entry;
-
         try {
+          const data = entry.get('data');
+          const title = data.get('title');
+          
+          if (!title) return entry;
+
           const entries = await CMS.getEntries({ collection_name: 'compositions' });
-          const existingEntry = entries.find(e => 
-            e.get('data').get('title') === title && 
-            e.get('data').get('section') === 1
-          );
+          const existingEntry = entries.find(e => {
+            const entryData = e.get('data');
+            return entryData.get('title') === title && entryData.get('section') === 1;
+          });
           
           if (existingEntry) {
             const titleField = document.querySelector('[name="title"]');
             if (titleField) titleField.setAttribute('readonly', true);
           }
         } catch (error) {
-          console.error('Error checking for existing entries:', error);
+          console.error('Error in preSave handler:', error);
         }
         
         return entry;

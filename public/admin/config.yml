@@ -23,9 +23,15 @@ collections:
           label: "Title", 
           name: "title", 
           widget: "string",
+          required: true,
           hint: "Title will be locked after creating the first section"
         }
-      - { label: "Description", name: "description", widget: "text" }
+      - { 
+          label: "Description", 
+          name: "description", 
+          widget: "text",
+          required: true 
+        }
       - {
           label: "Collection Type",
           name: "collection_type",
@@ -42,7 +48,12 @@ collections:
           min: 1,
           hint: "Section number is automatically assigned"
         }
-      - { label: "Content", name: "body", widget: "markdown" }
+      - { 
+          label: "Content", 
+          name: "body", 
+          widget: "markdown",
+          required: true 
+        }
     sortable_fields:
       - title
       - description
