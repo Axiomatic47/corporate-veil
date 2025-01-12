@@ -3,9 +3,9 @@ import { compositionData } from "@/utils/compositionData";
 
 // Specify which compositions should be featured by their IDs and collection names
 const featuredWorksConfig = [
-  { id: 1, collection: 'corrective' }, // Reform Proposals
-  { id: 1, collection: 'memorandum' }, // The Nature of Corporate Personhood
-  { id: 2, collection: 'memorandum' }  // Legal Rights and Responsibilities
+  { id: 1, collection: 'corrective' },  // Reform Proposals
+  { id: 1, collection: 'memorandum' },  // The Nature of Corporate Personhood
+  { id: 2, collection: 'memorandum' }   // Legal Rights and Responsibilities
 ];
 
 export const FeaturedWorkSection = () => {
