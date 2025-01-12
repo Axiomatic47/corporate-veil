@@ -11,6 +11,7 @@ interface CompositionCardProps {
   onLiteracyChange: (value: number[]) => void;
   content?: string;
   showSlider?: boolean;
+  collection?: string;
 }
 
 const CompositionCard = ({
@@ -21,13 +22,14 @@ const CompositionCard = ({
   onLiteracyChange,
   content,
   showSlider = false,
+  collection,
 }: CompositionCardProps) => {
   const navigate = useNavigate();
 
   const handleCardClick = () => {
-    // Determine which collection the composition belongs to
-    const collection = id <= 4 ? "memorandum" : "corrective";
-    navigate(`/composition/${collection}/section/1`);
+    // Use the provided collection or determine it based on ID if not provided
+    const targetCollection = collection || (id <= 4 ? "memorandum" : "corrective");
+    navigate(`/composition/${targetCollection}/section/1`);
   };
 
   return (
