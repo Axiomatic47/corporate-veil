@@ -5,10 +5,10 @@ export const HeroButtons = () => {
   const navigate = useNavigate();
   
   return (
-    <div className="flex justify-center gap-4">
+    <div className="flex justify-center gap-6">
       <Button
         variant="outline"
-        className="min-w-[120px] bg-white text-[#1A1F2C] hover:bg-gray-100 transition-colors py-6 text-lg font-medium"
+        className="min-w-[180px] bg-white/10 backdrop-blur-sm border-2 border-white/30 text-white hover:bg-white/20 hover:border-white/50 transition-all duration-300 py-7 text-lg font-medium rounded-lg shadow-lg"
         onClick={() => navigate("/composition/memorandum")}
       >
         Law
@@ -16,7 +16,7 @@ export const HeroButtons = () => {
       
       <Button
         variant="outline"
-        className="min-w-[120px] bg-transparent border-white text-white hover:bg-white/10 transition-colors py-6 text-lg font-medium"
+        className="min-w-[180px] bg-transparent border-2 border-white/30 text-white hover:bg-white/10 hover:border-white/50 transition-all duration-300 py-7 text-lg font-medium rounded-lg shadow-lg"
         onClick={() => navigate("/composition/corrective")}
       >
         Philosophy
