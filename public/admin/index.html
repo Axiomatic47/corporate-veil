@@ -75,7 +75,7 @@
             const data = entry.get('data');
             const collectionType = data.get('collection_type');
             
-            const entries = await this.props.query(`collections.${collectionType}`, 'entries');
+            const entries = await this.props.query('collections.compositions.entries');
             const sections = entries
               .filter(entry => entry.data.collection_type === collectionType)
               .map(entry => ({
@@ -83,7 +83,7 @@
                 slug: entry.slug
               }))
               .sort((a, b) => a.section - b.section);
-            
+
             if (this.mounted) {
               this.setState({ sections });
             }
@@ -147,7 +147,7 @@
 
           return h('div', { className: 'preview-content' },
             h('div', { className: 'section-nav' },
-              this.state.sections.map(section => 
+              this.state.sections.map(section =>
                 h('button', {
                   key: section.section,
                   onClick: () => this.handleSectionClick(section.slug),
@@ -179,7 +179,8 @@
         collections: [
           {
             name: 'compositions',
-            label: 'Memorandum',
+            label: 'Compositions',
+            label_singular: 'Composition',
             folder: 'content/compositions',
             create: true,
             slug: '{{year}}{{month}}{{day}}-{{slug}}',
@@ -190,43 +191,18 @@
                 label: 'Collection Type',
                 name: 'collection_type',
                 widget: 'select',
-                options: ['memorandum', 'corrective'],
-                required: true,
-                default: 'memorandum'
+                options: [
+                  { label: 'Memorandum', value: 'memorandum' },
+                  { label: 'Corrective', value: 'corrective' }
+                ],
+                required: true
               },
               { label: 'Section', name: 'section', widget: 'number', default: 1 },
               { label: 'Content', name: 'body', widget: 'markdown' }
             ],
             sortable_fields: ['title', 'section'],
-            filter: {
-              field: 'collection_type',
-              value: 'memorandum'
-            }
-          },
-          {
-            name: 'corrective',
-            label: 'Corrective Measures',
-            folder: 'content/compositions',
-            create: true,
-            slug: '{{year}}{{month}}{{day}}-{{slug}}',
-            fields: [
-              { label: 'Title', name: 'title', widget: 'string' },
-              { label: 'Description', name: 'description', widget: 'text' },
-              {
-                label: 'Collection Type',
-                name: 'collection_type',
-                widget: 'select',
-                options: ['memorandum', 'corrective'],
-                required: true,
-                default: 'corrective'
-              },
-              { label: 'Section', name: 'section', widget: 'number', default: 1 },
-              { label: 'Content', name: 'body', widget: 'markdown' }
-            ],
-            sortable_fields: ['title', 'section'],
-            filter: {
-              field: 'collection_type',
-              value: 'corrective'
+            editor: {
+              preview: true
             }
           }
         ]
@@ -234,7 +210,6 @@
 
       // Register the preview template
       CMS.registerPreviewTemplate('compositions', PreviewComponent);
-      CMS.registerPreviewTemplate('corrective', PreviewComponent);
 
       // Initialize the CMS
       CMS.init({ config });
