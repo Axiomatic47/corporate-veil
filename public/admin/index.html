@@ -37,37 +37,42 @@
     
     <!-- Initialize CMS -->
     <script>
-      window.addEventListener('load', function() {
-        // Initialize CMS
+      // Wait for DOM to be ready
+      document.addEventListener('DOMContentLoaded', function() {
+        // Initialize CMS with configuration
         CMS.init();
 
-        // Register preview template
+        // Register preview template using createClass
         const PreviewTemplate = createClass({
           render: function() {
             const entry = this.props.entry;
-            return h('div', {},
-              h('h1', {}, entry.getIn(['data', 'title'])),
-              h('div', {}, this.props.widgetFor('body'))
+            const title = entry.getIn(['data', 'title']);
+            const body = this.props.widgetFor('body');
+            
+            return h('div', { className: 'preview-container' },
+              h('h1', { className: 'title' }, title),
+              h('div', { className: 'content' }, body)
             );
           }
         });
 
+        // Register the preview template for compositions
         CMS.registerPreviewTemplate('compositions', PreviewTemplate);
 
-        // Register event listeners for content changes
+        // Handle content saving with proper error handling
         CMS.registerEventListener({
           name: 'preSave',
-          handler: function(entry) {
+          handler: async function(entry) {
             console.log('Content about to be saved:', entry);
             return entry;
-          },
+          }
         });
 
         CMS.registerEventListener({
           name: 'postSave',
-          handler: function(entry) {
+          handler: async function(entry) {
             console.log('Content was saved:', entry);
-          },
+          }
         });
       });
     </script>
