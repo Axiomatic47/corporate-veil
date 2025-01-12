@@ -15,7 +15,7 @@ const parseFrontMatter = (content: string): { data: any; content: string } => {
   const data = frontMatter.split('\n').reduce((acc: Record<string, any>, line) => {
     const [key, ...values] = line.split(':');
     if (key && values.length) {
-      const value = values.join(':').trim();
+      const value = values.join(':').trim().replace(/^["']|["']$/g, ''); // Remove quotes if present
       // Handle number values
       acc[key.trim()] = /^\d+$/.test(value) ? parseInt(value, 10) : value;
     }
