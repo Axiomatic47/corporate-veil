@@ -63,6 +63,8 @@
   <body>
     <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
     <script>
+      let cmsInstance = null;
+
       const createNewSection = async (entry) => {
         if (!entry) {
           throw new Error('Entry is required to create a new section');
@@ -83,7 +85,7 @@
         const description = data.get('description');
 
         const baseTitle = title.split(' - ')[0];
-        const newSlug = `${baseTitle.toLowerCase().replace(/\s+/g, '-')}-section-${currentSection + 1}`;
+        const newSlug = `${baseTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-section-${currentSection + 1}`;
 
         const entryData = {
           slug: newSlug,
@@ -97,13 +99,17 @@
           }
         };
 
-        const backend = await CMS.getBackend();
-        if (!backend || !backend.implementation) {
-          throw new Error('CMS backend not initialized');
+        try {
+          const backend = await CMS.getBackend();
+          if (!backend?.implementation) {
+            throw new Error('CMS backend not initialized');
+          }
+          await backend.implementation.createEntry('compositions', newSlug, entryData);
+          return newSlug;
+        } catch (error) {
+          console.error('Error creating new section:', error);
+          throw error;
         }
-
-        await backend.implementation.createEntry('compositions', newSlug, entryData);
-        return newSlug;
       };
 
       const PreviewComponent = createClass({
@@ -129,23 +135,28 @@
           
           try {
             const backend = await CMS.getBackend();
-            if (!backend || !backend.implementation) {
+            if (!backend?.implementation) {
               throw new Error('CMS backend not initialized');
             }
 
-            const entries = await backend.implementation.entries({ collection: 'compositions' });
+            const entries = await backend.implementation.entries({ 
+              collection: 'compositions' 
+            });
+
+            if (!this._isMounted) return;
+
             const currentTitle = this.props.entry.getIn(['data', 'title']);
             if (!currentTitle) return;
 
             const baseTitle = currentTitle.split(' - ')[0];
             const sections = entries
               .filter(entry => {
-                const entryTitle = entry.data.title;
+                const entryTitle = entry.data?.title;
                 return entryTitle && entryTitle.startsWith(baseTitle);
               })
               .sort((a, b) => {
-                const sectionA = parseInt(a.data.section || '1', 10);
-                const sectionB = parseInt(b.data.section || '1', 10);
+                const sectionA = parseInt(a.data?.section || '1', 10);
+                const sectionB = parseInt(b.data?.section || '1', 10);
                 return sectionA - sectionB;
               });
             
@@ -175,7 +186,7 @@
             console.error('Error creating section:', error);
             if (this._isMounted) {
               this.setState({
-                error: error.message || 'Failed to create new section. Please try again.',
+                error: error.message || 'Failed to create new section',
                 isCreatingSection: false
               });
             }
@@ -196,9 +207,9 @@
               sections.map(section => 
                 h('div', {
                   key: section.slug,
-                  className: `nav-item ${parseInt(section.data.section || '1', 10) === currentSection ? 'active' : ''}`,
+                  className: `nav-item ${parseInt(section.data?.section || '1', 10) === currentSection ? 'active' : ''}`,
                   onClick: () => this.navigateToSection(section.slug)
-                }, `Section ${section.data.section}`)
+                }, `Section ${section.data?.section}`)
               )
             ),
             h('h1', {}, entry.getIn(['data', 'title'])),
@@ -213,11 +224,8 @@
         }
       });
 
-      if (window.CMS) {
-        window.CMS.registerPreviewTemplate('compositions', PreviewComponent);
-      }
-
       window.addEventListener('load', function() {
+        CMS.registerPreviewTemplate('compositions', PreviewComponent);
         CMS.init();
       });
     </script>
