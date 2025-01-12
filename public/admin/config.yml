@@ -8,7 +8,7 @@ backend:
 media_folder: "public/uploads"
 public_folder: "/uploads"
 
-publish_mode: simple
+publish_mode: editorial_workflow
 
 collections:
   - name: "compositions"

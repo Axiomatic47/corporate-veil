@@ -39,6 +39,24 @@
     <script>
       window.addEventListener('load', function() {
         CMS.init();
+
+        // Add event listeners for content changes
+        if (window.CMS) {
+          CMS.registerEventListener({
+            name: 'preSave',
+            handler: function(entry) {
+              console.log('Content about to be saved:', entry);
+              return entry;
+            },
+          });
+
+          CMS.registerEventListener({
+            name: 'postSave',
+            handler: function(entry) {
+              console.log('Content was saved:', entry);
+            },
+          });
+        }
       });
     </script>
   </body>
