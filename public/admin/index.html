@@ -18,9 +18,10 @@
       const PreviewTemplate = createClass({
         render: function() {
           const {entry} = this.props;
-          return h('div', {},
-            h('h1', {}, entry.getIn(['data', 'title'])),
-            h('div', {}, this.props.widgetFor('body'))
+          return h('div', {className: 'prose dark:prose-invert max-w-none'},
+            h('h1', {className: 'text-4xl font-bold'}, entry.getIn(['data', 'title'])),
+            h('div', {className: 'mt-4'}, entry.getIn(['data', 'description'])),
+            h('div', {className: 'mt-8'}, this.props.widgetFor('body'))
           );
         }
       });

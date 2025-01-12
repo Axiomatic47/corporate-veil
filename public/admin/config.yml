@@ -5,7 +5,7 @@ backend:
 media_folder: "public/uploads"
 public_folder: "/uploads"
 
-# Enable real-time preview
+# Enable real-time preview and local backend
 local_backend: true
 publish_mode: editorial_workflow
 
