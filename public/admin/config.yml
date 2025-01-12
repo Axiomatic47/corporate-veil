@@ -1,20 +1,14 @@
 backend:
   name: git-gateway
   branch: main
-  commit_messages:
-    create: 'Create {{collection}} "{{slug}}"'
-    update: 'Update {{collection}} "{{slug}}"'
-    delete: 'Delete {{collection}} "{{slug}}"'
-    uploadMedia: 'Upload "{{path}}"'
-    deleteMedia: 'Delete "{{path}}"'
-
-# When using local development
-local_backend: true
-local_backend_url: http://localhost:8082/api/v1
+  local_backend: true
+  local_backend_url: http://localhost:8082/api/v1
 
 media_folder: "public/uploads"
 public_folder: "/uploads"
 
+# Enable real-time preview and local backend
+local_backend: true
 publish_mode: editorial_workflow
 
 collections:
