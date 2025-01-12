@@ -64,6 +64,24 @@ const Index = () => {
           </p>
         </div>
 
+        <section className="mt-24">
+          <h2 className="text-4xl font-serif mb-12">Featured Work</h2>
+          <div className="grid gap-8">
+            {featuredWorks.map((work) => (
+              <CompositionCard
+                key={work.id}
+                id={work.id}
+                title={work.title}
+                description={work.description}
+                literacyLevel={3}
+                onLiteracyChange={() => {}}
+                content={work.content}
+                showSlider={false}
+              />
+            ))}
+          </div>
+        </section>
+
         <section className="mb-24">
           <h2 className="text-4xl font-serif mb-8">The Indivisibility of Personhood and Constitutional Rights</h2>
           <div className="prose prose-invert max-w-none">
@@ -85,24 +103,6 @@ const Index = () => {
             <p className="text-gray-300 leading-relaxed mt-4">
               Ultimately, personhood under the Constitution is an all-or-nothing status. The denial of one constitutional right to corporations serves as the shared basis for denying all rights, as it highlights their fundamental incompatibility with the concept of personhood. Natural persons are protected by the Constitution because their rights are inherent, not granted. Corporations, by contrast, must rely on exceptional legal constructs to receive constitutional protections, constructs that contradict the indivisible and inherent nature of constitutional rights. Recognizing the holistic nature of personhood, we must reject the attribution of constitutional rights to corporations entirely, preserving the Constitution's integrity and its ethical commitment to humanity.
             </p>
-          </div>
-        </section>
-
-        <section className="mt-24">
-          <h2 className="text-4xl font-serif mb-12">Featured Work</h2>
-          <div className="grid gap-8">
-            {featuredWorks.map((work) => (
-              <CompositionCard
-                key={work.id}
-                id={work.id}
-                title={work.title}
-                description={work.description}
-                literacyLevel={3}
-                onLiteracyChange={() => {}}
-                content={work.content}
-                showSlider={false}
-              />
-            ))}
           </div>
         </section>
       </main>
