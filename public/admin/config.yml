@@ -5,6 +5,10 @@ backend:
 media_folder: "public/uploads"
 public_folder: "/uploads"
 
+# Enable real-time preview
+local_backend: true
+publish_mode: editorial_workflow
+
 collections:
   - name: "memorandum"
     label: "Memorandum Compositions"
