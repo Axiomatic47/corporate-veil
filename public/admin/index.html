@@ -34,22 +34,58 @@
     </style>
   </head>
   <body>
+    <!-- Load Decap CMS -->
     <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
-    <script src="components/PreviewTemplate.js"></script>
+    
+    <!-- Load configuration -->
     <script src="config/cms-config.js"></script>
+    
+    <!-- Initialize CMS -->
     <script>
-      // Register preview template
-      CMS.registerPreviewTemplate('compositions', PreviewTemplate);
-      
       // Initialize CMS with config
-      CMS.init(cmsConfig);
+      window.addEventListener('load', function() {
+        CMS.init({
+          config: {
+            backend: {
+              name: 'proxy',
+              branch: 'main',
+              proxy_url: 'http://localhost:8081/api/v1'
+            },
+            local_backend: true,
+            media_folder: 'public/uploads',
+            public_folder: '/uploads',
+            collections: [
+              {
+                name: 'compositions',
+                label: 'Compositions',
+                folder: 'content/compositions',
+                create: true,
+                slug: '{{year}}-{{month}}-{{day}}-{{slug}}',
+                fields: [
+                  { label: 'Title', name: 'title', widget: 'string' },
+                  { label: 'Description', name: 'description', widget: 'text' },
+                  {
+                    label: 'Collection Type',
+                    name: 'collection_type',
+                    widget: 'select',
+                    options: ['memorandum', 'corrective'],
+                    required: true
+                  },
+                  { label: 'Section', name: 'section', widget: 'number', default: 1 },
+                  { label: 'Content', name: 'body', widget: 'markdown' }
+                ]
+              }
+            ]
+          }
+        });
 
-      // Add event listener for successful publish
-      CMS.registerEventListener({
-        name: 'postPublish',
-        handler: function() {
-          console.log('Content published successfully');
-        },
+        // Add event listener for successful publish
+        CMS.registerEventListener({
+          name: 'postPublish',
+          handler: function() {
+            console.log('Content published successfully');
+          },
+        });
       });
     </script>
   </body>

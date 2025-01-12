@@ -15,25 +15,11 @@ const queryClient = new QueryClient();
 
 const AdminPage = () => {
   useEffect(() => {
-    // Load CMS script if not already loaded
-    if (!document.getElementById('decap-cms-script')) {
-      const script = document.createElement('script');
-      script.id = 'decap-cms-script';
-      script.src = 'https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js';
-      script.async = true;
-      document.body.appendChild(script);
-    }
+    // Redirect to the admin page
+    window.location.href = '/admin/index.html';
   }, []);
 
-  return (
-    <div className="fixed inset-0 w-full h-full">
-      <iframe
-        src="/admin/index.html"
-        className="w-full h-full border-0"
-        title="Content Management System"
-      />
-    </div>
-  );
+  return null;
 };
 
 const App = () => (
