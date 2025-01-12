@@ -9,105 +9,13 @@
 </head>
 <body>
   <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
-  <script>
+  <script type="module">
+    import PreviewTemplate from './components/PreviewTemplate.js';
+    import registerEventHandlers from './components/EventHandlers.js';
+
     CMS.registerPreviewStyle('/admin/styles/preview.css');
-    
-    const PreviewTemplate = createClass({
-      render: function() {
-        const entry = this.props.entry;
-        const data = entry && entry.toJS ? entry.toJS().data : (entry?.data || {});
-        
-        const title = data.title || '';
-        const description = data.description || '';
-        const collectionType = data.collection_type || '';
-        const section = data.section || 1;
-        const body = this.props.widgetFor('body');
-
-        const entries = this.props.entries;
-        const allEntries = entries && entries.toJS ? entries.toJS().compositions : [];
-        const relatedSections = Array.isArray(allEntries) 
-          ? allEntries
-              .filter(e => e.data.title === title)
-              .map(e => e.data.section)
-              .sort((a, b) => a - b)
-          : [];
-
-        return h('div', {className: 'preview-container'},
-          h('div', {className: 'flex'},
-            h('nav', {className: 'w-64 bg-gray-800 p-4 min-h-screen'},
-              h('h3', {className: 'text-white mb-4'}, 'Navigation'),
-              h('div', {className: 'space-y-2'},
-                relatedSections.map(sectionNum =>
-                  h('button', {
-                    key: sectionNum,
-                    className: `w-full p-2 text-left rounded ${section === sectionNum ? 'bg-white text-gray-800' : 'text-white hover:bg-gray-700'}`,
-                    onClick: () => {
-                      const sectionEntry = allEntries.find(e => 
-                        e.data.title === title && e.data.section === sectionNum
-                      );
-                      if (sectionEntry) {
-                        CMS.entry.set(sectionEntry);
-                      }
-                    }
-                  }, `Section ${sectionNum}`)
-                ),
-                h('button', {
-                  className: 'w-full mt-4 bg-blue-500 text-white p-2 rounded hover:bg-blue-600',
-                  onClick: () => {
-                    const newSection = Math.max(...relatedSections, 0) + 1;
-                    const newData = {...data, section: newSection};
-                    CMS.entry.set('data', newData);
-                  }
-                }, 'New Section')
-              )
-            ),
-            h('div', {className: 'flex-1 p-8'},
-              h('h1', {className: 'text-4xl font-bold mb-4'}, title),
-              h('div', {className: 'meta-info mb-6'},
-                h('p', {className: 'text-lg mb-2'}, description),
-                h('div', {className: 'flex gap-4'},
-                  h('span', {className: 'text-sm'}, `Collection: ${collectionType}`),
-                  h('span', {className: 'text-sm'}, `Section: ${section}`)
-                )
-              ),
-              h('div', {className: 'content mt-8'}, body)
-            )
-          )
-        );
-      }
-    });
-
     CMS.registerPreviewTemplate('compositions', PreviewTemplate);
-
-    CMS.registerEventListener({
-      name: 'preSave',
-      handler: async function(entry) {
-        if (!entry) return entry;
-        
-        try {
-          const data = entry.get ? entry.get('data').toJS() : entry.data;
-          if (!data) return entry;
-
-          const title = data.title;
-          if (!title) return entry;
-
-          const entries = await CMS.getEntries({ collection_name: 'compositions' });
-          const existingEntry = entries.find(e => {
-            const entryData = e.get ? e.get('data').toJS() : e.data;
-            return entryData.title === title && entryData.section === 1;
-          });
-          
-          if (existingEntry) {
-            const titleField = document.querySelector('[name="title"]');
-            if (titleField) titleField.setAttribute('readonly', true);
-          }
-        } catch (error) {
-          console.error('Error in preSave handler:', error);
-        }
-        
-        return entry;
-      }
-    });
+    registerEventHandlers();
   </script>
 </body>
 </html>
