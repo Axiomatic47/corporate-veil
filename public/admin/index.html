@@ -6,53 +6,59 @@
     <title>Content Manager</title>
     <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
     <link rel="stylesheet" href="styles/main.css">
-    <style>
-      .preview-container {
-        padding: 2rem;
-        background: #ffffff;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      }
-      .meta-info {
-        border-bottom: 1px solid #eaeaea;
-        padding-bottom: 1rem;
-      }
-    </style>
   </head>
   <body>
-    <!-- Include the script that builds the page and powers Decap CMS -->
     <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
     <script>
       // Initialize CMS when DOM is fully loaded
-      if (window.netlifyIdentity) {
-        window.netlifyIdentity.on("init", user => {
-          if (!user) {
-            window.netlifyIdentity.on("login", () => {
-              document.location.href = "/admin/";
-            });
-          }
-        });
-      }
-
-      // Wait for CMS to be ready
       window.addEventListener('load', function() {
         CMS.init();
 
-        // Simple preview template
-        const PreviewTemplate = createClass({
+        // Preview template for composition list view
+        const CompositionListPreview = createClass({
           render: function() {
             const entry = this.props.entry;
             const title = entry.getIn(['data', 'title']);
-            const body = this.props.widgetFor('body');
+            const description = entry.getIn(['data', 'description']);
+            const collectionType = entry.getIn(['data', 'collection_type']);
             
             return h('div', { className: 'preview-container' },
-              h('h1', { className: 'title' }, title),
-              h('div', { className: 'content' }, body)
+              h('div', { className: 'composition-card' },
+                h('h2', {}, title),
+                h('p', {}, description),
+                h('div', { className: 'meta' },
+                  h('span', {}, `Type: ${collectionType}`)
+                )
+              )
             );
           }
         });
 
-        CMS.registerPreviewTemplate('compositions', PreviewTemplate);
+        // Preview template for section view
+        const SectionPreview = createClass({
+          render: function() {
+            const entry = this.props.entry;
+            const title = entry.getIn(['data', 'title']);
+            const description = entry.getIn(['data', 'description']);
+            const section = entry.getIn(['data', 'section']);
+            const body = this.props.widgetFor('body');
+            
+            return h('div', { className: 'preview-container' },
+              h('div', { className: 'section-content' },
+                h('h1', {}, title),
+                h('p', { className: 'description' }, description),
+                h('div', { className: 'section-number' }, 
+                  h('span', {}, `Section ${section}`)
+                ),
+                h('div', { className: 'content' }, body)
+              )
+            );
+          }
+        });
+
+        // Register both preview templates
+        CMS.registerPreviewTemplate('compositions', CompositionListPreview);
+        CMS.registerPreviewStyle('/admin/styles/preview.css');
       });
     </script>
   </body>

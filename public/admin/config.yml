@@ -17,6 +17,7 @@ collections:
     create: true
     format: "frontmatter"
     slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    preview_path: "composition/{{fields.collection_type}}/section/{{fields.section}}"
     fields:
       - { label: "Title", name: "title", widget: "string" }
       - { label: "Description", name: "description", widget: "text" }
