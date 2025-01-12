@@ -1,6 +1,5 @@
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import { Header } from "@/components/Header";
 import { compositionData } from "@/utils/compositionData";
 
@@ -35,17 +34,16 @@ const SectionsPage = () => {
           {compositions.map((composition) => (
             <div
               key={composition.id}
-              className="bg-[#1A1F2C] rounded-lg p-8 border border-[#2A2F3C]"
+              className="bg-[#1A1F2C] rounded-lg p-8 border border-[#2A2F3C] cursor-pointer transition-all hover:bg-[#252A37]"
+              onClick={() => navigate(`/composition/${compositionId}/section/${composition.id}`)}
             >
               <h2 className="text-2xl font-serif mb-4">{composition.title}</h2>
               <p className="text-gray-300 mb-6">{composition.description}</p>
-              <Button
-                onClick={() => navigate(`/composition/${compositionId}/section/${composition.id}`)}
-                variant="outline"
-                className="bg-transparent border-white text-white hover:bg-white hover:text-[#1A1F2C]"
-              >
-                Read More
-              </Button>
+              <div className="prose prose-invert max-w-none">
+                <p className="text-gray-300 line-clamp-3">
+                  {`This is the content for Section 1 of ${composition.title} at literacy level 3. The content would adapt based on the selected literacy level.`}
+                </p>
+              </div>
             </div>
           ))}
         </div>
