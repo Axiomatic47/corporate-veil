@@ -12,8 +12,8 @@ const cmsConfig = {
     publish_mode: 'simple',
     collections: [
       {
-        name: 'compositions',
-        label: 'Compositions',
+        name: 'memorandum',
+        label: 'Memorandum',
         folder: 'content/compositions',
         create: true,
         slug: '{{year}}-{{month}}-{{day}}-{{slug}}',
@@ -25,22 +25,45 @@ const cmsConfig = {
             name: 'collection_type',
             widget: 'select',
             options: ['memorandum', 'corrective'],
-            required: true
+            required: true,
+            default: 'memorandum'
           },
           { label: 'Section', name: 'section', widget: 'number', default: 1 },
           { label: 'Content', name: 'body', widget: 'markdown' }
         ],
         sortable_fields: ['title', 'description'],
-        view_groups: [
+        filter: {
+          field: 'collection_type',
+          value: 'memorandum'
+        },
+        preview: true,
+        publish: true
+      },
+      {
+        name: 'corrective',
+        label: 'Corrective Measures',
+        folder: 'content/compositions',
+        create: true,
+        slug: '{{year}}-{{month}}-{{day}}-{{slug}}',
+        fields: [
+          { label: 'Title', name: 'title', widget: 'string' },
+          { label: 'Description', name: 'description', widget: 'text' },
           {
             label: 'Collection Type',
-            field: 'collection_type',
-            groups: [
-              { label: 'Memorandum', value: 'memorandum' },
-              { label: 'Corrective', value: 'corrective' }
-            ]
-          }
+            name: 'collection_type',
+            widget: 'select',
+            options: ['memorandum', 'corrective'],
+            required: true,
+            default: 'corrective'
+          },
+          { label: 'Section', name: 'section', widget: 'number', default: 1 },
+          { label: 'Content', name: 'body', widget: 'markdown' }
         ],
+        sortable_fields: ['title', 'description'],
+        filter: {
+          field: 'collection_type',
+          value: 'corrective'
+        },
         preview: true,
         publish: true
       }
