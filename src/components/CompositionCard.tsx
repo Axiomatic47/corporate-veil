@@ -1,7 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 
 interface CompositionCardProps {
@@ -21,8 +20,15 @@ const CompositionCard = ({
 }: CompositionCardProps) => {
   const navigate = useNavigate();
 
+  const handleCardClick = () => {
+    navigate(`/composition/${id}`);
+  };
+
   return (
-    <Card className="bg-[#1A1F2C] text-white border-none mb-6">
+    <Card 
+      className="bg-[#1A1F2C] text-white border-none mb-6 cursor-pointer transition-all hover:bg-[#252A37]"
+      onClick={handleCardClick}
+    >
       <CardHeader>
         <CardTitle className="text-2xl font-serif">{title}</CardTitle>
         <CardDescription className="text-gray-300">{description}</CardDescription>
@@ -37,16 +43,15 @@ const CompositionCard = ({
             step={1}
             onValueChange={onLiteracyChange}
             className="w-48"
+            onClick={(e) => e.stopPropagation()} // Prevent card click when adjusting slider
           />
           <span className="text-sm text-gray-300">{literacyLevel}</span>
         </div>
-        <Button
-          onClick={() => navigate(`/composition/${id}`)}
-          variant="outline"
-          className="bg-transparent border-white text-white hover:bg-white hover:text-[#1A1F2C]"
-        >
-          Read More
-        </Button>
+        <div className="prose prose-invert max-w-none">
+          <p className="text-gray-300 line-clamp-3">
+            This is a preview of the first section of this composition. The content adapts based on the selected literacy level {literacyLevel}.
+          </p>
+        </div>
       </CardContent>
     </Card>
   );
