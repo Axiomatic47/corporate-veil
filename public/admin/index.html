@@ -50,29 +50,32 @@
                 ),
                 h('button', {
                   className: 'w-full mt-4 bg-blue-500 text-white p-2 rounded hover:bg-blue-600',
-                  onClick: () => {
-                    const newSection = Math.max(...relatedSections, 0) + 1;
-                    const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-                    const slug = `${timestamp}-${title.toLowerCase().replace(/\s+/g, '-')}-section-${newSection}`;
-                    
-                    const backend = CMS.getBackend();
-                    const collection = CMS.getCollection('compositions');
-                    
-                    backend.createEntry(collection, {
-                      path: `content/compositions/${slug}.md`,
-                      slug: slug,
-                      data: {
-                        title: data.title,
-                        description: data.description,
-                        collection_type: data.collection_type,
-                        section: newSection,
-                        body: ''
-                      }
-                    }).then(() => {
+                  onClick: async () => {
+                    try {
+                      const newSection = Math.max(...relatedSections, 0) + 1;
+                      const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+                      const slug = `${timestamp}-${title.toLowerCase().replace(/\s+/g, '-')}-${newSection}`;
+                      
+                      const backend = CMS.getBackend();
+                      const collection = CMS.getCollection('compositions');
+                      
+                      await backend.createEntry(collection, {
+                        path: `content/compositions/${slug}.md`,
+                        slug: slug,
+                        data: {
+                          title: data.title,
+                          description: data.description,
+                          collection_type: data.collection_type,
+                          section: newSection,
+                          body: ''
+                        }
+                      });
+                      
                       window.location.reload();
-                    }).catch(error => {
+                    } catch (error) {
                       console.error('Error creating new section:', error);
-                    });
+                      alert('Failed to create new section. Please try again.');
+                    }
                   }
                 }, 'New Section')
               )
