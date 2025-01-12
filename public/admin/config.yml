@@ -19,7 +19,12 @@ collections:
     slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
     preview_path: "composition/{{fields.collection_type}}/section/{{fields.section}}"
     fields:
-      - { label: "Title", name: "title", widget: "string" }
+      - { 
+          label: "Title", 
+          name: "title", 
+          widget: "string",
+          hint: "Title will be locked after creating the first section"
+        }
       - { label: "Description", name: "description", widget: "text" }
       - {
           label: "Collection Type",
@@ -34,7 +39,8 @@ collections:
           widget: "number",
           default: 1,
           required: true,
-          min: 1
+          min: 1,
+          hint: "Section number is automatically assigned"
         }
       - { label: "Content", name: "body", widget: "markdown" }
     sortable_fields:

@@ -14,28 +14,87 @@
     
     const PreviewTemplate = createClass({
       render: function() {
-        const {entry} = this.props;
-        const title = entry.getIn(['data', 'title']);
-        const description = entry.getIn(['data', 'description']);
-        const collectionType = entry.getIn(['data', 'collection_type']);
-        const section = entry.getIn(['data', 'section']);
+        const {entry, getAsset} = this.props;
+        const data = entry.get('data').toJS();
+        const title = data.title;
+        const description = data.description;
+        const collectionType = data.collection_type;
+        const section = data.section;
         const body = this.props.widgetFor('body');
 
+        // Get all entries for the same title to show sections list
+        const entries = this.props.entries.getIn(['compositions']);
+        const relatedSections = entries 
+          ? entries
+              .filter(e => e.getIn(['data', 'title']) === title)
+              .map(e => e.getIn(['data', 'section']))
+              .toJS()
+          : [];
+
         return h('div', {className: 'preview-container'},
-          h('h1', {className: 'text-4xl font-bold mb-4'}, title),
-          h('div', {className: 'meta-info mb-6'},
-            h('p', {className: 'text-lg mb-2'}, description),
-            h('div', {className: 'flex gap-4'},
-              h('span', {className: 'text-sm'}, `Collection: ${collectionType}`),
-              h('span', {className: 'text-sm'}, `Section: ${section}`)
+          h('div', {className: 'flex'},
+            // Sections sidebar
+            h('div', {className: 'w-64 bg-gray-800 p-4 min-h-screen'},
+              h('h3', {className: 'text-white mb-4'}, 'Sections'),
+              h('div', {className: 'space-y-2'},
+                relatedSections.map(sectionNum =>
+                  h('div', {
+                    key: sectionNum,
+                    className: `p-2 rounded ${section === sectionNum ? 'bg-white text-gray-800' : 'text-white'}`
+                  }, `Section ${sectionNum}`)
+                ),
+                h('button', {
+                  className: 'w-full mt-4 bg-blue-500 text-white p-2 rounded hover:bg-blue-600',
+                  onClick: () => {
+                    // Create new section
+                    const newSection = Math.max(...relatedSections, 0) + 1;
+                    CMS.entry.get().then(entry => {
+                      const newData = {...entry.get('data').toJS()};
+                      newData.section = newSection;
+                      CMS.entry.set('data', newData);
+                    });
+                  }
+                }, 'New Section')
+              )
+            ),
+            // Main content
+            h('div', {className: 'flex-1 p-8'},
+              h('h1', {className: 'text-4xl font-bold mb-4'}, title),
+              h('div', {className: 'meta-info mb-6'},
+                h('p', {className: 'text-lg mb-2'}, description),
+                h('div', {className: 'flex gap-4'},
+                  h('span', {className: 'text-sm'}, `Collection: ${collectionType}`),
+                  h('span', {className: 'text-sm'}, `Section: ${section}`)
+                )
+              ),
+              h('div', {className: 'content mt-8'}, body)
             )
-          ),
-          h('div', {className: 'content mt-8'}, body)
+          )
         );
       }
     });
 
     CMS.registerPreviewTemplate('compositions', PreviewTemplate);
+
+    // Lock title field after first section is created
+    CMS.registerEventListener({
+      name: 'preSave',
+      handler: async function(entry) {
+        const title = entry.get('data').get('title');
+        const entries = await CMS.getEntries({ collection_name: 'compositions' });
+        const existingEntry = entries.find(e => 
+          e.get('data').get('title') === title && 
+          e.get('data').get('section') === 1
+        );
+        
+        if (existingEntry) {
+          // Lock title if section 1 exists
+          const titleField = document.querySelector('[name="title"]');
+          if (titleField) titleField.setAttribute('readonly', true);
+        }
+        return entry;
+      }
+    });
   </script>
 </body>
 </html>
