@@ -70,11 +70,11 @@
         },
 
         async loadSections() {
-          const entry = this.props.entry;
-          const data = entry.get('data');
-          const collectionType = data.get('collection_type');
-          
           try {
+            const entry = this.props.entry;
+            const data = entry.get('data');
+            const collectionType = data.get('collection_type');
+            
             const entries = await this.props.query(`collections.${collectionType}`, 'entries');
             const sections = entries
               .filter(entry => entry.data.collection_type === collectionType)
@@ -109,22 +109,22 @@
             const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
             const safeTitle = title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
             const newSection = currentSection + 1;
-            const newSlug = \`\${timestamp}-\${safeTitle}-section-\${newSection}\`;
+            const newSlug = timestamp + '-' + safeTitle + '-section-' + newSection;
 
             const backend = CMS.getBackend();
-            await backend.createEntry('compositions', {
+            const newEntryData = {
               slug: newSlug,
-              path: \`content/compositions/\${newSlug}.md\`,
-              raw: \`---
-title: \${title} - Section \${newSection}
-description: \${description}
-collection_type: \${collectionType}
-section: \${newSection}
----
-\`
-            });
+              path: 'content/compositions/' + newSlug + '.md',
+              raw: '---\n' +
+                'title: ' + title + ' - Section ' + newSection + '\n' +
+                'description: ' + description + '\n' +
+                'collection_type: ' + collectionType + '\n' +
+                'section: ' + newSection + '\n' +
+                '---\n'
+            };
 
-            window.location.href = \`/admin/#/collections/compositions/entries/\${newSlug}\`;
+            await backend.createEntry('compositions', newEntryData);
+            window.location.href = '/admin/#/collections/compositions/entries/' + newSlug;
           } catch (error) {
             console.error('Error creating new section:', error);
             alert('Failed to create new section. Please try again.');
@@ -135,7 +135,7 @@ section: \${newSection}
         },
 
         handleSectionClick(slug) {
-          window.location.href = \`/admin/#/collections/compositions/entries/\${slug}\`;
+          window.location.href = '/admin/#/collections/compositions/entries/' + slug;
         },
 
         render() {
@@ -152,7 +152,7 @@ section: \${newSection}
                   key: section.section,
                   onClick: () => this.handleSectionClick(section.slug),
                   className: section.section === data.get('section') ? 'active' : ''
-                }, \`Section \${section.section}\`)
+                }, 'Section ' + section.section)
               )
             ),
             h('h1', {}, data.get('title')),
@@ -168,7 +168,6 @@ section: \${newSection}
 
       // CMS Configuration
       const config = {
-        load_config_file: false,
         backend: {
           name: window.location.hostname === 'localhost' ? 'proxy' : 'github',
           branch: 'main',
@@ -177,7 +176,6 @@ section: \${newSection}
         local_backend: window.location.hostname === 'localhost',
         media_folder: 'public/uploads',
         public_folder: '/uploads',
-        publish_mode: 'simple',
         collections: [
           {
             name: 'compositions',
