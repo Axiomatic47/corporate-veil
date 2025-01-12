@@ -1,4 +1,3 @@
-# /public/admin/config.yml
 backend:
   name: github
   repo: Axiomatic47/corporate-veil
@@ -6,60 +5,54 @@ backend:
   base_url: https://api.netlify.com
   auth_endpoint: auth
 
-media_folder: public/uploads
-public_folder: /uploads
-
-# Global slug settings
-slug:
-  encoding: unicode
-  clean_accents: false
-  sanitize_replacement: "-"
-
-publish_mode: simple
+media_folder: "public/uploads"
+public_folder: "/uploads"
 
 collections:
-  - name: compositions
-    label: Compositions
-    folder: content/compositions
+  - name: "compositions"
+    label: "Compositions"
+    folder: "content/compositions"
     create: true
-    format: frontmatter
-    extension: md
-    identifier_field: title
+    format: "frontmatter"
+    extension: "md"
+    identifier_field: "title"
     fields:
-      - label: Title
-        name: title
-        widget: string
-        required: true
-      - label: Description
-        name: description
-        widget: text
-        required: true
-      - label: Collection Type
-        name: collection_type
-        widget: select
-        options:
-          - label: Memorandum
-            value: memorandum
-          - label: Corrective
-            value: corrective
-        required: true
-      - label: Section
-        name: section
-        widget: number
-        default: 1
-      - label: Content
-        name: body
-        widget: markdown
-        required: true
-    sortable_fields:
-      - title
-      - section
-    filter:
-      field: collection_type
+      - { 
+          label: "Title", 
+          name: "title", 
+          widget: "string",
+          required: true
+        }
+      - { 
+          label: "Description", 
+          name: "description", 
+          widget: "text",
+          required: true 
+        }
+      - {
+          label: "Collection Type",
+          name: "collection_type",
+          widget: "select",
+          options: ["memorandum", "corrective"],
+          required: true
+        }
+      - { 
+          label: "Section",
+          name: "section",
+          widget: "hidden",
+          default: 1
+        }
+      - { 
+          label: "Content", 
+          name: "body", 
+          widget: "markdown",
+          required: true 
+        }
+    sortable_fields: ["title", "section"]
     view_filters:
-      - label: Memorandum
+      - label: "Memorandum"
         field: collection_type
-        pattern: memorandum
-      - label: Corrective
+        pattern: "memorandum"
+      - label: "Corrective"
         field: collection_type
-        pattern: corrective
+        pattern: "corrective"

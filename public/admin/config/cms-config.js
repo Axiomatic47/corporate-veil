@@ -12,8 +12,8 @@ const cmsConfig = {
     publish_mode: 'simple',
     collections: [
       {
-        name: 'memorandum',
-        label: 'Memorandum',
+        name: 'compositions',
+        label: 'Compositions',
         folder: 'content/compositions',
         create: true,
         slug: '{{year}}-{{month}}-{{day}}-{{slug}}',
@@ -25,45 +25,24 @@ const cmsConfig = {
             name: 'collection_type',
             widget: 'select',
             options: ['memorandum', 'corrective'],
-            required: true,
-            default: 'memorandum'
+            required: true
           },
           { label: 'Section', name: 'section', widget: 'number', default: 1 },
           { label: 'Content', name: 'body', widget: 'markdown' }
         ],
         sortable_fields: ['title', 'description'],
-        filter: {
-          field: 'collection_type',
-          value: 'memorandum'
-        },
-        preview: true,
-        publish: true
-      },
-      {
-        name: 'corrective',
-        label: 'Corrective Measures',
-        folder: 'content/compositions',
-        create: true,
-        slug: '{{year}}-{{month}}-{{day}}-{{slug}}',
-        fields: [
-          { label: 'Title', name: 'title', widget: 'string' },
-          { label: 'Description', name: 'description', widget: 'text' },
+        view_filters: [
           {
-            label: 'Collection Type',
-            name: 'collection_type',
-            widget: 'select',
-            options: ['memorandum', 'corrective'],
-            required: true,
-            default: 'corrective'
+            label: 'Memorandum',
+            field: 'collection_type',
+            pattern: 'memorandum'
           },
-          { label: 'Section', name: 'section', widget: 'number', default: 1 },
-          { label: 'Content', name: 'body', widget: 'markdown' }
+          {
+            label: 'Corrective',
+            field: 'collection_type',
+            pattern: 'corrective'
+          }
         ],
-        sortable_fields: ['title', 'description'],
-        filter: {
-          field: 'collection_type',
-          value: 'corrective'
-        },
         preview: true,
         publish: true
       }
@@ -72,5 +51,3 @@ const cmsConfig = {
     site_url: window.location.origin
   }
 };
-
-export default cmsConfig;
