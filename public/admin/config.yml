@@ -1,9 +1,10 @@
 backend:
-  name: proxy
+  name: github
+  repo: yourusername/your-repo-name # Replace with your actual GitHub repository
   branch: main
-  proxy_url: http://localhost:8081/api/v1
+  auth_endpoint: auth
+  base_url: https://api.netlify.com
 
-local_backend: true
 media_folder: "public/uploads"
 public_folder: "/uploads"
 
