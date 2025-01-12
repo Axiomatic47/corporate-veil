@@ -61,46 +61,61 @@
         return newSlug;
       };
 
-      // Preview Component
       const PreviewComponent = createClass({
         getInitialState() {
-          return { isCreatingSection: false };
+          return {
+            isCreatingSection: false,
+            error: null
+          };
+        },
+
+        componentWillUnmount() {
+          // Cleanup any pending state updates
+          this.setState = () => {};
         },
 
         handleNewSection: async function(e) {
           e.preventDefault();
           if (this.state.isCreatingSection) return;
 
-          this.setState({ isCreatingSection: true });
-          
+          this.setState({ isCreatingSection: true, error: null });
+
           try {
             const newSlug = await createNewSection(this.props.entry);
-            window.location.href = `/admin/#/collections/compositions/entries/${newSlug}`;
+            // Use window.location.replace to prevent history stack issues
+            window.location.replace(`/admin/#/collections/compositions/entries/${newSlug}`);
           } catch (error) {
             console.error('Error creating section:', error);
-            alert('Failed to create new section. Please try again.');
-            this.setState({ isCreatingSection: false });
+            this.setState({
+              error: 'Failed to create new section. Please try again.',
+              isCreatingSection: false
+            });
           }
         },
 
         render: function() {
           const { entry, widgetFor } = this.props;
-          
+          const { isCreatingSection, error } = this.state;
+
           return h('div', { className: 'preview-content' },
             h('h1', {}, entry.getIn(['data', 'title'])),
             h('div', { className: 'content-preview' }, widgetFor('body')),
+            error && h('div', { style: { color: 'red', marginTop: '1rem' } }, error),
             h('button', {
               className: 'new-section-button',
               onClick: this.handleNewSection,
-              disabled: this.state.isCreatingSection
-            }, this.state.isCreatingSection ? 'Creating...' : 'New Section')
+              disabled: isCreatingSection
+            }, isCreatingSection ? 'Creating...' : 'New Section')
           );
         }
       });
 
       // Initialize CMS
-      window.addEventListener('load', () => {
-        CMS.registerPreviewTemplate('compositions', PreviewComponent);
+      if (window.CMS) {
+        window.CMS.registerPreviewTemplate('compositions', PreviewComponent);
+      }
+
+      window.addEventListener('load', function() {
         CMS.init();
       });
     </script>
