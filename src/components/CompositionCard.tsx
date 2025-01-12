@@ -27,9 +27,9 @@ const CompositionCard = ({
   const navigate = useNavigate();
 
   const handleCardClick = () => {
-    // Use the provided collection or determine it based on ID if not provided
-    const targetCollection = collection || (id <= 4 ? "memorandum" : "corrective");
-    navigate(`/composition/${targetCollection}/section/1`);
+    if (collection) {
+      navigate(`/composition/${collection}/section/${id}`);
+    }
   };
 
   return (
