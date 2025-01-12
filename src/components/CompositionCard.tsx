@@ -9,6 +9,7 @@ interface CompositionCardProps {
   description: string;
   literacyLevel: number;
   onLiteracyChange: (value: number[]) => void;
+  content?: string;
 }
 
 const CompositionCard = ({
@@ -17,6 +18,7 @@ const CompositionCard = ({
   description,
   literacyLevel,
   onLiteracyChange,
+  content,
 }: CompositionCardProps) => {
   const navigate = useNavigate();
 
@@ -49,7 +51,7 @@ const CompositionCard = ({
         </div>
         <div className="prose prose-invert max-w-none">
           <p className="text-gray-300 line-clamp-3">
-            This is a preview of the first section of this composition. The content adapts based on the selected literacy level {literacyLevel}.
+            {content || `This is the content for Section 1 of ${title} at literacy level ${literacyLevel}. The content would adapt based on the selected literacy level.`}
           </p>
         </div>
       </CardContent>
