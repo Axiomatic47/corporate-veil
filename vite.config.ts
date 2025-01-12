@@ -36,7 +36,7 @@ export default defineConfig(({ mode }) => ({
     port: 8080,
     proxy: {
       '/.netlify': {
-        target: 'http://localhost:8081',
+        target: 'http://localhost:8082',
         changeOrigin: true,
       }
     }
