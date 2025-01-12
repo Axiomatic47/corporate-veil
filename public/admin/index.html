@@ -45,7 +45,6 @@
                         parseInt(e?.getIn?.(['data', 'section'])) === sectionNum
                       );
                       if (sectionEntry) {
-                        // Navigate to the selected section's entry
                         window.location.href = `#/collections/compositions/entries/${sectionEntry.get('slug')}`;
                       }
                     }
@@ -55,20 +54,22 @@
                   className: 'w-full mt-4 bg-blue-500 text-white p-2 rounded hover:bg-blue-600',
                   onClick: () => {
                     const newSection = Math.max(...relatedSections, 0) + 1;
-                    // Create a new entry through the CMS API
-                    CMS.store.dispatch({
-                      type: 'DRAFT_CREATE_NEW_ENTRY',
-                      payload: {
-                        collectionName: 'compositions',
-                        data: {
-                          title: data.title,
-                          description: data.description,
-                          collection_type: data.collection_type,
-                          section: newSection,
-                          body: ''
-                        }
-                      }
-                    });
+                    // Create new entry using the proper CMS API
+                    CMS.getBackend()
+                      .createEntry('compositions', {
+                        title: data.title,
+                        description: data.description,
+                        collection_type: data.collection_type,
+                        section: newSection,
+                        body: ''
+                      })
+                      .then(() => {
+                        // Refresh the page to show the new section
+                        window.location.reload();
+                      })
+                      .catch(error => {
+                        console.error('Error creating new section:', error);
+                      });
                   }
                 }, 'New Section')
               )
