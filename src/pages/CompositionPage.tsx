@@ -15,9 +15,30 @@ const CompositionPage = () => {
     title: `Section ${i + 1}`,
   }));
 
-  // Get composition title based on the ID
-  const getCompositionTitle = () => {
+  // Get collection name based on the ID
+  const getCollectionName = () => {
     return compositionId === "memorandum" ? "Memorandum and Manifestation" : "Corrective Measures";
+  };
+
+  // Get composition title based on the ID and section
+  const getCompositionTitle = () => {
+    if (compositionId === "memorandum") {
+      const memorandumTitles = [
+        "The Nature of Corporate Personhood",
+        "Legal Rights and Responsibilities",
+        "Historical Evolution",
+        "Constitutional Implications"
+      ];
+      return memorandumTitles[0]; // For now returning first title, in real app would be based on actual composition
+    } else {
+      const correctiveTitles = [
+        "Reform Proposals",
+        "Regulatory Framework",
+        "Accountability Measures",
+        "Future Directions"
+      ];
+      return correctiveTitles[0];
+    }
   };
 
   // This would be replaced with actual content based on the literacy level
@@ -60,11 +81,10 @@ const CompositionPage = () => {
         </div>
       </header>
 
-      {/* Rest of the component */}
       <div className="flex">
         {/* Sidebar */}
         <div className="w-64 min-h-[calc(100vh-4rem)] bg-[#1A1F2C] text-white p-6">
-          <h2 className="text-xl font-serif mb-6">{getCompositionTitle()}</h2>
+          <h2 className="text-xl font-serif mb-6">{getCollectionName()}</h2>
           <div className="space-y-2">
             {sections.map((section) => (
               <button
@@ -87,8 +107,9 @@ const CompositionPage = () => {
         {/* Main Content */}
         <div className="flex-1 p-8 text-white">
           <div className="mb-8">
+            <h2 className="text-2xl font-serif text-gray-300 mb-2">{getCollectionName()}</h2>
             <h1 className="text-4xl font-serif mb-2">{getCompositionTitle()}</h1>
-            <h2 className="text-3xl font-serif text-gray-300">Section {sectionId}</h2>
+            <h3 className="text-3xl font-serif text-gray-300">Section {sectionId}</h3>
           </div>
 
           <div className="mb-8 flex items-center space-x-4">
