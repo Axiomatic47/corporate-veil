@@ -3,13 +3,14 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 import fs from 'fs';
+import type { Connect, ViteDevServer } from 'vite';
 
 // Custom plugin to handle admin routes
 const adminRoutePlugin = () => ({
   name: 'admin-route',
-  configureServer(server) {
+  configureServer(server: ViteDevServer) {
     return () => {
-      server.middlewares.use((req, res, next) => {
+      server.middlewares.use((req: Connect.IncomingMessage, res: Connect.ServerResponse, next: Connect.NextFunction) => {
         if (req.url?.startsWith('/admin')) {
           const adminPath = path.resolve(__dirname, 'public/admin/index.html');
           try {
