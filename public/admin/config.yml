@@ -8,24 +8,21 @@ backend:
 media_folder: "public/uploads"
 public_folder: "/uploads"
 
-publish_mode: editorial_workflow
-
 collections:
   - name: "compositions"
     label: "Compositions"
     folder: "content/compositions"
     create: true
     format: "frontmatter"
+    extension: "md"
     identifier_field: "title"
     slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
-    preview_path: "composition/{{fields.collection_type}}/section/{{fields.section}}"
     fields:
       - { 
           label: "Title", 
           name: "title", 
           widget: "string",
-          required: true,
-          hint: "Title will be locked after creating the first section"
+          required: true
         }
       - { 
           label: "Description", 
@@ -43,8 +40,10 @@ collections:
       - { 
           label: "Section",
           name: "section",
-          widget: "hidden",
-          default: 1
+          widget: "number",
+          default: 1,
+          value_type: "int",
+          min: 1
         }
       - { 
           label: "Content", 
@@ -52,9 +51,7 @@ collections:
           widget: "markdown",
           required: true 
         }
-    sortable_fields:
-      - title
-      - description
+    sortable_fields: ["title", "description"]
     view_filters:
       - label: "Memorandum"
         field: collection_type
@@ -62,6 +59,3 @@ collections:
       - label: "Corrective"
         field: collection_type
         pattern: "corrective"
-    view_groups:
-      - label: "By Collection Type"
-        field: collection_type

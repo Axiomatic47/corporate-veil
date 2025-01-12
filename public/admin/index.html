@@ -4,18 +4,32 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Content Manager</title>
-  <link href="/admin/styles/preview.css" rel="stylesheet" />
   <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 </head>
 <body>
   <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
-  <script type="module">
-    import PreviewTemplate from './components/PreviewTemplate.js';
-    import registerEventHandlers from './components/EventHandlers.js';
-
+  <script>
     CMS.registerPreviewStyle('/admin/styles/preview.css');
-    CMS.registerPreviewTemplate('compositions', PreviewTemplate);
-    registerEventHandlers();
+    
+    const PreviewComponent = createClass({
+      render: function() {
+        const {entry, widgetFor} = this.props;
+        const title = entry.getIn(['data', 'title']);
+        const description = entry.getIn(['data', 'description']);
+        const section = entry.getIn(['data', 'section']);
+        
+        return h('div', {className: 'preview-container'},
+          h('div', {className: 'section-content'},
+            h('h1', {}, title),
+            h('div', {className: 'description'}, description),
+            h('div', {className: 'section-number'}, `Section ${section}`),
+            h('div', {className: 'content'}, widgetFor('body'))
+          )
+        );
+      }
+    });
+
+    CMS.registerPreviewTemplate('compositions', PreviewComponent);
   </script>
 </body>
 </html>
