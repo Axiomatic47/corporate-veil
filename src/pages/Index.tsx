@@ -1,68 +1,54 @@
-import React, { useState } from "react";
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import CompositionCard from "@/components/CompositionCard";
 import { Home } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const Index = () => {
-  const [activeSection, setActiveSection] = useState("memorandum");
-  const [literacyLevels, setLiteracyLevels] = useState({
-    comp1: 3,
-    comp2: 3,
-    comp3: 3,
-  });
+  const navigate = useNavigate();
 
-  const featuredWorks = {
-    memorandum: [
-      {
-        id: 1,
-        title: "The Nature of Corporate Personhood",
-        description: "An analysis of the fundamental principles underlying corporate personhood in constitutional law.",
-      },
-      {
-        id: 2,
-        title: "Corporate Rights and Responsibilities",
-        description: "Examining the balance between corporate rights and societal obligations.",
-      },
-      {
-        id: 3,
-        title: "Future of Corporate Law",
-        description: "Exploring emerging trends and potential reforms in corporate constitutional law.",
-      },
-    ],
-    corrective: [
-      {
-        id: 4,
-        title: "Reform Measures in Corporate Governance",
-        description: "A comprehensive study of proposed reforms in corporate governance structures.",
-      },
-      {
-        id: 5,
-        title: "Regulatory Framework Analysis",
-        description: "Evaluating current and proposed regulatory measures for corporate entities.",
-      },
-      {
-        id: 6,
-        title: "Stakeholder Protection Mechanisms",
-        description: "Examining methods to enhance stakeholder protection in corporate structures.",
-      },
-    ],
-  };
-
-  const handleLiteracyChange = (composition: string) => (value: number[]) => {
-    setLiteracyLevels((prev) => ({
-      ...prev,
-      [composition]: value[0],
-    }));
-  };
+  const featuredWorks = [
+    {
+      id: 1,
+      title: "The Nature of Corporate Personhood",
+      description: "An analysis of the fundamental principles underlying corporate personhood in constitutional law.",
+    },
+    {
+      id: 2,
+      title: "Corporate Rights and Responsibilities",
+      description: "Examining the balance between corporate rights and societal obligations.",
+    },
+    {
+      id: 3,
+      title: "Future of Corporate Law",
+      description: "Exploring emerging trends and potential reforms in corporate constitutional law.",
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-[#1A1F2C] text-white">
-      <header className="py-6 px-8 flex justify-between items-center">
+      <header className="py-6 px-8 flex justify-between items-center bg-[#0F1218]">
         <h1 className="text-2xl font-serif">Corporate Veil</h1>
-        <Button variant="ghost" className="text-white">
-          <Home className="w-6 h-6" />
-        </Button>
+        <div className="flex space-x-4">
+          <Button
+            variant="ghost"
+            className="text-white hover:bg-[#2A2F3C] px-6"
+            onClick={() => navigate("/composition/memorandum")}
+          >
+            Memorandum and Manifestation
+          </Button>
+          <Button
+            variant="ghost"
+            className="text-white hover:bg-[#2A2F3C] px-6"
+            onClick={() => navigate("/composition/corrective")}
+          >
+            Corrective Measures
+          </Button>
+          <Button variant="ghost" className="text-white">
+            <Home className="w-6 h-6" />
+          </Button>
+        </div>
       </header>
 
       <main className="container mx-auto px-4 py-12">
@@ -73,59 +59,19 @@ const Index = () => {
           <p className="text-xl text-gray-300 max-w-3xl mx-auto">
             Explore the legal framework and implications of corporate personhood in constitutional law.
           </p>
-
-          <div className="flex justify-center gap-4 mt-8">
-            <Button
-              onClick={() => setActiveSection("memorandum")}
-              className={`text-lg px-6 py-3 ${
-                activeSection === "memorandum"
-                  ? "bg-sidebar-primary text-white"
-                  : "bg-[#2A2F3C] text-white hover:bg-[#3A3F4C]"
-              }`}
-            >
-              Memorandum and Manifestation
-            </Button>
-            <Button
-              onClick={() => setActiveSection("corrective")}
-              className={`text-lg px-6 py-3 ${
-                activeSection === "corrective"
-                  ? "bg-sidebar-primary text-white"
-                  : "bg-[#2A2F3C] text-white hover:bg-[#3A3F4C]"
-              }`}
-            >
-              Corrective Measures
-            </Button>
-          </div>
         </div>
-
-        <section className="mb-24">
-          <Card className="bg-[#222632] border-none p-8">
-            <CardContent className="text-gray-300">
-              <h2 className="text-2xl font-serif text-white mb-4">
-                {activeSection === "memorandum"
-                  ? "Understanding Corporate Personhood"
-                  : "Implementing Reform Measures"}
-              </h2>
-              <p className="leading-relaxed">
-                {activeSection === "memorandum"
-                  ? "Explore the foundational concepts and legal precedents that shape our understanding of corporate personhood in constitutional law. This section delves into the historical development, current interpretations, and implications for modern business practices."
-                  : "Discover proposed reforms and corrective measures designed to address the challenges and controversies surrounding corporate personhood. This section examines potential solutions and their impact on corporate governance and societal interests."}
-              </p>
-            </CardContent>
-          </Card>
-        </section>
 
         <section className="mt-24">
           <h2 className="text-4xl font-serif mb-12">Featured Work</h2>
           <div className="grid gap-8">
-            {featuredWorks[activeSection].map((work) => (
+            {featuredWorks.map((work) => (
               <CompositionCard
                 key={work.id}
                 id={work.id}
                 title={work.title}
                 description={work.description}
-                literacyLevel={literacyLevels[`comp${work.id}` as keyof typeof literacyLevels]}
-                onLiteracyChange={handleLiteracyChange(`comp${work.id}`)}
+                literacyLevel={3}
+                onLiteracyChange={(value) => console.log(value)}
               />
             ))}
           </div>
