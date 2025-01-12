@@ -1,68 +1,41 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Content Manager</title>
-    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
-    <link rel="stylesheet" href="styles/main.css">
-  </head>
-  <body>
-    <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
-    <script>
-      // Initialize CMS when DOM is fully loaded
-      window.addEventListener('load', function() {
-        CMS.init();
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Content Manager</title>
+  <link href="/admin/styles/preview.css" rel="stylesheet" />
+  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+</head>
+<body>
+  <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+  <script>
+    CMS.registerPreviewStyle('/admin/styles/preview.css');
+    
+    const PreviewTemplate = createClass({
+      render: function() {
+        const {entry} = this.props;
+        const title = entry.getIn(['data', 'title']);
+        const description = entry.getIn(['data', 'description']);
+        const collectionType = entry.getIn(['data', 'collection_type']);
+        const section = entry.getIn(['data', 'section']);
+        const body = this.props.widgetFor('body');
 
-        // Preview template for composition list view
-        const CompositionListPreview = createClass({
-          render: function() {
-            const entry = this.props.entry;
-            const title = entry.getIn(['data', 'title']);
-            const description = entry.getIn(['data', 'description']);
-            const collectionType = entry.getIn(['data', 'collection_type']);
-            const section = entry.getIn(['data', 'section']);
-            
-            return h('div', { className: 'preview-container' },
-              h('div', { className: 'composition-card' },
-                h('h2', {}, title),
-                h('p', {}, description),
-                h('div', { className: 'meta' },
-                  h('span', {}, `Type: ${collectionType}`),
-                  h('span', {}, `Section: ${section}`)
-                )
-              )
-            );
-          }
-        });
+        return h('div', {className: 'preview-container'},
+          h('h1', {className: 'text-4xl font-bold mb-4'}, title),
+          h('div', {className: 'meta-info mb-6'},
+            h('p', {className: 'text-lg mb-2'}, description),
+            h('div', {className: 'flex gap-4'},
+              h('span', {className: 'text-sm'}, `Collection: ${collectionType}`),
+              h('span', {className: 'text-sm'}, `Section: ${section}`)
+            )
+          ),
+          h('div', {className: 'content mt-8'}, body)
+        );
+      }
+    });
 
-        // Preview template for section view
-        const SectionPreview = createClass({
-          render: function() {
-            const entry = this.props.entry;
-            const title = entry.getIn(['data', 'title']);
-            const description = entry.getIn(['data', 'description']);
-            const section = entry.getIn(['data', 'section']);
-            const body = this.props.widgetFor('body');
-            
-            return h('div', { className: 'preview-container' },
-              h('div', { className: 'section-content' },
-                h('h1', {}, title),
-                h('p', { className: 'description' }, description),
-                h('div', { className: 'section-number' }, 
-                  h('span', {}, `Section ${section}`)
-                ),
-                h('div', { className: 'content' }, body)
-              )
-            );
-          }
-        });
-
-        // Register preview templates
-        CMS.registerPreviewTemplate('compositions', CompositionListPreview);
-        CMS.registerPreviewTemplate('sections', SectionPreview);
-        CMS.registerPreviewStyle('/admin/styles/preview.css');
-      });
-    </script>
-  </body>
+    CMS.registerPreviewTemplate('compositions', PreviewTemplate);
+  </script>
+</body>
 </html>

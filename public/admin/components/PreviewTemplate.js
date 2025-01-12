@@ -22,3 +22,5 @@ const PreviewTemplate = createClass({
     );
   }
 });
+
+export default PreviewTemplate;
