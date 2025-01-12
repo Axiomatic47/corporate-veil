@@ -1,5 +1,6 @@
+import { useEffect, useState } from "react";
 import CompositionCard from "@/components/CompositionCard";
-import { compositionData } from "@/utils/compositionData";
+import { compositionData, initializeCompositionData } from "@/utils/compositionData";
 
 // Specify which compositions should be featured by their IDs and collection names
 const featuredWorksConfig = [
@@ -8,6 +9,26 @@ const featuredWorksConfig = [
 ];
 
 export const FeaturedWorkSection = () => {
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        await initializeCompositionData();
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Error loading composition data:', error);
+        setIsLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
+
+  if (isLoading) {
+    return <div>Loading featured works...</div>;
+  }
+
   // Map the configuration to actual composition data
   const featuredWorks = featuredWorksConfig.map(config => {
     const collection = compositionData[config.collection];

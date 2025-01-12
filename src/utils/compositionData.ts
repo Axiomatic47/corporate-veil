@@ -44,13 +44,18 @@ const filterCompositions = (compositions: Composition[], type: 'memorandum' | 'c
   return compositions.filter(comp => comp.collection_type === type);
 };
 
-// Initialize the composition data
-const initializeCompositionData = async (): Promise<CompositionCollection> => {
-  const allCompositions = await loadCompositions();
-  return {
-    memorandum: filterCompositions(allCompositions, 'memorandum'),
-    corrective: filterCompositions(allCompositions, 'corrective')
-  };
+// Initialize with empty collections
+export const compositionData: CompositionCollection = {
+  memorandum: [],
+  corrective: []
 };
 
-export const compositionData = await initializeCompositionData();
+// Function to initialize the composition data
+export const initializeCompositionData = async (): Promise<void> => {
+  const allCompositions = await loadCompositions();
+  compositionData.memorandum = filterCompositions(allCompositions, 'memorandum');
+  compositionData.corrective = filterCompositions(allCompositions, 'corrective');
+};
+
+// Initialize the data when the module is imported
+initializeCompositionData().catch(console.error);
