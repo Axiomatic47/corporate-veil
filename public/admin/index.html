@@ -17,32 +17,28 @@
         border-bottom: 1px solid #eaeaea;
         padding-bottom: 1rem;
       }
-      .nc-entryEditor-toolbar {
-        z-index: 100;
-        position: fixed !important;
-        bottom: 0;
-        right: 0;
-        background: white;
-        padding: 1rem;
-        box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
-      }
-      .nc-collectionPage-dropdown {
-        position: relative !important;
-      }
     </style>
   </head>
   <body>
-    <!-- Load Decap CMS -->
+    <!-- Include the script that builds the page and powers Decap CMS -->
     <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
-    
-    <!-- Initialize CMS -->
     <script>
-      // Wait for DOM to be ready
-      document.addEventListener('DOMContentLoaded', function() {
-        // Initialize CMS with configuration
+      // Initialize CMS when DOM is fully loaded
+      if (window.netlifyIdentity) {
+        window.netlifyIdentity.on("init", user => {
+          if (!user) {
+            window.netlifyIdentity.on("login", () => {
+              document.location.href = "/admin/";
+            });
+          }
+        });
+      }
+
+      // Wait for CMS to be ready
+      window.addEventListener('load', function() {
         CMS.init();
 
-        // Register preview template using createClass
+        // Simple preview template
         const PreviewTemplate = createClass({
           render: function() {
             const entry = this.props.entry;
@@ -56,24 +52,7 @@
           }
         });
 
-        // Register the preview template for compositions
         CMS.registerPreviewTemplate('compositions', PreviewTemplate);
-
-        // Handle content saving with proper error handling
-        CMS.registerEventListener({
-          name: 'preSave',
-          handler: async function(entry) {
-            console.log('Content about to be saved:', entry);
-            return entry;
-          }
-        });
-
-        CMS.registerEventListener({
-          name: 'postSave',
-          handler: async function(entry) {
-            console.log('Content was saved:', entry);
-          }
-        });
       });
     </script>
   </body>
