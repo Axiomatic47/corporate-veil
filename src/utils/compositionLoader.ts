@@ -43,16 +43,32 @@ export const loadCompositions = async (): Promise<Composition[]> => {
       const content = modules[path] as string;
       
       try {
-        const { data: frontmatter, content: body } = parseFrontMatter(content);
-        
-        compositions.push({
-          id,
-          title: frontmatter.title || 'Untitled',
-          description: frontmatter.description || '',
-          collection_type: frontmatter.collection_type || 'memorandum',
-          section: frontmatter.section || 1,
-          content: body
-        });
+        // Check if content is base64 encoded
+        if (content.startsWith('data:text/markdown;base64,')) {
+          const base64Content = content.replace('data:text/markdown;base64,', '');
+          const decodedContent = atob(base64Content);
+          const { data: frontmatter, content: body } = parseFrontMatter(decodedContent);
+          
+          compositions.push({
+            id,
+            title: frontmatter.title || 'Untitled',
+            description: frontmatter.description || '',
+            collection_type: frontmatter.collection_type || 'memorandum',
+            section: frontmatter.section || 1,
+            content: body
+          });
+        } else {
+          const { data: frontmatter, content: body } = parseFrontMatter(content);
+          
+          compositions.push({
+            id,
+            title: frontmatter.title || 'Untitled',
+            description: frontmatter.description || '',
+            collection_type: frontmatter.collection_type || 'memorandum',
+            section: frontmatter.section || 1,
+            content: body
+          });
+        }
         
         id++;
       } catch (parseError) {
