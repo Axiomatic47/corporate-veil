@@ -24,6 +24,20 @@
         width: 100%;
         background: white;
       }
+      /* Additional fixes for editor layout */
+      .css-2oej7z-ToolbarContainer {
+        position: sticky;
+        top: 0;
+        z-index: 300;
+        background: white;
+      }
+      .css-1f7nhiq-CollectionMain {
+        padding-top: 20px;
+      }
+      /* Ensure proper z-indexing for dropdowns */
+      .css-1hvrgvd-CollectionTopBar > div {
+        z-index: 150;
+      }
     </style>
   </head>
   <body>
@@ -61,8 +75,43 @@
       CMS.registerPreviewTemplate('memorandum', PreviewTemplate);
       CMS.registerPreviewTemplate('corrective', PreviewTemplate);
 
-      // Configure CMS
-      CMS.init();
+      // Configure CMS with authentication
+      CMS.init({
+        config: {
+          load_config_file: false,
+          backend: {
+            name: 'git-gateway',
+            branch: 'main',
+          },
+          local_backend: true,
+          media_folder: 'public/uploads',
+          public_folder: '/uploads',
+          collections: [
+            {
+              name: 'memorandum',
+              label: 'Memorandum Compositions',
+              folder: 'content/memorandum',
+              create: true,
+              fields: [
+                { label: 'Title', name: 'title', widget: 'string' },
+                { label: 'Description', name: 'description', widget: 'text' },
+                { label: 'Content', name: 'body', widget: 'markdown' }
+              ]
+            },
+            {
+              name: 'corrective',
+              label: 'Corrective Compositions',
+              folder: 'content/corrective',
+              create: true,
+              fields: [
+                { label: 'Title', name: 'title', widget: 'string' },
+                { label: 'Description', name: 'description', widget: 'text' },
+                { label: 'Content', name: 'body', widget: 'markdown' }
+              ]
+            }
+          ]
+        }
+      });
     </script>
   </body>
 </html>

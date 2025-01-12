@@ -33,6 +33,15 @@ collections:
       - { label: "Title", name: "title", widget: "string" }
       - { label: "Description", name: "description", widget: "text" }
       - { label: "Content", name: "body", widget: "markdown" }
+    publish: true
+    type: folder_based_collection
+    sortable_fields:
+      - commit_date
+      - title
+      - commit_author
+      - description
+    view_filters: []
+    view_groups: []
       
   - name: "corrective"
     label: "Corrective Compositions"
@@ -45,3 +54,17 @@ collections:
       - { label: "Title", name: "title", widget: "string" }
       - { label: "Description", name: "description", widget: "text" }
       - { label: "Content", name: "body", widget: "markdown" }
+    publish: true
+    type: folder_based_collection
+    sortable_fields:
+      - commit_date
+      - title
+      - commit_author
+      - description
+    view_filters: []
+    view_groups: []
+
+slug:
+  encoding: unicode
+  clean_accents: false
+  sanitize_replacement: "-"
