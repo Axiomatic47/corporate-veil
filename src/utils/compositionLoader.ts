@@ -15,18 +15,52 @@ export const loadCompositions = async (): Promise<Composition[]> => {
     
     for (const path in modules) {
       const content = modules[path] as string;
-      const { data: frontmatter, content: body } = matter(content);
       
-      compositions.push({
-        id,
-        title: frontmatter.title || 'Untitled',
-        description: frontmatter.description || '',
-        collection_type: frontmatter.collection_type || 'memorandum',
-        section: frontmatter.section || 1,
-        content: body.trim()
-      });
-      
-      id++;
+      // Use a try-catch block for each file parsing to handle potential errors
+      try {
+        const { data: frontmatter, content: body } = matter(content, {
+          // Configure gray-matter to work in browser environment
+          engines: {
+            yaml: {
+              parse: (str: string) => {
+                try {
+                  // Simple YAML parsing for frontmatter
+                  return str.split('\n').reduce((acc: any, line) => {
+                    const [key, ...values] = line.split(':');
+                    if (key && values.length) {
+                      acc[key.trim()] = values.join(':').trim();
+                    }
+                    return acc;
+                  }, {});
+                } catch (e) {
+                  console.error('Error parsing YAML:', e);
+                  return {};
+                }
+              },
+              stringify: (obj: object) => {
+                return Object.entries(obj)
+                  .map(([key, value]) => `${key}: ${value}`)
+                  .join('\n');
+              }
+            }
+          }
+        });
+        
+        compositions.push({
+          id,
+          title: frontmatter.title || 'Untitled',
+          description: frontmatter.description || '',
+          collection_type: frontmatter.collection_type || 'memorandum',
+          section: frontmatter.section || 1,
+          content: body.trim()
+        });
+        
+        id++;
+      } catch (parseError) {
+        console.error(`Error parsing file ${path}:`, parseError);
+        // Continue with next file if one fails
+        continue;
+      }
     }
 
     // Sort compositions by section number
@@ -36,6 +70,6 @@ export const loadCompositions = async (): Promise<Composition[]> => {
     return compositions;
   } catch (error) {
     console.error('Error loading compositions:', error);
-    throw error; // Let the error bubble up so we can see it in the console
+    throw error;
   }
 };
