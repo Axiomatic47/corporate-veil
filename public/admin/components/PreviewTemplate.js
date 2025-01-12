@@ -1,17 +1,21 @@
 const PreviewTemplate = createClass({
   render: function() {
     const {entry, entries} = this.props;
-    const data = entry.get('data').toJS();
+    
+    // Safely access data with null checks
+    const data = entry?.get?.('data')?.toJS?.() || {};
     const title = data.title || '';
     const description = data.description || '';
     const section = data.section || 1;
     const body = this.props.widgetFor('body');
 
-    const allEntries = entries.get('compositions');
+    // Safely handle entries
+    const allEntries = entries?.get?.('compositions') || [];
     const relatedSections = allEntries
       ? allEntries
-          .filter(e => e.getIn(['data', 'title']) === title)
-          .map(e => e.getIn(['data', 'section']))
+          .filter(e => e?.getIn?.(['data', 'title']) === title)
+          .map(e => e?.getIn?.(['data', 'section']))
+          .filter(Boolean)
           .sort()
           .toJS()
       : [];
@@ -27,8 +31,8 @@ const PreviewTemplate = createClass({
                 className: `w-full p-2 text-left rounded ${section === sectionNum ? 'bg-white text-gray-800' : 'text-white hover:bg-gray-700'}`,
                 onClick: () => {
                   const sectionEntry = allEntries.find(e => 
-                    e.getIn(['data', 'title']) === title && 
-                    e.getIn(['data', 'section']) === sectionNum
+                    e?.getIn?.(['data', 'title']) === title && 
+                    e?.getIn?.(['data', 'section']) === sectionNum
                   );
                   if (sectionEntry) {
                     CMS.entry.set(sectionEntry);
