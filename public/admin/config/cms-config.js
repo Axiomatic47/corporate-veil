@@ -42,8 +42,12 @@ const cmsConfig = {
             field: 'collection_type',
             pattern: 'corrective'
           }
-        ]
+        ],
+        preview: true,
+        publish: true
       }
-    ]
+    ],
+    display_url: window.location.origin,
+    site_url: window.location.origin
   }
 };

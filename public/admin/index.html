@@ -6,6 +6,32 @@
     <title>Content Manager</title>
     <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
     <link rel="stylesheet" href="styles/main.css">
+    <style>
+      .preview-container {
+        padding: 2rem;
+        background: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .meta-info {
+        border-bottom: 1px solid #eaeaea;
+        padding-bottom: 1rem;
+      }
+      /* Fix for publish button visibility */
+      .nc-entryEditor-toolbar {
+        z-index: 100;
+        position: fixed !important;
+        bottom: 0;
+        right: 0;
+        background: white;
+        padding: 1rem;
+        box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+      }
+      /* Fix for dropdown menu */
+      .nc-collectionPage-dropdown {
+        position: relative !important;
+      }
+    </style>
   </head>
   <body>
     <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
@@ -17,6 +43,14 @@
       
       // Initialize CMS with config
       CMS.init(cmsConfig);
+
+      // Add event listener for successful publish
+      CMS.registerEventListener({
+        name: 'postPublish',
+        handler: function() {
+          console.log('Content published successfully');
+        },
+      });
     </script>
   </body>
 </html>
