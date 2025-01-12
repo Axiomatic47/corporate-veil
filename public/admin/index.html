@@ -5,143 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Content Manager</title>
     <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
-    <style>
-      /* Fix dropdown positioning */
-      .css-1hvrgvd-CollectionTopBar {
-        z-index: 100;
-        position: fixed;
-        top: 0;
-        width: 100%;
-        background: white;
-      }
-      .css-1j73xvq-ToolbarSubSectionFirst {
-        z-index: 200;
-      }
-      /* Ensure editor has proper spacing */
-      .css-1q6r8f2-StyledWrapper {
-        margin-top: 60px;
-      }
-      /* Fix dropdown menu positioning */
-      .css-2oej7z-ToolbarContainer {
-        position: sticky;
-        top: 0;
-        z-index: 300;
-        background: white;
-      }
-      /* Additional fixes for editor layout */
-      .css-1f7nhiq-CollectionMain {
-        padding-top: 20px;
-      }
-      /* Fix publish button visibility */
-      .css-1a7rmj4-ToolbarSectionMain-ToolbarSection,
-      .css-1a7rmj4-ToolbarSectionMain-ToolbarSection button {
-        display: flex !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-      }
-      /* Fix collection dropdown */
-      .css-1hvrgvd-CollectionTopBar .dropdown {
-        position: relative !important;
-      }
-      .css-1hvrgvd-CollectionTopBar .dropdown-menu {
-        position: absolute !important;
-        top: 100% !important;
-        left: 0 !important;
-        display: none !important;
-        z-index: 1000 !important;
-      }
-      .css-1hvrgvd-CollectionTopBar .dropdown.open .dropdown-menu {
-        display: block !important;
-      }
-      /* Ensure proper stacking context */
-      .css-12d84x1-TopBarContainer {
-        z-index: 1000 !important;
-      }
-      /* Fix collection list visibility */
-      .css-1hvrgvd-CollectionTopBar .css-1ia5gj2-DropdownList {
-        position: absolute !important;
-        background: white !important;
-        border: 1px solid #ddd !important;
-        border-radius: 4px !important;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1) !important;
-      }
-    </style>
+    <link rel="stylesheet" href="styles/main.css">
   </head>
   <body>
     <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+    <script src="components/PreviewTemplate.js"></script>
+    <script src="config/cms-config.js"></script>
     <script>
-      // Basic preview template for all content types
-      const PreviewTemplate = createClass({
-        render: function() {
-          const {entry} = this.props;
-          return h('div', {className: 'prose dark:prose-invert max-w-none'},
-            h('h1', {className: 'text-4xl font-bold'}, entry.getIn(['data', 'title'])),
-            h('div', {className: 'mt-4'}, entry.getIn(['data', 'description'])),
-            h('div', {className: 'mt-4'}, 
-              h('strong', {}, 'Collection Type: '), 
-              entry.getIn(['data', 'collection_type'])
-            ),
-            h('div', {className: 'mt-4'}, 
-              h('strong', {}, 'Section: '), 
-              entry.getIn(['data', 'section'])
-            ),
-            h('div', {className: 'mt-8'}, this.props.widgetFor('body'))
-          );
-        }
-      });
-
+      // Register preview template
       CMS.registerPreviewTemplate('compositions', PreviewTemplate);
-
-      // Configure CMS
-      CMS.init({
-        config: {
-          load_config_file: false,
-          backend: {
-            name: 'proxy',
-            branch: 'main',
-            proxy_url: 'http://localhost:8081/api/v1'
-          },
-          local_backend: true,
-          media_folder: 'public/uploads',
-          public_folder: '/uploads',
-          publish_mode: 'simple',
-          collections: [
-            {
-              name: 'compositions',
-              label: 'Compositions',
-              folder: 'content/compositions',
-              create: true,
-              slug: '{{year}}-{{month}}-{{day}}-{{slug}}',
-              fields: [
-                { label: 'Title', name: 'title', widget: 'string' },
-                { label: 'Description', name: 'description', widget: 'text' },
-                {
-                  label: 'Collection Type',
-                  name: 'collection_type',
-                  widget: 'select',
-                  options: ['memorandum', 'corrective'],
-                  required: true
-                },
-                { label: 'Section', name: 'section', widget: 'number', default: 1 },
-                { label: 'Content', name: 'body', widget: 'markdown' }
-              ],
-              sortable_fields: ['title', 'description'],
-              view_filters: [
-                {
-                  label: 'Memorandum',
-                  field: 'collection_type',
-                  pattern: 'memorandum'
-                },
-                {
-                  label: 'Corrective',
-                  field: 'collection_type',
-                  pattern: 'corrective'
-                }
-              ]
-            }
-          ]
-        }
-      });
+      
+      // Initialize CMS with config
+      CMS.init(cmsConfig);
     </script>
   </body>
 </html>
