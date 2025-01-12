@@ -1,99 +1,99 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Content Manager</title>
-  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
-</head>
-<body>
-  <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
-  <script>
-    CMS.registerPreviewStyle('/admin/styles/preview.css');
-    
-    const PreviewComponent = createClass({
-      render: function() {
-        const {entry, entries} = this.props;
-        
-        const data = entry?.get?.('data')?.toJS?.() || {};
-        const title = data.title || '';
-        const description = data.description || '';
-        const section = parseInt(data.section) || 1;
-        const body = this.props.widgetFor('body');
-        const collection_type = data.collection_type || 'memorandum';
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Content Manager</title>
+    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+  </head>
+  <body>
+    <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+    <script>
+      CMS.registerPreviewStyle('/admin/styles/preview.css');
+      
+      const PreviewComponent = createClass({
+        render: function() {
+          const {entry, entries} = this.props;
+          
+          const data = entry?.get?.('data')?.toJS?.() || {};
+          const title = data.title || '';
+          const description = data.description || '';
+          const section = parseInt(data.section) || 1;
+          const body = this.props.widgetFor('body');
+          const collection_type = data.collection_type || 'memorandum';
 
-        const allEntries = entries?.get?.('compositions') || [];
-        const relatedSections = Array.from(allEntries)
-          .filter(e => e?.getIn?.(['data', 'title']) === title)
-          .map(e => parseInt(e?.getIn?.(['data', 'section']) || 1))
-          .filter(Boolean)
-          .sort((a, b) => a - b);
+          const allEntries = entries?.get?.('compositions') || [];
+          const relatedSections = Array.from(allEntries)
+            .filter(e => e?.getIn?.(['data', 'title']) === title)
+            .map(e => parseInt(e?.getIn?.(['data', 'section']) || 1))
+            .filter(Boolean)
+            .sort((a, b) => a - b);
 
-        return h('div', {className: 'preview-container'},
-          h('div', {className: 'flex'},
-            h('nav', {className: 'w-64 bg-gray-800 p-4 min-h-screen'},
-              h('h3', {className: 'text-white mb-4'}, 'Sections'),
-              h('div', {className: 'space-y-2'},
-                relatedSections.map(sectionNum =>
+          return h('div', {className: 'preview-container'},
+            h('div', {className: 'flex'},
+              h('nav', {className: 'w-64 bg-gray-800 p-4 min-h-screen'},
+                h('h3', {className: 'text-white mb-4'}, 'Sections'),
+                h('div', {className: 'space-y-2'},
+                  relatedSections.map(sectionNum =>
+                    h('button', {
+                      key: sectionNum,
+                      className: `w-full p-2 text-left rounded ${section === sectionNum ? 'bg-white text-gray-800' : 'text-white hover:bg-gray-700'}`,
+                      onClick: () => {
+                        const sectionEntry = Array.from(allEntries).find(e => 
+                          e?.getIn?.(['data', 'title']) === title && 
+                          parseInt(e?.getIn?.(['data', 'section'])) === sectionNum
+                        );
+                        if (sectionEntry) {
+                          window.location.href = `#/collections/compositions/entries/${sectionEntry.get('slug')}`;
+                        }
+                      }
+                    }, `Section ${sectionNum}`)
+                  ),
                   h('button', {
-                    key: sectionNum,
-                    className: `w-full p-2 text-left rounded ${section === sectionNum ? 'bg-white text-gray-800' : 'text-white hover:bg-gray-700'}`,
-                    onClick: () => {
-                      const sectionEntry = Array.from(allEntries).find(e => 
-                        e?.getIn?.(['data', 'title']) === title && 
-                        parseInt(e?.getIn?.(['data', 'section'])) === sectionNum
-                      );
-                      if (sectionEntry) {
-                        window.location.href = `#/collections/compositions/entries/${sectionEntry.get('slug')}`;
+                    className: 'w-full mt-4 bg-blue-500 text-white p-2 rounded hover:bg-blue-600',
+                    onClick: async () => {
+                      try {
+                        const newSection = Math.max(...relatedSections, 0) + 1;
+                        const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+                        const slug = `${timestamp}-${title.toLowerCase().replace(/\s+/g, '-')}-${newSection}`;
+                        
+                        const backend = CMS.getBackend();
+                        
+                        await backend.createEntry('compositions', {
+                          path: `content/compositions/${slug}.md`,
+                          slug: slug,
+                          data: {
+                            title: data.title,
+                            description: data.description,
+                            collection_type: collection_type,
+                            section: newSection,
+                            body: ''
+                          }
+                        });
+                        
+                        window.location.reload();
+                      } catch (error) {
+                        console.error('Error creating new section:', error);
+                        alert('Failed to create new section. Please try again.');
                       }
                     }
-                  }, `Section ${sectionNum}`)
-                ),
-                h('button', {
-                  className: 'w-full mt-4 bg-blue-500 text-white p-2 rounded hover:bg-blue-600',
-                  onClick: async () => {
-                    try {
-                      const newSection = Math.max(...relatedSections, 0) + 1;
-                      const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-                      const slug = `${timestamp}-${title.toLowerCase().replace(/\s+/g, '-')}-${newSection}`;
-                      
-                      const backend = CMS.getBackend();
-                      
-                      await backend.createEntry('compositions', {
-                        path: `content/compositions/${slug}.md`,
-                        slug: slug,
-                        data: {
-                          title: data.title,
-                          description: data.description,
-                          collection_type: collection_type,
-                          section: newSection,
-                          body: ''
-                        }
-                      });
-                      
-                      window.location.reload();
-                    } catch (error) {
-                      console.error('Error creating new section:', error);
-                      alert('Failed to create new section. Please try again.');
-                    }
-                  }
-                }, 'New Section')
-              )
-            ),
-            h('div', {className: 'flex-1 p-8'},
-              h('div', {className: 'section-content'},
-                h('h1', {}, title),
-                h('div', {className: 'description'}, description),
-                h('div', {className: 'section-number'}, `Section ${section}`),
-                h('div', {className: 'content'}, body)
+                  }, 'New Section')
+                )
+              ),
+              h('div', {className: 'flex-1 p-8'},
+                h('div', {className: 'section-content'},
+                  h('h1', {}, title),
+                  h('div', {className: 'description'}, description),
+                  h('div', {className: 'section-number'}, `Section ${section}`),
+                  h('div', {className: 'content'}, body)
+                )
               )
             )
-          )
-        );
-      }
-    });
+          );
+        }
+      });
 
-    CMS.registerPreviewTemplate('compositions', PreviewComponent);
-  </script>
-</body>
+      CMS.registerPreviewTemplate('compositions', PreviewComponent);
+    </script>
+  </body>
 </html>
