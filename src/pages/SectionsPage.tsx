@@ -1,22 +1,29 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
-import { compositionData } from "@/utils/compositionData";
+import { compositionData, Composition, initializeCompositionData } from "@/utils/compositionData";
 
 const SectionsPage = () => {
   const { compositionId } = useParams();
   const navigate = useNavigate();
+  const [compositions, setCompositions] = useState<Composition[]>([]);
 
-  // Select the appropriate compositions based on the route
-  const compositions = compositionId === "memorandum" 
-    ? compositionData.memorandum 
-    : compositionData.corrective;
+  useEffect(() => {
+    const loadData = async () => {
+      await initializeCompositionData();
+      const collectionCompositions = compositionId === "memorandum" 
+        ? compositionData.memorandum 
+        : compositionData.corrective;
+      setCompositions(collectionCompositions);
+    };
+
+    loadData();
+  }, [compositionId]);
 
   return (
     <div className="min-h-screen bg-[#0F1218] text-white">
       <Header />
 
-      {/* Main Content */}
       <main className="container mx-auto px-4 py-12">
         <div className="text-center mb-16">
           <h1 className="text-5xl font-serif mb-6">
@@ -35,14 +42,10 @@ const SectionsPage = () => {
             <div
               key={composition.id}
               className="bg-[#1A1F2C] rounded-lg p-8 border border-[#2A2F3C] cursor-pointer transition-all hover:bg-[#252A37]"
-              onClick={() => navigate(`/composition/${compositionId}/section/1`)}
+              onClick={() => navigate(`/composition/${compositionId}/section/${composition.section}`)}
             >
               <h2 className="text-2xl font-serif mb-4">{composition.title}</h2>
-              <div className="prose prose-invert max-w-none">
-                <p className="text-gray-300 line-clamp-4">
-                  {`This is the content for Section 1 of ${composition.title} at literacy level 3. The content would adapt based on the selected literacy level.`}
-                </p>
-              </div>
+              <p className="text-gray-300 line-clamp-4">{composition.description}</p>
             </div>
           ))}
         </div>
