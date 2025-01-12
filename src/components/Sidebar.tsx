@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { compositionData } from "@/utils/compositionData";
 
 interface SidebarProps {
   sections: Array<{ id: number; title: string }>;
@@ -10,9 +11,13 @@ interface SidebarProps {
 export const Sidebar = ({ sections, collectionName, compositionId, currentSectionId }: SidebarProps) => {
   const navigate = useNavigate();
 
-  // Find the current section to get its title
-  const currentSection = sections.find(section => section.id === Number(currentSectionId));
-  const compositionTitle = currentSection?.title || "";
+  // Get the composition title based on the compositionId
+  const getCompositionTitle = () => {
+    const collection = compositionId === "memorandum" ? compositionData.memorandum : compositionData.corrective;
+    return collection[0]?.title || ""; // We use the first section's title as the composition title
+  };
+
+  const compositionTitle = getCompositionTitle();
 
   return (
     <div className="w-64 min-h-[calc(100vh-4rem)] bg-[#1A1F2C] text-white p-6">
