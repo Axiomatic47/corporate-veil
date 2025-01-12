@@ -43,7 +43,7 @@ const CompositionPage = () => {
           </div>
 
           <div className="mb-8 flex items-center space-x-4">
-            <span className="text-sm text-gray-300">Literacy Level:</span>
+            <span className="text-sm text-gray-300">Reading Level:</span>
             <Slider
               defaultValue={[literacyLevel]}
               max={5}

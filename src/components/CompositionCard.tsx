@@ -37,7 +37,7 @@ const CompositionCard = ({
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex items-center space-x-4">
-          <span className="text-sm text-gray-300">Literacy Level:</span>
+          <span className="text-sm text-gray-300">Reading Level:</span>
           <Slider
             defaultValue={[literacyLevel]}
             max={5}
