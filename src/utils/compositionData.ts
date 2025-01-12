@@ -1,3 +1,5 @@
+import { create } from 'zustand';
+
 export interface Composition {
   id: number;
   title: string;
@@ -7,28 +9,26 @@ export interface Composition {
   content?: string;
 }
 
-interface CompositionCollection {
+interface CompositionStore {
   memorandum: Composition[];
   corrective: Composition[];
+  initialized: boolean;
+  setCompositions: (compositions: Composition[]) => void;
 }
 
-export const compositionData: CompositionCollection = {
+export const useCompositionStore = create<CompositionStore>((set) => ({
   memorandum: [],
-  corrective: []
-};
+  corrective: [],
+  initialized: false,
+  setCompositions: (compositions) => {
+    const memorandum = compositions.filter(comp => comp.collection_type === 'memorandum');
+    const corrective = compositions.filter(comp => comp.collection_type === 'corrective');
+    set({ memorandum, corrective, initialized: true });
+  },
+}));
 
-// Filter compositions by collection type
-const filterCompositions = (compositions: Composition[], type: 'memorandum' | 'corrective'): Composition[] => {
-  return compositions.filter(comp => comp.collection_type === type);
-};
-
-// Function to initialize the composition data
 export const initializeCompositionData = async (): Promise<void> => {
   const { loadCompositions } = await import('./compositionLoader');
-  const allCompositions = await loadCompositions();
-  compositionData.memorandum = filterCompositions(allCompositions, 'memorandum');
-  compositionData.corrective = filterCompositions(allCompositions, 'corrective');
+  const compositions = await loadCompositions();
+  useCompositionStore.getState().setCompositions(compositions);
 };
-
-// Initialize the data when the module is imported
-initializeCompositionData().catch(console.error);

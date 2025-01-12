@@ -1,24 +1,34 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
-import { compositionData, Composition, initializeCompositionData } from "@/utils/compositionData";
+import { useCompositionStore, initializeCompositionData } from "@/utils/compositionData";
+import { useToast } from "@/components/ui/use-toast";
 
 const SectionsPage = () => {
   const { compositionId } = useParams();
   const navigate = useNavigate();
-  const [compositions, setCompositions] = useState<Composition[]>([]);
+  const { toast } = useToast();
+  const { memorandum, corrective, initialized } = useCompositionStore();
 
   useEffect(() => {
     const loadData = async () => {
-      await initializeCompositionData();
-      const collectionCompositions = compositionId === "memorandum" 
-        ? compositionData.memorandum 
-        : compositionData.corrective;
-      setCompositions(collectionCompositions);
+      if (!initialized) {
+        try {
+          await initializeCompositionData();
+        } catch (error) {
+          toast({
+            title: "Error",
+            description: "Failed to load compositions",
+            variant: "destructive",
+          });
+        }
+      }
     };
 
     loadData();
-  }, [compositionId]);
+  }, [initialized, toast]);
+
+  const compositions = compositionId === "memorandum" ? memorandum : corrective;
 
   return (
     <div className="min-h-screen bg-[#0F1218] text-white">
