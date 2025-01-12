@@ -45,15 +45,8 @@
                         parseInt(e?.getIn?.(['data', 'section'])) === sectionNum
                       );
                       if (sectionEntry) {
-                        // Create a new entry with the selected section's data
-                        const newData = {
-                          title: sectionEntry.getIn(['data', 'title']),
-                          description: sectionEntry.getIn(['data', 'description']),
-                          collection_type: sectionEntry.getIn(['data', 'collection_type']),
-                          section: sectionNum,
-                          body: sectionEntry.getIn(['data', 'body'])
-                        };
-                        CMS.entry.set({data: newData});
+                        // Navigate to the selected section's entry
+                        window.location.href = `#/collections/compositions/entries/${sectionEntry.get('slug')}`;
                       }
                     }
                   }, `Section ${sectionNum}`)
@@ -62,15 +55,20 @@
                   className: 'w-full mt-4 bg-blue-500 text-white p-2 rounded hover:bg-blue-600',
                   onClick: () => {
                     const newSection = Math.max(...relatedSections, 0) + 1;
-                    // Create a new entry with incremented section number
-                    const newData = {
-                      title: data.title,
-                      description: data.description,
-                      collection_type: data.collection_type,
-                      section: newSection,
-                      body: '' // Start with empty content for new section
-                    };
-                    CMS.entry.set({data: newData});
+                    // Create a new entry through the CMS API
+                    CMS.store.dispatch({
+                      type: 'DRAFT_CREATE_NEW_ENTRY',
+                      payload: {
+                        collectionName: 'compositions',
+                        data: {
+                          title: data.title,
+                          description: data.description,
+                          collection_type: data.collection_type,
+                          section: newSection,
+                          body: ''
+                        }
+                      }
+                    });
                   }
                 }, 'New Section')
               )
