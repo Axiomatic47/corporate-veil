@@ -28,12 +28,17 @@ export const useCompositionStore = create<CompositionStore>((set) => ({
   },
   refreshCompositions: async () => {
     const { loadCompositions } = await import('./compositionLoader');
-    const compositions = await loadCompositions();
-    set(state => ({
-      ...state,
-      memorandum: compositions.filter(comp => comp.collection_type === 'memorandum'),
-      corrective: compositions.filter(comp => comp.collection_type === 'corrective'),
-    }));
+    try {
+      const compositions = await loadCompositions();
+      set(state => ({
+        ...state,
+        memorandum: compositions.filter(comp => comp.collection_type === 'memorandum'),
+        corrective: compositions.filter(comp => comp.collection_type === 'corrective'),
+      }));
+    } catch (error) {
+      console.error('Failed to refresh compositions:', error);
+      throw error;
+    }
   }
 }));
 
@@ -49,6 +54,11 @@ export const compositionData = {
 
 export const initializeCompositionData = async (): Promise<void> => {
   const { loadCompositions } = await import('./compositionLoader');
-  const compositions = await loadCompositions();
-  useCompositionStore.getState().setCompositions(compositions);
+  try {
+    const compositions = await loadCompositions();
+    useCompositionStore.getState().setCompositions(compositions);
+  } catch (error) {
+    console.error('Failed to initialize composition data:', error);
+    throw error;
+  }
 };

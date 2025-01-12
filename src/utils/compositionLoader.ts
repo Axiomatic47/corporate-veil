@@ -11,14 +11,11 @@ export const loadCompositions = async (): Promise<Composition[]> => {
     });
     
     const compositions: Composition[] = [];
+    let id = 1;
     
     for (const path in modules) {
       const content = modules[path] as string;
       const { data: frontmatter, content: body } = matter(content);
-      
-      // Extract the numeric ID from the filename (YYYY-MM-DD-title format)
-      const filename = path.split('/').pop() || '';
-      const id = parseInt(filename.split('-')[0]) || compositions.length + 1;
       
       compositions.push({
         id,
@@ -28,12 +25,17 @@ export const loadCompositions = async (): Promise<Composition[]> => {
         section: frontmatter.section || 1,
         content: body.trim()
       });
+      
+      id++;
     }
 
+    // Sort compositions by section number
+    compositions.sort((a, b) => a.section - b.section);
+    
     console.log('Loaded compositions:', compositions);
     return compositions;
   } catch (error) {
     console.error('Error loading compositions:', error);
-    return [];
+    throw error; // Let the error bubble up so we can see it in the console
   }
 };

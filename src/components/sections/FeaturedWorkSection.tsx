@@ -1,20 +1,17 @@
 import { useEffect, useState } from "react";
 import CompositionCard from "@/components/CompositionCard";
-import { compositionData, initializeCompositionData } from "@/utils/compositionData";
-
-// Specify which compositions should be featured by their IDs and collection names
-const featuredWorksConfig = [
-  { id: 1, collection: 'memorandum' },  // The Nature of Corporate Personhood
-  { id: 1, collection: 'corrective' },  // Reform Proposals
-];
+import { useCompositionStore } from "@/utils/compositionData";
 
 export const FeaturedWorkSection = () => {
+  const { memorandum, corrective, initialized, refreshCompositions } = useCompositionStore();
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        await initializeCompositionData();
+        if (!initialized) {
+          await refreshCompositions();
+        }
         setIsLoading(false);
       } catch (error) {
         console.error('Error loading composition data:', error);
@@ -23,28 +20,17 @@ export const FeaturedWorkSection = () => {
     };
 
     loadData();
-  }, []);
+  }, [initialized, refreshCompositions]);
 
   if (isLoading) {
     return <div>Loading featured works...</div>;
   }
 
-  // Map the configuration to actual composition data
-  const featuredWorks = featuredWorksConfig.map(config => {
-    const collection = compositionData[config.collection];
-    const composition = collection.find(comp => comp.id === config.id);
-    
-    if (!composition) {
-      console.error(`Composition not found for id ${config.id} in ${config.collection}`);
-      return null;
-    }
-
-    return {
-      ...composition,
-      collection: config.collection,
-      content: `This is the content for Section 1 of ${composition.title} at reading level 3. The content would adapt based on the selected reading level.`
-    };
-  }).filter(Boolean);
+  // Get the first composition from each collection type
+  const featuredWorks = [
+    memorandum[0],
+    corrective[0]
+  ].filter(Boolean); // Remove any undefined values
 
   return (
     <section className="mt-32">
@@ -53,7 +39,7 @@ export const FeaturedWorkSection = () => {
         {featuredWorks.map((work) => (
           work && (
             <CompositionCard
-              key={`${work.collection}-${work.id}`}
+              key={`${work.collection_type}-${work.id}`}
               id={work.id}
               title={work.title}
               description={work.description}
@@ -61,7 +47,7 @@ export const FeaturedWorkSection = () => {
               onLiteracyChange={() => {}}
               content={work.content}
               showSlider={false}
-              collection={work.collection}
+              collection={work.collection_type}
             />
           )
         ))}
