@@ -6,228 +6,209 @@
     <title>Content Manager</title>
     <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
     <style>
-      .preview-content {
-        padding: 2rem;
-        max-width: 800px;
-        margin: 0 auto;
+      .preview-container {
+        display: flex;
+        min-height: calc(100vh - 56px);
       }
-      .content-preview {
-        margin: 2rem 0;
+      .sidebar {
+        width: 256px;
+        background-color: #1A1F2C;
+        color: white;
+        padding: 1.5rem;
+      }
+      .preview-content {
+        flex: 1;
+        padding: 2rem;
+      }
+      .section-nav {
+        margin-top: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+      .section-button {
+        padding: 0.5rem 1rem;
+        background: transparent;
+        color: #94a3b8;
+        border: none;
+        border-radius: 0.25rem;
+        text-align: left;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .section-button:hover {
+        background: #2A2F3C;
+        color: white;
+      }
+      .section-button.active {
+        background: white;
+        color: #1A1F2C;
       }
       .new-section-button {
-        display: inline-block;
-        background-color: #2563eb;
+        margin-top: 1rem;
+        padding: 0.5rem 1rem;
+        background: #2563eb;
         color: white;
-        padding: 8px 16px;
-        border-radius: 4px;
         border: none;
+        border-radius: 0.25rem;
         cursor: pointer;
-        margin-top: 16px;
-        font-size: 14px;
+        transition: background 0.2s;
       }
-      .new-section-button:hover {
-        background-color: #1d4ed8;
+      .new-section-button:hover:not(:disabled) {
+        background: #1d4ed8;
       }
       .new-section-button:disabled {
-        background-color: #93c5fd;
+        background: #93c5fd;
         cursor: not-allowed;
       }
-      .nav-menu {
-        padding: 1rem;
-        background-color: #f3f4f6;
-        border-radius: 4px;
+      .collection-title {
+        font-size: 1.25rem;
+        margin-bottom: 0.5rem;
+      }
+      .composition-title {
+        color: #94a3b8;
+        font-size: 1.125rem;
         margin-bottom: 1rem;
-      }
-      .nav-item {
-        padding: 0.5rem;
-        margin: 0.25rem 0;
-        cursor: pointer;
-        border-radius: 4px;
-      }
-      .nav-item:hover {
-        background-color: #e5e7eb;
-      }
-      .nav-item.active {
-        background-color: #2563eb;
-        color: white;
-      }
-      .error-message {
-        color: #dc2626;
-        padding: 0.5rem;
-        margin: 0.5rem 0;
-        background-color: #fee2e2;
-        border-radius: 4px;
       }
     </style>
   </head>
   <body>
     <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
     <script>
-      let cmsInstance = null;
-
-      const createNewSection = async (entry) => {
-        if (!entry) {
-          throw new Error('Entry is required to create a new section');
-        }
-
-        const data = entry.get('data');
-        if (!data) {
-          throw new Error('Entry data is required');
-        }
-
-        const title = data.get('title');
-        if (!title) {
-          throw new Error('Title is required to create a new section');
-        }
-
-        const currentSection = parseInt(data.get('section') || '1', 10);
-        const collectionType = data.get('collection_type');
-        const description = data.get('description');
-
-        const baseTitle = title.split(' - ')[0];
-        const newSlug = `${baseTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-section-${currentSection + 1}`;
-
-        const entryData = {
-          slug: newSlug,
-          path: `content/compositions/${newSlug}.md`,
-          data: {
-            title: `${baseTitle} - Section ${currentSection + 1}`,
-            description: description,
-            collection_type: collectionType,
-            section: currentSection + 1,
-            body: ''
-          }
-        };
-
-        try {
-          const backend = await CMS.getBackend();
-          if (!backend?.implementation) {
-            throw new Error('CMS backend not initialized');
-          }
-          await backend.implementation.createEntry('compositions', newSlug, entryData);
-          return newSlug;
-        } catch (error) {
-          console.error('Error creating new section:', error);
-          throw error;
-        }
-      };
-
       const PreviewComponent = createClass({
         getInitialState() {
           return {
-            isCreatingSection: false,
-            error: null,
-            sections: []
+            sections: [],
+            isCreating: false,
+            cmsReady: false
           };
         },
 
         componentDidMount() {
-          this._isMounted = true;
-          this.loadSections();
+          this.mounted = true;
+          // Wait for CMS to be ready
+          CMS.getBackend().status().then(() => {
+            if (this.mounted) {
+              this.setState({ cmsReady: true });
+              this.loadSections();
+            }
+          });
         },
 
         componentWillUnmount() {
-          this._isMounted = false;
+          this.mounted = false;
         },
 
-        loadSections: async function() {
-          if (!this._isMounted) return;
-          
+        async loadSections() {
           try {
-            const backend = await CMS.getBackend();
-            if (!backend?.implementation) {
-              throw new Error('CMS backend not initialized');
-            }
+            const entry = this.props.entry;
+            const data = entry.get('data');
+            const collectionType = data.get('collection_type');
 
-            const entries = await backend.implementation.entries({ 
-              collection: 'compositions' 
-            });
-
-            if (!this._isMounted) return;
-
-            const currentTitle = this.props.entry.getIn(['data', 'title']);
-            if (!currentTitle) return;
-
-            const baseTitle = currentTitle.split(' - ')[0];
+            const entries = await this.props.query('collections.compositions.entries');
             const sections = entries
-              .filter(entry => {
-                const entryTitle = entry.data?.title;
-                return entryTitle && entryTitle.startsWith(baseTitle);
-              })
-              .sort((a, b) => {
-                const sectionA = parseInt(a.data?.section || '1', 10);
-                const sectionB = parseInt(b.data?.section || '1', 10);
-                return sectionA - sectionB;
-              });
-            
-            if (this._isMounted) {
+              .filter(entry => entry.data.collection_type === collectionType)
+              .map(entry => ({
+                section: entry.data.section,
+                title: entry.data.title,
+                slug: entry.slug
+              }))
+              .sort((a, b) => a.section - b.section);
+
+            if (this.mounted) {
               this.setState({ sections });
             }
           } catch (error) {
             console.error('Error loading sections:', error);
-            if (this._isMounted) {
-              this.setState({ error: 'Failed to load sections' });
-            }
           }
         },
 
-        handleNewSection: async function(e) {
-          e.preventDefault();
-          if (this.state.isCreatingSection) return;
+        async handleNewSection() {
+          if (!this.state.cmsReady || this.state.isCreating) return;
 
-          this.setState({ isCreatingSection: true, error: null });
-
+          this.setState({ isCreating: true });
           try {
-            const newSlug = await createNewSection(this.props.entry);
-            if (this._isMounted) {
-              window.location.href = `/admin/#/collections/compositions/entries/${newSlug}`;
-            }
+            const entry = this.props.entry;
+            const data = entry.get('data');
+
+            const title = data.get('title');
+            const description = data.get('description');
+            const collectionType = data.get('collection_type');
+            const currentSection = parseInt(data.get('section'), 10);
+            const newSection = currentSection + 1;
+
+            const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+            const safeTitle = title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+            const newSlug = timestamp + '-' + safeTitle + '-section-' + newSection;
+
+            const backend = CMS.getBackend();
+            await backend.createEntry('compositions', {
+              slug: newSlug,
+              path: 'content/compositions/' + newSlug + '.md',
+              raw: [
+                '---',
+                'title: ' + title + ' - Section ' + newSection,
+                'description: ' + description,
+                'collection_type: ' + collectionType,
+                'section: ' + newSection,
+                '---'
+              ].join('\n')
+            });
+
+            window.location.href = '/admin/#/collections/compositions/entries/' + newSlug;
           } catch (error) {
-            console.error('Error creating section:', error);
-            if (this._isMounted) {
-              this.setState({
-                error: error.message || 'Failed to create new section',
-                isCreatingSection: false
-              });
+            console.error('Error creating new section:', error);
+            alert('Failed to create new section. Please try again.');
+            if (this.mounted) {
+              this.setState({ isCreating: false });
             }
           }
         },
 
-        navigateToSection: function(slug) {
-          window.location.href = `/admin/#/collections/compositions/entries/${slug}`;
-        },
+        render() {
+          const entry = this.props.entry;
+          if (!entry) return null;
 
-        render: function() {
-          const { entry, widgetFor } = this.props;
-          const { isCreatingSection, error, sections } = this.state;
-          const currentSection = parseInt(entry.getIn(['data', 'section']) || '1', 10);
+          const data = entry.get('data');
+          if (!data) return null;
 
-          return h('div', { className: 'preview-content' },
-            h('div', { className: 'nav-menu' },
-              sections.map(section => 
-                h('div', {
-                  key: section.slug,
-                  className: `nav-item ${parseInt(section.data?.section || '1', 10) === currentSection ? 'active' : ''}`,
-                  onClick: () => this.navigateToSection(section.slug)
-                }, `Section ${section.data?.section}`)
-              )
+          const currentSection = data.get('section');
+          const collectionType = data.get('collection_type');
+          const collectionTitle = collectionType === 'memorandum' ? 'Memorandum and Manifestation' : 'Corrective Measures';
+
+          return h('div', { className: 'preview-container' },
+            // Sidebar
+            h('div', { className: 'sidebar' },
+              h('div', { className: 'collection-title' }, collectionTitle),
+              h('div', { className: 'composition-title' }, data.get('title')),
+              h('div', { className: 'section-nav' },
+                this.state.sections.map(section =>
+                  h('button', {
+                    key: section.section,
+                    onClick: () => {
+                      window.location.href = '/admin/#/collections/compositions/entries/' + section.slug;
+                    },
+                    className: 'section-button' + (currentSection === section.section ? ' active' : '')
+                  }, 'Section ' + section.section)
+                )
+              ),
+              h('button', {
+                className: 'new-section-button',
+                onClick: this.handleNewSection,
+                disabled: !this.state.cmsReady || this.state.isCreating
+              }, this.state.isCreating ? 'Creating...' : 'New Section')
             ),
-            h('h1', {}, entry.getIn(['data', 'title'])),
-            h('div', { className: 'content-preview' }, widgetFor('body')),
-            error && h('div', { className: 'error-message' }, error),
-            h('button', {
-              className: 'new-section-button',
-              onClick: this.handleNewSection,
-              disabled: isCreatingSection
-            }, isCreatingSection ? 'Creating...' : 'New Section')
+            // Preview Content
+            h('div', { className: 'preview-content' },
+              h('h1', {}, data.get('title')),
+              h('div', {}, this.props.widgetFor('body'))
+            )
           );
         }
       });
 
-      window.addEventListener('load', function() {
-        CMS.registerPreviewTemplate('compositions', PreviewComponent);
-        CMS.init();
-      });
+      CMS.registerPreviewTemplate('compositions', PreviewComponent);
+      CMS.init();
     </script>
   </body>
 </html>
