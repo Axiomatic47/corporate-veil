@@ -1,0 +1,27 @@
+backend:
+  name: git-gateway
+  branch: main
+
+media_folder: "public/uploads"
+public_folder: "/uploads"
+
+collections:
+  - name: "memorandum"
+    label: "Memorandum Compositions"
+    folder: "content/memorandum"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "Title", name: "title", widget: "string" }
+      - { label: "Description", name: "description", widget: "text" }
+      - { label: "Content", name: "body", widget: "markdown" }
+      
+  - name: "corrective"
+    label: "Corrective Compositions"
+    folder: "content/corrective"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "Title", name: "title", widget: "string" }
+      - { label: "Description", name: "description", widget: "text" }
+      - { label: "Content", name: "body", widget: "markdown" }
