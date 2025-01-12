@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { Home, ArrowLeft } from "lucide-react";
+import { Home } from "lucide-react";
 
 const CompositionPage = () => {
   const { compositionId, sectionId } = useParams();
@@ -21,53 +21,62 @@ const CompositionPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0F1218] text-white flex">
-      {/* Sidebar */}
-      <div className="w-64 bg-[#1A1F2C] border-r border-[#2A2F3C] p-4 space-y-2">
-        {sections.map((section) => (
+    <div className="min-h-screen bg-[#0F1218]">
+      {/* Header */}
+      <header className="w-full bg-[#1A1F2C] py-4 px-8 flex justify-between items-center border-b border-[#2A2F3C]">
+        <h1 className="text-2xl font-serif text-white">Axiomatic Law</h1>
+        <div className="flex space-x-4">
           <Button
-            key={section.id}
             variant="ghost"
-            className={`w-full text-left justify-start font-serif text-lg ${
-              Number(sectionId) === section.id
-                ? "bg-[#2A2F3C] text-white"
-                : "text-gray-400 hover:text-white hover:bg-[#2A2F3C]"
-            }`}
-            onClick={() =>
-              navigate(`/composition/${compositionId}/section/${section.id}`)
-            }
+            className="text-white hover:bg-[#2A2F3C] px-6"
+            onClick={() => navigate("/composition/memorandum")}
           >
-            Section {section.id}
+            Memorandum and Manifestation
           </Button>
-        ))}
-      </div>
-
-      {/* Main Content */}
-      <div className="flex-1">
-        <header className="py-6 px-8 flex justify-between items-center">
-          <div className="flex items-center space-x-4">
-            <Button 
-              variant="ghost" 
-              className="text-white" 
-              onClick={() => navigate(-1)}
-            >
-              <ArrowLeft className="w-6 h-6" />
-            </Button>
-            <h1 className="text-2xl font-serif">Corporate Veil</h1>
-          </div>
+          <Button
+            variant="ghost"
+            className="text-white hover:bg-[#2A2F3C] px-6"
+            onClick={() => navigate("/composition/corrective")}
+          >
+            Corrective Measures
+          </Button>
           <Button 
             variant="ghost" 
-            className="text-white" 
+            className="text-white hover:bg-[#2A2F3C]"
             onClick={() => navigate("/")}
           >
             <Home className="w-6 h-6" />
           </Button>
-        </header>
+        </div>
+      </header>
 
-        <main className="px-8 py-12">
+      <div className="flex">
+        {/* Sidebar */}
+        <div className="w-64 min-h-[calc(100vh-4rem)] bg-[#1A1F2C] text-white p-6">
+          <h2 className="text-xl font-serif mb-6">Composition {compositionId}</h2>
+          <div className="space-y-2">
+            {sections.map((section) => (
+              <button
+                key={section.id}
+                onClick={() =>
+                  navigate(`/composition/${compositionId}/section/${section.id}`)
+                }
+                className={`w-full text-left py-2 px-4 rounded transition-colors ${
+                  Number(sectionId) === section.id
+                    ? "bg-white text-[#1A1F2C] font-medium"
+                    : "text-gray-300 hover:bg-[#2A2F3C] hover:text-white"
+                }`}
+              >
+                Section {section.id}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <div className="flex-1 p-8 text-white">
           <div className="mb-8">
-            <h1 className="text-4xl font-serif mb-4">Composition {compositionId}</h1>
-            <p className="text-xl text-gray-300">Section {sectionId}</p>
+            <h1 className="text-4xl font-serif mb-4">Section {sectionId}</h1>
           </div>
 
           <div className="mb-8 flex items-center space-x-4">
@@ -86,7 +95,7 @@ const CompositionPage = () => {
           <div className="bg-[#1A1F2C] rounded-lg p-8">
             <p className="text-lg leading-relaxed">{getContent(literacyLevel)}</p>
           </div>
-        </main>
+        </div>
       </div>
     </div>
   );
