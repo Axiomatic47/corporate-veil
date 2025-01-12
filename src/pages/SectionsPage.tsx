@@ -7,29 +7,58 @@ const SectionsPage = () => {
   const { compositionId } = useParams();
   const navigate = useNavigate();
 
-  // Mock data - in a real app this would come from an API
-  const compositions = [
+  // Mock data for Memorandum and Manifestation
+  const memorandumCompositions = [
     {
       id: 1,
-      title: "Foundations of Metaphysics",
-      description: "An exploration of fundamental metaphysical principles",
+      title: "The Nature of Corporate Personhood",
+      description: "An exploration of fundamental principles underlying corporate personhood in constitutional law.",
     },
     {
       id: 2,
-      title: "Composition 1",
-      description: "Description for Composition 1. This is a placeholder description that outlines the main themes and topics covered in this composition.",
+      title: "Legal Rights and Responsibilities",
+      description: "Understanding the balance between corporate rights and their corresponding obligations to society.",
     },
     {
       id: 3,
-      title: "Composition 2",
-      description: "Description for Composition 2. This is a placeholder description that outlines the main themes and topics covered in this composition.",
+      title: "Historical Evolution",
+      description: "Tracing the development of corporate personhood through significant legal precedents and societal changes.",
     },
     {
       id: 4,
-      title: "Composition 3",
-      description: "Description for Composition 3. This is a placeholder description that outlines the main themes and topics covered in this composition.",
+      title: "Constitutional Implications",
+      description: "Analyzing the impact of corporate personhood on constitutional interpretation and application.",
     },
   ];
+
+  // Mock data for Corrective Measures
+  const correctiveCompositions = [
+    {
+      id: 1,
+      title: "Reform Proposals",
+      description: "Examining contemporary proposals for reforming corporate constitutional rights and responsibilities.",
+    },
+    {
+      id: 2,
+      title: "Regulatory Framework",
+      description: "Analysis of current regulatory mechanisms and their effectiveness in corporate governance.",
+    },
+    {
+      id: 3,
+      title: "Accountability Measures",
+      description: "Exploring methods to enhance corporate accountability and transparency.",
+    },
+    {
+      id: 4,
+      title: "Future Directions",
+      description: "Investigating emerging trends and potential future developments in corporate law reform.",
+    },
+  ];
+
+  // Select the appropriate compositions based on the route
+  const compositions = compositionId === "memorandum" 
+    ? memorandumCompositions 
+    : correctiveCompositions;
 
   return (
     <div className="min-h-screen bg-[#0F1218] text-white">
@@ -73,7 +102,10 @@ const SectionsPage = () => {
             {compositionId === "memorandum" ? "Memorandum and Manifestation" : "Corrective Measures"}
           </h1>
           <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-            Delve into metaphysics, ethics, and epistemology
+            {compositionId === "memorandum" 
+              ? "Explore the fundamental principles and implications of corporate personhood in constitutional law"
+              : "Examine contemporary approaches to corporate law reform and accountability"
+            }
           </p>
         </div>
 
