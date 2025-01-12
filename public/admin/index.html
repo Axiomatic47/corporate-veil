@@ -51,32 +51,58 @@
         background-color: #2563eb;
         color: white;
       }
+      .error-message {
+        color: #dc2626;
+        padding: 0.5rem;
+        margin: 0.5rem 0;
+        background-color: #fee2e2;
+        border-radius: 4px;
+      }
     </style>
   </head>
   <body>
     <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
     <script>
       const createNewSection = async (entry) => {
-        const data = entry.get('data').toJS();
-        const collectionType = data.collection_type;
-        const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-        const baseTitle = data.title.toLowerCase().replace(/\s+/g, '-');
-        const newSlug = `${timestamp}-${baseTitle}-section-${data.section + 1}`;
+        if (!entry) {
+          throw new Error('Entry is required to create a new section');
+        }
+
+        const data = entry.get('data');
+        if (!data) {
+          throw new Error('Entry data is required');
+        }
+
+        const title = data.get('title');
+        if (!title) {
+          throw new Error('Title is required to create a new section');
+        }
+
+        const currentSection = parseInt(data.get('section') || '1', 10);
+        const collectionType = data.get('collection_type');
+        const description = data.get('description');
+
+        const baseTitle = title.split(' - ')[0];
+        const newSlug = `${baseTitle.toLowerCase().replace(/\s+/g, '-')}-section-${currentSection + 1}`;
 
         const entryData = {
           slug: newSlug,
           path: `content/compositions/${newSlug}.md`,
           data: {
-            title: `${data.title} - Section ${data.section + 1}`,
-            description: data.description,
+            title: `${baseTitle} - Section ${currentSection + 1}`,
+            description: description,
             collection_type: collectionType,
-            section: data.section + 1,
+            section: currentSection + 1,
             body: ''
           }
         };
 
         const backend = await CMS.getBackend();
-        await backend.implementation.persistEntry(entryData, { collection: 'compositions' });
+        if (!backend || !backend.implementation) {
+          throw new Error('CMS backend not initialized');
+        }
+
+        await backend.implementation.createEntry('compositions', newSlug, entryData);
         return newSlug;
       };
 
@@ -90,6 +116,7 @@
         },
 
         componentDidMount() {
+          this._isMounted = true;
           this.loadSections();
         },
 
@@ -102,11 +129,25 @@
           
           try {
             const backend = await CMS.getBackend();
+            if (!backend || !backend.implementation) {
+              throw new Error('CMS backend not initialized');
+            }
+
             const entries = await backend.implementation.entries({ collection: 'compositions' });
             const currentTitle = this.props.entry.getIn(['data', 'title']);
-            const sections = entries.filter(entry => 
-              entry.data.title.startsWith(currentTitle.split(' - ')[0])
-            ).sort((a, b) => a.data.section - b.data.section);
+            if (!currentTitle) return;
+
+            const baseTitle = currentTitle.split(' - ')[0];
+            const sections = entries
+              .filter(entry => {
+                const entryTitle = entry.data.title;
+                return entryTitle && entryTitle.startsWith(baseTitle);
+              })
+              .sort((a, b) => {
+                const sectionA = parseInt(a.data.section || '1', 10);
+                const sectionB = parseInt(b.data.section || '1', 10);
+                return sectionA - sectionB;
+              });
             
             if (this._isMounted) {
               this.setState({ sections });
@@ -128,13 +169,13 @@
           try {
             const newSlug = await createNewSection(this.props.entry);
             if (this._isMounted) {
-              window.location.replace(`/admin/#/collections/compositions/entries/${newSlug}`);
+              window.location.href = `/admin/#/collections/compositions/entries/${newSlug}`;
             }
           } catch (error) {
             console.error('Error creating section:', error);
             if (this._isMounted) {
               this.setState({
-                error: 'Failed to create new section. Please try again.',
+                error: error.message || 'Failed to create new section. Please try again.',
                 isCreatingSection: false
               });
             }
@@ -142,27 +183,27 @@
         },
 
         navigateToSection: function(slug) {
-          window.location.replace(`/admin/#/collections/compositions/entries/${slug}`);
+          window.location.href = `/admin/#/collections/compositions/entries/${slug}`;
         },
 
         render: function() {
           const { entry, widgetFor } = this.props;
           const { isCreatingSection, error, sections } = this.state;
-          const currentSection = entry.getIn(['data', 'section']);
+          const currentSection = parseInt(entry.getIn(['data', 'section']) || '1', 10);
 
           return h('div', { className: 'preview-content' },
             h('div', { className: 'nav-menu' },
               sections.map(section => 
                 h('div', {
                   key: section.slug,
-                  className: `nav-item ${section.data.section === currentSection ? 'active' : ''}`,
+                  className: `nav-item ${parseInt(section.data.section || '1', 10) === currentSection ? 'active' : ''}`,
                   onClick: () => this.navigateToSection(section.slug)
                 }, `Section ${section.data.section}`)
               )
             ),
             h('h1', {}, entry.getIn(['data', 'title'])),
             h('div', { className: 'content-preview' }, widgetFor('body')),
-            error && h('div', { style: { color: 'red', marginTop: '1rem' } }, error),
+            error && h('div', { className: 'error-message' }, error),
             h('button', {
               className: 'new-section-button',
               onClick: this.handleNewSection,
