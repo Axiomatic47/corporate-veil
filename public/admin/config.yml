@@ -1,6 +1,6 @@
 backend:
   name: github
-  repo: https://github.com/Axiomatic47/corporate-veil.git
+  repo: Axiomatic47/corporate-veil
   branch: main
   auth_endpoint: auth
   base_url: https://api.netlify.com
