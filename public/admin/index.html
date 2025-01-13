@@ -16,43 +16,22 @@
   <body>
     <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
     <script>
-      // Initialize CMS with config
-      CMS.init({
-        config: {
-          backend: {
-            name: 'github',
-            repo: 'Axiomatic47/corporate-veil',
-            branch: 'main',
-            base_url: 'https://api.netlify.com',
-            auth_endpoint: 'auth'
-          },
-          media_folder: 'public/uploads',
-          public_folder: '/uploads',
-          collections: [{
-            name: 'compositions',
-            label: 'Compositions',
-            folder: 'content/compositions',
-            create: true,
-            format: 'frontmatter',
-            extension: 'md',
-            identifier_field: 'title',
-            fields: [
-              { label: 'Title', name: 'title', widget: 'string', required: true },
-              { label: 'Description', name: 'description', widget: 'text', required: true },
-              {
-                label: 'Collection Type',
-                name: 'collection_type',
-                widget: 'select',
-                options: ['memorandum', 'corrective'],
-                required: true
-              },
-              { label: 'Section', name: 'section', widget: 'hidden', default: 1 },
-              { label: 'Content', name: 'body', widget: 'markdown', required: true }
-            ]
-          }]
+      // Let CMS use the config.yml file
+      CMS.init();
+
+      // Wait for CMS to be ready before registering components
+      const initializePreview = () => {
+        if (typeof CMS !== 'undefined') {
+          // Load preview component
+          const script = document.createElement('script');
+          script.src = 'components/PreviewComponent.js';
+          document.body.appendChild(script);
+        } else {
+          setTimeout(initializePreview, 1000);
         }
-      });
+      };
+
+      initializePreview();
     </script>
-    <script src="components/PreviewComponent.js"></script>
   </body>
 </html>
