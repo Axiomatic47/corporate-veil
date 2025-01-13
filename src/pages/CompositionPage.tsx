@@ -89,10 +89,16 @@ const CompositionPage = () => {
   };
 
   const handleLiteracyChange = (value: number[]) => {
-    setLiteracyLevel(value[0]);
+    // Map the slider value to the nearest valid reading level
+    const validLevels = [1, 3, 5];
+    const nearestLevel = validLevels.reduce((prev, curr) => {
+      return Math.abs(curr - value[0]) < Math.abs(prev - value[0]) ? curr : prev;
+    });
+    
+    setLiteracyLevel(nearestLevel);
     toast({
       title: "Reading Level Updated",
-      description: `Reading level set to ${value[0]}`,
+      description: `Reading level set to ${nearestLevel}`,
     });
   };
 
@@ -150,7 +156,7 @@ const CompositionPage = () => {
                   value={[literacyLevel]}
                   max={5}
                   min={1}
-                  step={1}
+                  step={2}
                   onValueChange={handleLiteracyChange}
                   className="w-48"
                 />
