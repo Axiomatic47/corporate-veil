@@ -34,43 +34,40 @@ const PreviewComponent = createClass({
       const currentSection = parseInt(data.get('section') || '0', 10);
       const newSection = currentSection + 1;
 
-      const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-      const safeTitle = (title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
-      const newSlug = timestamp + '-' + safeTitle + '-section-' + newSection;
+      // Create new entry data
+      const newEntryData = {
+        title: `${title} - Section ${newSection}`,
+        description: description,
+        collection_type: collectionType,
+        section: newSection,
+        body: ''
+      };
 
-      const newContent = [
-        '---',
-        'title: ' + title + ' - Section ' + newSection,
-        'description: ' + description,
-        'collection_type: ' + collectionType,
-        'section: ' + newSection,
-        '---'
-      ].join('\n');
-
-      fetch('/api/v1/compositions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          slug: newSlug,
-          path: 'content/compositions/' + newSlug + '.md',
-          raw: newContent
+      // Use CMS API to create new entry
+      CMS.getBackend()
+        .createEntry('compositions', {
+          data: newEntryData,
+          raw: `---\ntitle: ${newEntryData.title}\ndescription: ${newEntryData.description}\ncollection_type: ${newEntryData.collection_type}\nsection: ${newSection}\n---\n`
         })
-      })
-      .then(() => {
-        window.location.href = '/admin/#/collections/compositions/entries/' + newSlug;
-      })
-      .catch(error => {
-        console.error('Error creating section:', error);
-        alert('Failed to create new section. Please try again.');
-        if (this.mounted) {
-          this.setState({ isCreating: false });
-        }
-      });
+        .then(newEntry => {
+          if (this.mounted) {
+            this.setState({ isCreating: false });
+            // Navigate to the new entry using CMS navigation
+            CMS.getBackend()
+              .unpublishedEntry('compositions', newEntry.slug)
+              .then(entry => {
+                CMS.entry.set(entry);
+              });
+          }
+        })
+        .catch(error => {
+          console.error('Error creating new section:', error);
+          if (this.mounted) {
+            this.setState({ isCreating: false });
+          }
+        });
     } catch (error) {
       console.error('Error processing new section:', error);
-      alert('Failed to process new section. Please try again.');
       if (this.mounted) {
         this.setState({ isCreating: false });
       }
