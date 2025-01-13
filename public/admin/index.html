@@ -10,6 +10,10 @@
   </head>
   <body>
     <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+    <!-- Load config first -->
+    <script src="./config/cms-config.js"></script>
+    <!-- Load handlers -->
+    <script src="./components/EventHandlers.js"></script>
     <script>
       // Add debugging
       console.log('Loading admin interface...');
@@ -18,40 +22,23 @@
         try {
           console.log('Window loaded, initializing CMS...');
 
-          // Load config
-          const response = await fetch('./config/cms-config.js');
-          const configText = await response.text();
-          console.log('Loaded config:', configText);
-
-          // Create a module context
-          const configModule = { exports: {} };
-          const configFunc = new Function('module', 'exports', configText);
-          configFunc(configModule, configModule.exports);
-
-          // Get the config
-          const config = configModule.exports.default;
-          console.log('Parsed config:', config);
-
-          // Load EventHandlers
-          const handlersResponse = await fetch('./components/EventHandlers.js');
-          const handlersText = await handlersResponse.text();
-          console.log('Loaded handlers:', handlersText);
-
-          // Evaluate handlers
-          const handlersModule = { exports: {} };
-          const handlersFunc = new Function('module', 'exports', handlersText);
-          handlersFunc(handlersModule, handlersModule.exports);
-          const registerEventHandlers = handlersModule.exports.default;
+          if (!window.cmsConfig) {
+            throw new Error('CMS config not loaded properly');
+          }
 
           // Initialize CMS
-          console.log('Initializing CMS with config:', config);
+          console.log('Initializing CMS with config:', window.cmsConfig);
           window.CMS.init({
-            config: config.config
+            config: window.cmsConfig.config
           });
 
           // Register handlers
           console.log('Registering event handlers...');
-          registerEventHandlers();
+          if (window.registerEventHandlers) {
+            window.registerEventHandlers();
+          } else {
+            throw new Error('Event handlers not loaded properly');
+          }
 
         } catch (error) {
           console.error('Error initializing admin interface:', error);
