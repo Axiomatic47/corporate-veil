@@ -2,126 +2,175 @@
 const PreviewComponent = createClass({
   getInitialState() {
     return {
+      isCreating: false,
       sections: [],
       error: null,
-      loading: true,
       initialized: false
     };
   },
 
   componentDidMount() {
-    // Initialize when mounted
-    this.initialize();
+    this.mounted = true;
+    this.waitForCMS();
   },
 
-  async initialize() {
-    if (this.props.entry) {
-      try {
-        await this.loadSections();
-        this.setState({ initialized: true });
-      } catch (error) {
-        console.error('Initialization error:', error);
-        this.setState({ error: 'Failed to initialize preview' });
-      }
+  componentWillUnmount() {
+    this.mounted = false;
+  },
+
+  waitForCMS() {
+    if (!this.mounted) return;
+
+    if (CMS?.getBackend) {
+      this.setState({ initialized: true }, () => {
+        this.loadSections();
+      });
+    } else {
+      console.warn('CMS backend not initialized yet, retrying...');
+      setTimeout(() => this.waitForCMS(), 1000);
     }
   },
 
-  componentDidUpdate(prevProps) {
-    // Reload sections if entry changes
-    if (this.props.entry && this.props.entry !== prevProps.entry) {
-      this.loadSections();
-    }
-  },
-
-  async loadSections() {
+  loadSections() {
     const entry = this.props.entry;
     if (!entry) return;
 
-    try {
-      this.setState({ loading: true });
-      
-      const data = entry.get('data');
-      const title = data.get('title');
-      const collectionType = data.get('collection_type');
+    const data = entry.get('data');
+    if (!data) return;
 
-      // Use entries prop instead of fetch
-      const entries = this.props.entries.get('compositions');
-      if (!entries) {
-        throw new Error('No entries found');
-      }
+    const title = data.get('title');
+    const collectionType = data.get('collection_type');
 
-      const sections = entries
-        .filter(e => {
-          const entryData = e.get('data');
-          return entryData.get('title') === title && 
-                 entryData.get('collection_type') === collectionType;
-        })
-        .map(e => ({
-          section: e.get('data').get('section'),
-          slug: e.get('slug')
-        }))
-        .sort((a, b) => a.section - b.section)
-        .toJS();
-
-      this.setState({ 
-        sections,
-        error: null,
-        loading: false 
-      });
-    } catch (error) {
-      console.error('Error loading sections:', error);
-      this.setState({ 
-        error: 'Failed to load sections',
-        loading: false 
-      });
+    if (!this.state.initialized) {
+      console.warn('CMS not initialized yet');
+      return;
     }
+
+    CMS.getBackend()
+      .listEntries({
+        collection: 'compositions',
+        page: 1,
+        perPage: 100
+      })
+      .then(response => {
+        if (!this.mounted) return;
+
+        if (!response?.entries) {
+          console.warn('No entries found');
+          return;
+        }
+
+        const sections = response.entries
+          .filter(e => {
+            const entryData = e.data;
+            return entryData && 
+                   entryData.title === title && 
+                   entryData.collection_type === collectionType;
+          })
+          .map(e => ({
+            section: e.data.section,
+            slug: e.slug
+          }))
+          .sort((a, b) => a.section - b.section);
+
+        this.setState({ sections, error: null });
+      })
+      .catch(error => {
+        console.error('Error loading sections:', error);
+        this.setState({ error: 'Failed to load sections' });
+      });
   },
 
   handleNewSection() {
-    if (!this.state.initialized) return;
-    
+    if (this.state.isCreating || !this.state.initialized) return;
+
     const entry = this.props.entry;
     if (!entry) return;
 
+    this.setState({ isCreating: true });
+
     try {
       const data = entry.get('data');
+      const title = data.get('title');
+      const description = data.get('description');
+      const collectionType = data.get('collection_type');
       const currentSection = parseInt(data.get('section') || '0', 10);
       const newSection = currentSection + 1;
 
-      // Create new entry data
-      const newData = data.withMutations(map => {
-        map.set('section', newSection);
-      });
+      const newEntryData = {
+        title: title,
+        description: description,
+        collection_type: collectionType,
+        section: newSection,
+        body: '*This is the section content, which changes by selection of navigation bar links to the left*'
+      };
 
-      // Update the entry
-      this.props.entry = this.props.entry.set('data', newData);
-      
-      // Notify CMS
-      if (CMS.entry && typeof CMS.entry.set === 'function') {
-        CMS.entry.set(this.props.entry);
-      }
+      const frontmatter = `---
+title: ${newEntryData.title}
+description: ${newEntryData.description}
+collection_type: ${newEntryData.collection_type}
+section: ${newEntryData.section}
+---
+${newEntryData.body}`;
+
+      CMS.getBackend()
+        .createEntry('compositions', {
+          data: newEntryData,
+          raw: frontmatter
+        })
+        .then(newEntry => {
+          if (this.mounted) {
+            this.setState({ isCreating: false, error: null });
+            this.loadSections();
+            
+            CMS.getBackend()
+              .unpublishedEntry('compositions', newEntry.slug)
+              .then(entry => {
+                if (entry && CMS.entry) {
+                  CMS.entry.set(entry);
+                }
+              })
+              .catch(error => {
+                console.error('Error loading new entry:', error);
+                this.setState({ error: 'Failed to load new entry' });
+              });
+          }
+        })
+        .catch(error => {
+          console.error('Error creating new section:', error);
+          if (this.mounted) {
+            this.setState({ 
+              isCreating: false,
+              error: 'Failed to create new section'
+            });
+          }
+        });
     } catch (error) {
-      console.error('Error creating new section:', error);
-      this.setState({ error: 'Failed to create new section' });
+      console.error('Error in handleNewSection:', error);
+      this.setState({ 
+        isCreating: false,
+        error: 'Failed to create new section'
+      });
     }
   },
 
-  handleSectionClick(sectionSlug) {
-    if (!this.state.initialized) return;
-
-    try {
-      // Find the entry with matching slug
-      const targetEntry = this.props.entries
-        .get('compositions')
-        .find(e => e.get('slug') === sectionSlug);
-
-      if (targetEntry && CMS.entry && typeof CMS.entry.set === 'function') {
-        CMS.entry.set(targetEntry);
-      }
-    } catch (error) {
-      console.error('Error switching sections:', error);
-      this.setState({ error: 'Failed to switch sections' });
+  handleSectionClick(slug) {
+    if (!this.state.initialized) {
+      this.setState({ error: 'CMS not initialized yet' });
+      return;
     }
+
+    CMS.getBackend()
+      .unpublishedEntry('compositions', slug)
+      .then(entry => {
+        if (entry && CMS.entry) {
+          CMS.entry.set(entry);
+        }
+      })
+      .catch(error => {
+        console.error('Error switching sections:', error);
+        this.setState({ error: 'Failed to switch sections' });
+      });
   },
 
   render() {
@@ -131,39 +180,38 @@ const PreviewComponent = createClass({
     const data = entry.get('data');
     if (!data) return null;
 
-    const currentSection = parseInt(data.get('section') || '0', 10);
-    const collectionType = data.get('collection_type');
-    const collectionTitle = collectionType === 'memorandum' 
+    const collectionTitle = data.get('collection_type') === 'memorandum' 
       ? 'Memorandum and Manifestation' 
       : 'Corrective Measures';
 
-    return h('div', { className: 'preview-container' },
-      h('div', { className: 'sidebar' },
-        h('div', { className: 'collection-title' }, collectionTitle),
-        h('div', { className: 'composition-title' }, data.get('title')),
-        this.state.error && h('div', { className: 'error-message' }, this.state.error),
-        this.state.loading 
-          ? h('div', { className: 'loading-message' }, 'Loading sections...')
-          : h('div', null,
-              h('button', {
-                className: 'new-section-button',
-                onClick: () => this.handleNewSection(),
-                disabled: !this.state.initialized
-              }, 'New Section'),
-              h('div', { className: 'section-list' },
-                this.state.sections.map(section =>
-                  h('button', {
-                    key: section.section,
-                    className: `section-button ${section.section === currentSection ? 'active' : ''}`,
-                    onClick: () => this.handleSectionClick(section.slug)
-                  }, `Section ${section.section}`)
-                )
-              )
-            )
-      ),
-      h('div', { className: 'preview-content' },
-        h('h1', {}, data.get('title')),
-        h('div', {}, this.props.widgetFor('body'))
+    return h('div', { className: 'w-64 min-h-screen bg-[#1A1F2C] text-white p-6' },
+      h('div', { className: 'space-y-4' },
+        h('div', null,
+          h('h2', { className: 'text-lg font-medium mb-1' }, collectionTitle),
+          h('p', { className: 'text-sm text-gray-400' }, data.get('title'))
+        ),
+        this.state.error && h('div', { className: 'text-red-500 text-sm' }, this.state.error),
+        !this.state.initialized && h('div', { className: 'text-gray-400 text-sm' }, 'Initializing CMS...'),
+        h('button', {
+          className: `w-full px-3 py-2 rounded-md text-sm ${
+            this.state.isCreating ? 'bg-gray-700 text-gray-400' : 'bg-blue-600 hover:bg-blue-700'
+          }`,
+          onClick: this.handleNewSection,
+          disabled: this.state.isCreating || !this.state.initialized
+        }, this.state.isCreating ? 'Creating...' : 'New Section'),
+        h('nav', { className: 'space-y-2 mt-4' },
+          this.state.sections.map(section =>
+            h('button', {
+              key: section.section,
+              onClick: () => this.handleSectionClick(section.slug),
+              className: `w-full px-3 py-2 rounded-md text-sm ${
+                parseInt(data.get('section')) === section.section
+                  ? 'bg-gray-700 text-white'
+                  : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+              }`
+            }, `Section ${section.section}`)
+          )
+        )
       )
     );
   }
