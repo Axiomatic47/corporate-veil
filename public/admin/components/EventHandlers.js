@@ -1,93 +1,154 @@
 (() => {
-  const registerEventHandlers = () => {
+  const registerEventHandlers = async () => {
     let currentEntries = [];
     let currentEntry = null;
-    let sidebarInitialized = false;
 
     const createSidebar = () => {
       const sidebarContainer = document.createElement('div');
       sidebarContainer.className = 'custom-sidebar';
       sidebarContainer.innerHTML = `
-        <div class="mb-4">
-          <h2 class="text-lg font-medium">Sections</h2>
-          <button id="add-section" class="px-4 py-2 mt-4 bg-white/10 rounded">
-            Add Section
+        <div style="margin-bottom: 1rem;">
+          <h2 style="font-size: 1.25rem; margin-bottom: 1rem;">Sections</h2>
+          <button id="add-section" style="width: 100%; padding: 0.5rem; background: #2196f3; color: white; border: none; border-radius: 4px;">
+            Add New Section
           </button>
         </div>
-        <div id="sections-list" class="space-y-2"></div>
+        <div id="sections-list"></div>
       `;
 
-      const sectionsList = sidebarContainer.querySelector('#sections-list');
+      // Add section button handler
       const addSectionBtn = sidebarContainer.querySelector('#add-section');
-
-      // Sort entries by section number
-      currentEntries
-        .sort((a, b) => a.data.section - b.data.section)
-        .forEach((entry, index) => {
-          const section = document.createElement('div');
-          section.className = `sidebar-section ${
-            currentEntry?.data?.title === entry.data.title ? 'bg-white/20' : ''
-          }`;
-          section.draggable = true;
-          section.dataset.index = index;
-          section.innerHTML = `
-            <div class="flex items-center">
-              <span class="mr-2">≡</span>
-              <span>${entry.data.title}</span>
-            </div>
-          `;
-
-          section.addEventListener('dragstart', (e) => {
-            section.classList.add('dragging');
-          });
-
-          section.addEventListener('dragend', async () => {
-            section.classList.remove('dragging');
-            const newOrder = Array.from(sectionsList.children).map((child, idx) => ({
-              entry: currentEntries[parseInt(child.dataset.index)],
-              newSection: idx + 1
-            }));
-
-            try {
-              for (const {entry, newSection} of newOrder) {
-                if (entry.data.section !== newSection) {
-                  entry.data.section = newSection;
-                  await window.CMS.entry.persist(entry);
-                }
-              }
-            } catch (error) {
-              console.error('Error updating section order:', error);
+      addSectionBtn.addEventListener('click', () => {
+        window.CMS.store.getStore().dispatch({
+          type: 'DRAFT_CREATE_NEW_ENTRY',
+          payload: {
+            collectionName: 'compositions',
+            data: {
+              collection_type: 'memorandum',
+              section: currentEntries.length + 1,
+              title: 'New Section'
             }
-          });
-
-          section.addEventListener('click', () => {
-            window.CMS.entry.select(entry);
-          });
-
-          sectionsList.appendChild(section);
+          }
         });
-
-      sectionsList.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        const draggable = document.querySelector('.dragging');
-        if (!draggable) return;
-
-        const afterElement = getDragAfterElement(sectionsList, e.clientY);
-        if (afterElement) {
-          sectionsList.insertBefore(draggable, afterElement);
-        } else {
-          sectionsList.appendChild(draggable);
-        }
       });
 
       return sidebarContainer;
     };
 
+    const updateSections = async () => {
+      try {
+        // Get entries from the store
+        const collections = window.CMS.store.getStore().getState().collections;
+        const compositions = collections.get('compositions');
+        if (!compositions) return;
+
+        currentEntries = compositions.get('entries').toJS();
+
+        // Sort entries by section number
+        currentEntries.sort((a, b) => a.data.section - b.data.section);
+
+        // Update sections list
+        const sectionsList = document.querySelector('#sections-list');
+        if (!sectionsList) return;
+
+        sectionsList.innerHTML = '';
+        currentEntries.forEach((entry, index) => {
+          const section = document.createElement('div');
+          section.className = 'sidebar-section';
+          section.draggable = true;
+          section.dataset.index = index;
+          section.innerHTML = `
+            <div style="display: flex; align-items: center;">
+              <span style="margin-right: 0.5rem;">≡</span>
+              <span>${entry.data.title || 'Untitled'}</span>
+            </div>
+          `;
+
+          // Click handler
+          section.addEventListener('click', () => {
+            window.CMS.store.getStore().dispatch({
+              type: 'DRAFT_CREATE_FROM_ENTRY',
+              payload: {
+                collectionName: 'compositions',
+                entry
+              }
+            });
+          });
+
+          // Drag handlers
+          section.addEventListener('dragstart', () => section.classList.add('dragging'));
+          section.addEventListener('dragend', () => {
+            section.classList.remove('dragging');
+            reorderSections();
+          });
+
+          sectionsList.appendChild(section);
+        });
+      } catch (error) {
+        console.error('Error updating sections:', error);
+      }
+    };
+
+    const reorderSections = async () => {
+      const sectionsList = document.querySelector('#sections-list');
+      if (!sectionsList) return;
+
+      const sections = Array.from(sectionsList.children);
+      const newOrder = sections.map((section, index) => ({
+        entry: currentEntries[parseInt(section.dataset.index)],
+        newSection: index + 1
+      }));
+
+      try {
+        for (const {entry, newSection} of newOrder) {
+          if (entry && entry.data.section !== newSection) {
+            const newData = { ...entry.data, section: newSection };
+            window.CMS.store.getStore().dispatch({
+              type: 'ENTRY_PERSIST',
+              payload: {
+                collectionName: 'compositions',
+                entryDraft: { data: newData },
+                options: { raw: true }
+              }
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Error reordering sections:', error);
+      }
+    };
+
+    // Initialize sidebar
+    const initializeSidebar = () => {
+      const sidebar = createSidebar();
+      document.body.appendChild(sidebar);
+
+      // Add dragover handler to sections list
+      const sectionsList = sidebar.querySelector('#sections-list');
+      sectionsList.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        const dragging = document.querySelector('.dragging');
+        if (!dragging) return;
+
+        const afterElement = getDragAfterElement(sectionsList, e.clientY);
+        if (afterElement) {
+          sectionsList.insertBefore(dragging, afterElement);
+        } else {
+          sectionsList.appendChild(dragging);
+        }
+      });
+
+      // Initial sections update
+      updateSections();
+    };
+
     const getDragAfterElement = (container, y) => {
       const draggableElements = [...container.querySelectorAll('.sidebar-section:not(.dragging)')];
+
       return draggableElements.reduce((closest, child) => {
         const box = child.getBoundingClientRect();
         const offset = y - box.top - box.height / 2;
+
         if (offset < 0 && offset > closest.offset) {
           return { offset, element: child };
         } else {
@@ -96,65 +157,12 @@
       }, { offset: Number.NEGATIVE_INFINITY }).element;
     };
 
-    const initializeSidebar = async () => {
-      try {
-        console.log('Initializing sidebar...');
-
-        // Get entries
-        currentEntries = await window.CMS.getEntries({ collection_name: 'compositions' });
-
-        // Remove existing sidebar if present
-        const existingSidebar = document.querySelector('.custom-sidebar');
-        if (existingSidebar) {
-          existingSidebar.remove();
-        }
-
-        // Create and append new sidebar
-        const sidebar = createSidebar();
-        document.body.appendChild(sidebar);
-
-        // Adjust main content area
-        const mainContent = document.querySelector('.css-1gj57a0-AppMainContainer');
-        if (mainContent) {
-          mainContent.style.marginLeft = '16rem';
-          mainContent.style.width = 'calc(100% - 16rem)';
-        }
-
-        sidebarInitialized = true;
-      } catch (error) {
-        console.error('Error initializing sidebar:', error);
-      }
-    };
-
-    // Register event handlers
-    window.CMS.registerEventListener({
-      name: 'prePublish',
-      handler: function() {
-        console.log('Pre-publish triggered');
-        return true;
-      }
+    // Register event listeners
+    window.CMS.store.getStore().subscribe(() => {
+      updateSections();
     });
 
-    window.CMS.registerEventListener({
-      name: 'postPublish',
-      handler: function() {
-        console.log('Post-publish triggered');
-        initializeSidebar();
-      }
-    });
-
-    window.CMS.registerEventListener({
-      name: 'onLoad',
-      handler: function(entry) {
-        console.log('Entry loaded:', entry);
-        currentEntry = entry;
-        if (!sidebarInitialized) {
-          initializeSidebar();
-        }
-      }
-    });
-
-    // Initialize on load
+    // Initialize
     setTimeout(initializeSidebar, 1000);
   };
 
