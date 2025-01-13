@@ -1,15 +1,14 @@
 backend:
-  name: git-gateway
+  name: github
+  repo: axiomaticjk/corporate-veil-main
   branch: main
-  proxy_url: http://localhost:8082/api/v1
 
 local_backend: true
+local_backend_url: http://localhost:8081/api/v1
+
 media_folder: "public/uploads"
 public_folder: "/uploads"
 publish_mode: "simple"
-
-editor:
-  preview: false
 
 collections:
   - name: "compositions"
@@ -19,6 +18,9 @@ collections:
     identifier_field: "title"
     format: "frontmatter"
     sort: "section"
+    preview_path: compositions/{{slug}}
+    editor:
+      preview: true
     fields:
       - {label: "Collection Type", name: "collection_type", widget: "select", options: ["memorandum", "corrective"]}
       - {label: "Section", name: "section", widget: "number", value_type: "int", default: 1}

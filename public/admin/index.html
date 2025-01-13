@@ -4,26 +4,164 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Content Manager</title>
+    <script src="https://unpkg.com/react@17/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"></script>
     <style>
-      /* Hide preview pane */
-      .Pane2 {
-        display: none !important;
+      .custom-editor-layout {
+        display: flex;
+        width: 100%;
       }
 
-      /* Hide section number field */
-      [id*="section-field"] {
-        display: none !important;
+      .composition-sidebar {
+        position: fixed;
+        left: 0;
+        top: 48px;
+        bottom: 0;
+        width: 250px;
+        background: #1A1F2C;
+        border-right: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 20px;
+        color: white;
+      }
+
+      .composition-sidebar h2 {
+        margin: 0 0 16px 0;
+        color: white;
+        font-size: 18px;
+      }
+
+      .add-section-btn {
+        width: 100%;
+        padding: 8px;
+        background: #2196f3;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        margin-bottom: 16px;
+        cursor: pointer;
+      }
+
+      .section-item {
+        padding: 12px;
+        margin-bottom: 8px;
+        background: #252A37;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+      }
+
+      .section-item:hover {
+        background: #2F3545;
+      }
+
+      .section-item.active {
+        background: #3A4055;
+        border-color: #2196f3;
+      }
+
+      .main-content {
+        margin-left: 250px;
+        flex-grow: 1;
+      }
+
+      /* Adjust CMS main container */
+      .css-1gj57a0-AppMainContainer {
+        margin-left: 250px !important;
+        width: calc(100% - 250px) !important;
       }
     </style>
   </head>
   <body>
     <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
     <script>
-      window.addEventListener('load', function() {
-        // Initialize CMS
-        CMS.init();
+      // Create editor component that includes the sidebar
+      const CompositionEditor = createClass({
+        getInitialState() {
+          return {
+            sections: []
+          };
+        },
+
+        componentDidMount() {
+          this.updateSections();
+          window.CMS.store.subscribe(this.updateSections);
+        },
+
+        updateSections() {
+          try {
+            const collections = window.CMS.store.getState().collections;
+            const entries = collections.get('compositions')?.entries?.toJS() || [];
+            const sortedEntries = entries.sort((a, b) =>
+              (a.data.section || 0) - (b.data.section || 0)
+            );
+            this.setState({ sections: sortedEntries });
+          } catch (error) {
+            console.error('Error updating sections:', error);
+          }
+        },
+
+        handleAddSection() {
+          const nextSection = this.state.sections.length > 0 ?
+            Math.max(...this.state.sections.map(e => e.data.section || 0)) + 1 : 1;
+
+          window.CMS.store.dispatch({
+            type: 'DRAFT_CREATE_NEW_ENTRY',
+            payload: {
+              collectionName: 'compositions',
+              data: {
+                collection_type: 'memorandum',
+                section: nextSection,
+                title: `New Section ${nextSection}`,
+                description: '',
+                content_level_1: '',
+                content_level_3: '',
+                content_level_5: ''
+              }
+            }
+          });
+        },
+
+        handleSectionClick(entry) {
+          window.location.hash = `/collections/compositions/entries/${entry.slug}`;
+        },
+
+        render() {
+          const { entry, widgetFor } = this.props;
+          const currentSlug = entry.get('slug');
+
+          return h('div', { className: 'custom-editor-layout' },
+            h('div', { className: 'composition-sidebar' },
+              h('h2', null, 'Sections'),
+              h('button', {
+                className: 'add-section-btn',
+                onClick: this.handleAddSection
+              }, 'Add Section'),
+              h('div', null,
+                this.state.sections.map(section =>
+                  h('div', {
+                    key: section.slug,
+                    className: `section-item ${section.slug === currentSlug ? 'active' : ''}`,
+                    onClick: () => this.handleSectionClick(section)
+                  }, section.data.title || 'Untitled Section')
+                )
+              )
+            ),
+            h('div', { className: 'main-content' },
+              widgetFor('collection_type'),
+              widgetFor('section'),
+              widgetFor('title'),
+              widgetFor('description'),
+              widgetFor('content_level_1'),
+              widgetFor('content_level_3'),
+              widgetFor('content_level_5')
+            )
+          );
+        }
       });
+
+      CMS.registerPreviewTemplate('compositions', CompositionEditor);
+      CMS.init();
     </script>
-    <script src="./components/CustomSidebar.js"></script>
   </body>
 </html>
