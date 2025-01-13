@@ -3,27 +3,31 @@ const PreviewComponent = createClass({
     return {
       isCreating: false,
       sections: [],
-      error: null
+      error: null,
+      initialized: false
     };
   },
 
   componentDidMount() {
     this.mounted = true;
-    if (CMS && CMS.getBackend) {
-      this.loadSections();
-    } else {
-      console.warn('CMS backend not initialized yet');
-      // Retry after a short delay to allow CMS to initialize
-      setTimeout(() => {
-        if (this.mounted && CMS && CMS.getBackend) {
-          this.loadSections();
-        }
-      }, 1000);
-    }
+    this.waitForCMS();
   },
 
   componentWillUnmount() {
     this.mounted = false;
+  },
+
+  waitForCMS() {
+    if (!this.mounted) return;
+
+    if (CMS?.getBackend) {
+      this.setState({ initialized: true }, () => {
+        this.loadSections();
+      });
+    } else {
+      console.warn('CMS backend not initialized yet, retrying...');
+      setTimeout(() => this.waitForCMS(), 1000);
+    }
   },
 
   loadSections() {
@@ -36,24 +40,26 @@ const PreviewComponent = createClass({
     const title = data.get('title');
     const collectionType = data.get('collection_type');
 
-    // Ensure CMS and backend are available
-    if (!CMS || !CMS.getBackend) {
-      console.error('CMS backend not available');
+    if (!this.state.initialized) {
+      console.warn('CMS not initialized yet');
       return;
     }
 
-    // Get all entries for the same composition
     CMS.getBackend()
-      .entries('compositions')
-      .then(entries => {
+      .listEntries({
+        collection: 'compositions',
+        page: 1,
+        perPage: 100
+      })
+      .then(response => {
         if (!this.mounted) return;
 
-        if (!entries) {
+        if (!response?.entries) {
           console.warn('No entries found');
           return;
         }
 
-        const sections = entries
+        const sections = response.entries
           .filter(e => {
             const entryData = e.data;
             return entryData && 
@@ -75,7 +81,7 @@ const PreviewComponent = createClass({
   },
 
   handleNewSection() {
-    if (this.state.isCreating) return;
+    if (this.state.isCreating || !this.state.initialized) return;
 
     const entry = this.props.entry;
     if (!entry) return;
@@ -95,7 +101,6 @@ const PreviewComponent = createClass({
       const currentSection = parseInt(data.get('section') || '0', 10);
       const newSection = currentSection + 1;
 
-      // Create new entry data with all fields from the current section
       const newEntryData = {
         title: title,
         description: description,
@@ -104,7 +109,6 @@ const PreviewComponent = createClass({
         body: '*This is the section content, which changes by selection of navigation bar links to the left*'
       };
 
-      // Create the frontmatter string
       const frontmatter = `---
 title: ${newEntryData.title}
 description: ${newEntryData.description}
@@ -113,17 +117,6 @@ section: ${newSection}
 ---
 ${newEntryData.body}`;
 
-      // Ensure CMS and backend are available
-      if (!CMS || !CMS.getBackend) {
-        console.error('CMS backend not available');
-        this.setState({ 
-          isCreating: false,
-          error: 'CMS backend not available'
-        });
-        return;
-      }
-
-      // Create new entry
       CMS.getBackend()
         .createEntry('compositions', {
           data: newEntryData,
@@ -133,7 +126,7 @@ ${newEntryData.body}`;
           if (this.mounted) {
             this.setState({ isCreating: false, error: null });
             this.loadSections();
-            // Navigate to the new entry
+            
             CMS.getBackend()
               .unpublishedEntry('compositions', newEntry.slug)
               .then(entry => {
@@ -166,9 +159,8 @@ ${newEntryData.body}`;
   },
 
   handleSectionClick(slug) {
-    if (!CMS || !CMS.getBackend) {
-      console.error('CMS backend not available');
-      this.setState({ error: 'CMS backend not available' });
+    if (!this.state.initialized) {
+      this.setState({ error: 'CMS not initialized yet' });
       return;
     }
 
@@ -199,10 +191,11 @@ ${newEntryData.body}`;
         h('div', { className: 'collection-title' }, collectionTitle),
         h('div', { className: 'composition-title' }, data.get('title')),
         this.state.error && h('div', { className: 'error-message' }, this.state.error),
+        !this.state.initialized && h('div', { className: 'loading-message' }, 'Initializing CMS...'),
         h('button', {
           className: 'new-section-button',
           onClick: this.handleNewSection,
-          disabled: this.state.isCreating
+          disabled: this.state.isCreating || !this.state.initialized
         }, this.state.isCreating ? 'Creating...' : 'New Section'),
         h('div', { className: 'section-list' },
           this.state.sections.map(section =>
@@ -222,5 +215,4 @@ ${newEntryData.body}`;
   }
 });
 
-// Register the preview component globally
 window.PreviewComponent = PreviewComponent;
