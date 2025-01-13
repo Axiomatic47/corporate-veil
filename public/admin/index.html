@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Content Manager</title>
-    <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
     <style>
       /* Override dark theme */
       .css-1gj57a0-AppMainContainer input,
@@ -28,6 +28,7 @@
     </style>
   </head>
   <body>
+    <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
     <!-- Load config first -->
     <script src="./config/cms-config.js"></script>
     <!-- Load handlers -->
@@ -35,6 +36,7 @@
     <script>
       window.addEventListener('load', () => {
         console.log('Initializing CMS...');
+
         // Initialize CMS
         window.CMS.init({
           config: window.cmsConfig.config

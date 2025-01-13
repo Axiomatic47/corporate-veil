@@ -1,19 +1,14 @@
 (() => {
   const cmsConfig = {
     config: {
-      load_config_file: false,
+      local_backend: true,  // Enable local backend
       backend: {
-        name: 'github',
-        repo: 'Axiomatic47/corporate-veil',
+        name: 'git-gateway',
         branch: 'main',
-        base_url: 'https://api.netlify.com'
-      },
-      local_backend: {
-        url: 'http://localhost:8081/api/v1'
+        local_backend: true
       },
       media_folder: 'public/uploads',
       public_folder: '/uploads',
-      publish_mode: 'simple',
       collections: [
         {
           name: 'compositions',
