@@ -6,7 +6,9 @@ const cmsConfig = {
       branch: 'main',
       proxy_url: 'http://localhost:8081/api/v1'
     },
-    local_backend: true,
+    local_backend: {
+      url: 'http://localhost:8081/api/v1'
+    },
     media_folder: 'public/uploads',
     public_folder: '/uploads',
     publish_mode: 'simple',
