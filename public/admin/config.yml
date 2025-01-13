@@ -1,6 +1,9 @@
 backend:
-  name: git-gateway
+  name: github
+  repo: your-username/your-repo-name # You'll need to replace this with your actual GitHub repository
   branch: main
+  auth_endpoint: auth
+  base_url: https://api.netlify.com
 
 media_folder: "public/uploads"
 public_folder: "/uploads"

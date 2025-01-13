@@ -4,7 +4,6 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Content Manager</title>
-    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
     <link href="styles/main.css" rel="stylesheet" />
   </head>
   <body>
@@ -18,19 +17,6 @@
       
       // Register event handlers
       registerEventHandlers();
-      
-      if (window.netlifyIdentity) {
-        window.netlifyIdentity.on("init", user => {
-          if (!user) {
-            window.netlifyIdentity.on("login", () => {
-              const adminPath = window.location.hostname === 'localhost' 
-                ? 'http://localhost:8080/admin/'
-                : '/admin/';
-              window.location.href = adminPath;
-            });
-          }
-        });
-      }
     </script>
   </body>
 </html>
