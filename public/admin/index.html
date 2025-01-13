@@ -4,94 +4,26 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Content Manager</title>
-    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
     <style>
-      /* Hide section number field */
-      [id*="section-field"] {
+      /* Hide preview pane */
+      .Pane2 {
         display: none !important;
       }
 
-      /* Custom sidebar styles */
-      .custom-sidebar {
-        position: fixed;
-        left: 0;
-        top: 48px;
-        bottom: 0;
-        width: 250px;
-        padding: 20px;
-        background: #f7f7f7;
-        border-right: 1px solid #ddd;
-        overflow-y: auto;
-      }
-
-      .sidebar-header {
-        margin-bottom: 20px;
-      }
-
-      .sidebar-header h2 {
-        margin: 0 0 10px 0;
-        font-size: 18px;
-      }
-
-      .add-section {
-        width: 100%;
-        padding: 8px;
-        background: #2196f3;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-      }
-
-      .add-section:hover {
-        background: #1976d2;
-      }
-
-      .section-item {
-        padding: 10px;
-        margin-bottom: 8px;
-        background: white;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-      }
-
-      .section-item:hover {
-        background: #f5f5f5;
-      }
-
-      .section-item.dragging {
-        opacity: 0.5;
-      }
-
-      .drag-handle {
-        margin-right: 10px;
-        color: #999;
-        cursor: move;
-      }
-
-      /* Main content adjustments */
-      .css-1gj57a0-AppMainContainer {
-        margin-left: 250px !important;
-        width: calc(100% - 250px) !important;
-      }
-
-      /* Hide preview pane */
-      .Pane2 {
+      /* Hide section number field */
+      [id*="section-field"] {
         display: none !important;
       }
     </style>
   </head>
   <body>
     <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
-    <script src="./components/CustomSidebar.js"></script>
     <script>
       window.addEventListener('load', function() {
         // Initialize CMS
         CMS.init();
       });
     </script>
+    <script src="./components/CustomSidebar.js"></script>
   </body>
 </html>

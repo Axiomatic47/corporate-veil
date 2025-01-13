@@ -1,6 +1,7 @@
 backend:
   name: git-gateway
   branch: main
+  proxy_url: http://localhost:8082/api/v1
 
 local_backend: true
 media_folder: "public/uploads"
@@ -17,25 +18,12 @@ collections:
     create: true
     identifier_field: "title"
     format: "frontmatter"
-    sortable_fields: ['section']
-    view_filters:
-      - label: "Memorandum"
-        field: collection_type
-        pattern: "memorandum"
-      - label: "Corrective"
-        field: collection_type
-        pattern: "corrective"
-    editor:
-      preview: false
+    sort: "section"
     fields:
       - {label: "Collection Type", name: "collection_type", widget: "select", options: ["memorandum", "corrective"]}
-      - {label: "Section", name: "section", widget: "hidden", default: 1}
+      - {label: "Section", name: "section", widget: "number", value_type: "int", default: 1}
       - {label: "Title", name: "title", widget: "string"}
       - {label: "Description", name: "description", widget: "text"}
       - {label: "Content (Level 1)", name: "content_level_1", widget: "markdown"}
       - {label: "Content (Level 3)", name: "content_level_3", widget: "markdown"}
       - {label: "Content (Level 5)", name: "content_level_5", widget: "markdown"}
-
-    widgets:
-      - name: custom-sidebar
-        collection: compositions
