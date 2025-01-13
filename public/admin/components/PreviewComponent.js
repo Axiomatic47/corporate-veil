@@ -1,16 +1,53 @@
 const PreviewComponent = createClass({
   getInitialState() {
     return {
-      isCreating: false
+      isCreating: false,
+      sections: []
     };
   },
 
   componentDidMount() {
     this.mounted = true;
+    this.loadSections();
   },
 
   componentWillUnmount() {
     this.mounted = false;
+  },
+
+  loadSections() {
+    const entry = this.props.entry;
+    if (!entry) return;
+
+    const data = entry.get('data');
+    if (!data) return;
+
+    const title = data.get('title');
+    const collectionType = data.get('collection_type');
+
+    // Get all entries for the same composition
+    CMS.getBackend()
+      .entries('compositions')
+      .then(entries => {
+        if (!this.mounted) return;
+
+        const sections = entries
+          .filter(e => {
+            const entryData = e.data;
+            return entryData.title === title && 
+                   entryData.collection_type === collectionType;
+          })
+          .map(e => ({
+            section: e.data.section,
+            slug: e.slug
+          }))
+          .sort((a, b) => a.section - b.section);
+
+        this.setState({ sections });
+      })
+      .catch(error => {
+        console.error('Error loading sections:', error);
+      });
   },
 
   handleNewSection() {
@@ -32,28 +69,27 @@ const PreviewComponent = createClass({
       const description = data.get('description') || '';
       const collectionType = data.get('collection_type') || '';
       const currentSection = parseInt(data.get('section') || '0', 10);
-      const body = data.get('body') || '';
       const newSection = currentSection + 1;
 
       // Create new entry data with all fields from the current section
       const newEntryData = {
-        title: title, // Keep the same title for continuity
-        description: description, // Keep the same description for continuity
+        title: title,
+        description: description,
         collection_type: collectionType,
         section: newSection,
-        body: '' // Start with empty content for the new section
+        body: '*This is the section content, which changes by selection of navigation bar links to the left*'
       };
 
-      // Create the frontmatter string with all fields
+      // Create the frontmatter string
       const frontmatter = `---
 title: ${newEntryData.title}
 description: ${newEntryData.description}
 collection_type: ${newEntryData.collection_type}
 section: ${newSection}
 ---
-`;
+${newEntryData.body}`;
 
-      // Use CMS API to create new entry
+      // Create new entry
       CMS.getBackend()
         .createEntry('compositions', {
           data: newEntryData,
@@ -62,7 +98,8 @@ section: ${newSection}
         .then(newEntry => {
           if (this.mounted) {
             this.setState({ isCreating: false });
-            // Navigate to the new entry using CMS navigation
+            this.loadSections();
+            // Navigate to the new entry
             CMS.getBackend()
               .unpublishedEntry('compositions', newEntry.slug)
               .then(entry => {
@@ -84,6 +121,17 @@ section: ${newSection}
     }
   },
 
+  handleSectionClick(slug) {
+    CMS.getBackend()
+      .unpublishedEntry('compositions', slug)
+      .then(entry => {
+        CMS.entry.set(entry);
+      })
+      .catch(error => {
+        console.error('Error loading section:', error);
+      });
+  },
+
   render() {
     const entry = this.props.entry;
     if (!entry) return null;
@@ -91,7 +139,7 @@ section: ${newSection}
     const data = entry.get('data');
     if (!data) return null;
 
-    const currentSection = data.get('section');
+    const currentSection = parseInt(data.get('section') || '0', 10);
     const collectionType = data.get('collection_type');
     const collectionTitle = collectionType === 'memorandum' ? 'Memorandum and Manifestation' : 'Corrective Measures';
 
@@ -103,7 +151,16 @@ section: ${newSection}
           className: 'new-section-button',
           onClick: this.handleNewSection,
           disabled: this.state.isCreating
-        }, this.state.isCreating ? 'Creating...' : 'New Section')
+        }, this.state.isCreating ? 'Creating...' : 'New Section'),
+        h('div', { className: 'section-list' },
+          this.state.sections.map(section =>
+            h('button', {
+              key: section.section,
+              className: `section-button ${section.section === currentSection ? 'active' : ''}`,
+              onClick: () => this.handleSectionClick(section.slug)
+            }, `Section ${section.section}`)
+          )
+        )
       ),
       h('div', { className: 'preview-content' },
         h('h1', {}, data.get('title')),
