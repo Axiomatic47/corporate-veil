@@ -11,9 +11,9 @@ const registerEventHandlers = () => {
 
         if (!data) return entry;
 
-        // Validate section number
+        // Validate section number is positive
         if (data.section) {
-          data.section = Math.min(Math.max(1, data.section), 4);
+          data.section = Math.max(1, data.section);
         }
 
         // Validate reading level
