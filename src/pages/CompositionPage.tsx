@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 import { Slider } from "@/components/ui/slider";
 import { Header } from "@/components/Header";
@@ -34,12 +34,29 @@ const CompositionPage = () => {
     <div className="min-h-screen bg-[#0F1218]">
       <Header />
       <div className="flex">
-        <Sidebar
-          sections={existingSections}
-          collectionName={getCollectionName()}
-          compositionId={compositionId}
-          currentSectionId={sectionId}
-        />
+        <div className="w-64 min-h-[calc(100vh-4rem)] bg-sidebar text-sidebar-foreground p-6">
+          <div className="space-y-4">
+            <div>
+              <h2 className="text-lg font-medium text-sidebar-foreground mb-1">{getCollectionName()}</h2>
+              <p className="text-sm text-sidebar-foreground/60">{currentComposition?.title || "Untitled"}</p>
+            </div>
+            <nav className="space-y-2">
+              {existingSections.map((section) => (
+                <a
+                  key={section.id}
+                  href={`/composition/${compositionId}/section/${section.id}`}
+                  className={`block px-3 py-2 rounded-md text-sm ${
+                    section.id === parseInt(sectionId)
+                      ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                      : "text-sidebar-foreground/60 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
+                  }`}
+                >
+                  {section.title}
+                </a>
+              ))}
+            </nav>
+          </div>
+        </div>
         <div className="flex-1 p-8 text-white">
           <div className="mb-8">
             <h2 className="text-2xl font-serif text-gray-300 mb-2">{getCollectionName()}</h2>
