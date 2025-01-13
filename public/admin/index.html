@@ -8,26 +8,27 @@
     <link rel="stylesheet" href="styles/preview.css">
   </head>
   <body>
+    <!-- Add React and ReactDOM explicitly -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+
+    <!-- Load CMS -->
     <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+
+    <!-- Load PreviewComponent -->
+    <script src="components/PreviewComponent.js"></script>
+
     <script>
-      // Initialize CMS first
-      CMS.init();
+      // Wait for all dependencies to load
+      window.addEventListener('load', function() {
+        // Initialize CMS
+        CMS.init();
 
-      // Wait for CMS to be fully initialized before registering components
-      const initializePreview = () => {
-        if (typeof CMS !== 'undefined' && CMS.getBackend) {
-          // Register preview template after CMS initialization
+        // Register preview template only after CMS is ready
+        if (window.PreviewComponent) {
           CMS.registerPreviewTemplate('compositions', window.PreviewComponent);
-        } else {
-          setTimeout(initializePreview, 1000);
         }
-      };
-
-      // Load preview component script
-      const script = document.createElement('script');
-      script.src = 'components/PreviewComponent.js';
-      script.onload = initializePreview;
-      document.body.appendChild(script);
+      });
     </script>
   </body>
 </html>

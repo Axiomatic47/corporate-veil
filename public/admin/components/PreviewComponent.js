@@ -1,102 +1,112 @@
-// Import createClass if not using global React
-// const { createClass } = window.React || require('react');
+'use strict';
 
 const PreviewComponent = createClass({
+  // Initialize with null timeouts to handle cleanup
+  timeouts: [],
+
   getInitialState() {
     return {
       isCreating: false,
       sections: [],
       error: null,
-      initialized: false,
-      cmsReady: false
+      initialized: false
     };
   },
 
   componentDidMount() {
-    this.mounted = true;
-    this.waitForCMS();
+    this._isMounted = true;
+    // Add timeout to collection for cleanup
+    const timeout = setTimeout(() => this.initializePreview(), 1000);
+    this.timeouts.push(timeout);
   },
 
   componentWillUnmount() {
-    this.mounted = false;
+    this._isMounted = false;
+    // Clear all timeouts
+    this.timeouts.forEach(timeout => clearTimeout(timeout));
+    this.timeouts = [];
   },
 
-  waitForCMS() {
-    if (!this.mounted) return;
+  initializePreview() {
+    if (!this._isMounted) return;
 
-    if (typeof CMS !== 'undefined' && CMS?.getBackend) {
-      this.setState({ initialized: true, cmsReady: true }, () => {
+    if (CMS?.getBackend && typeof CMS.getBackend === 'function') {
+      this.setState({ initialized: true }, () => {
         this.loadSections();
       });
     } else {
-      console.warn('CMS backend not initialized yet, retrying...');
-      setTimeout(() => this.waitForCMS(), 1000);
+      // Add timeout to collection for cleanup
+      const timeout = setTimeout(() => this.initializePreview(), 1000);
+      this.timeouts.push(timeout);
     }
   },
 
-  loadSections() {
+  async loadSections() {
+    if (!this._isMounted || !this.state.initialized) return;
+
     const entry = this.props.entry;
-    if (!entry) return;
+    if (!entry?.get) return;
 
     const data = entry.get('data');
-    if (!data) return;
+    if (!data?.get) return;
 
-    const title = data.get('title');
-    const collectionType = data.get('collection_type');
+    try {
+      const title = data.get('title');
+      const collectionType = data.get('collection_type');
 
-    if (!this.state.initialized || !this.state.cmsReady) {
-      console.warn('CMS not initialized yet');
-      return;
-    }
+      // Ensure backend is available
+      const backend = CMS.getBackend();
+      if (!backend?.listEntries) {
+        throw new Error('CMS backend not properly initialized');
+      }
 
-    CMS.getBackend()
-      .listEntries({
+      const response = await backend.listEntries({
         collection: 'compositions',
         page: 1,
         perPage: 100
-      })
-      .then(response => {
-        if (!this.mounted) return;
-
-        if (!response?.entries) {
-          console.warn('No entries found');
-          return;
-        }
-
-        const sections = response.entries
-          .filter(e => {
-            const entryData = e.data;
-            return entryData &&
-                   entryData.title === title &&
-                   entryData.collection_type === collectionType;
-          })
-          .map(e => ({
-            section: e.data.section,
-            slug: e.slug
-          }))
-          .sort((a, b) => a.section - b.section);
-
-        this.setState({ sections, error: null });
-      })
-      .catch(error => {
-        console.error('Error loading sections:', error);
-        this.setState({ error: 'Failed to load sections' });
       });
+
+      if (!this._isMounted) return;
+
+      if (!response?.entries) {
+        console.warn('No entries found');
+        return;
+      }
+
+      const sections = response.entries
+        .filter(e => {
+          const entryData = e.data;
+          return entryData &&
+                 entryData.title === title &&
+                 entryData.collection_type === collectionType;
+        })
+        .map(e => ({
+          section: e.data.section,
+          slug: e.slug
+        }))
+        .sort((a, b) => a.section - b.section);
+
+      if (this._isMounted) {
+        this.setState({ sections, error: null });
+      }
+    } catch (error) {
+      console.error('Error loading sections:', error);
+      if (this._isMounted) {
+        this.setState({ error: 'Failed to load sections' });
+      }
+    }
   },
 
-  handleNewSection() {
+  async handleNewSection() {
     if (this.state.isCreating || !this.state.initialized) return;
 
     const entry = this.props.entry;
-    if (!entry) return;
-
-    this.setState({ isCreating: true });
+    if (!entry?.get) return;
 
     const data = entry.get('data');
-    if (!data) {
-      this.setState({ isCreating: false });
-      return;
-    }
+    if (!data?.get) return;
+
+    this.setState({ isCreating: true });
 
     try {
       const title = data.get('title') || '';
@@ -106,8 +116,8 @@ const PreviewComponent = createClass({
       const newSection = currentSection + 1;
 
       const newEntryData = {
-        title: title,
-        description: description,
+        title,
+        description,
         collection_type: collectionType,
         section: newSection,
         body: '*This is the section content, which changes by selection of navigation bar links to the left*'
@@ -121,70 +131,61 @@ section: ${newSection}
 ---
 ${newEntryData.body}`;
 
-      CMS.getBackend()
-        .createEntry('compositions', {
-          data: newEntryData,
-          raw: frontmatter
-        })
-        .then(newEntry => {
-          if (this.mounted) {
-            this.setState({ isCreating: false, error: null });
-            this.loadSections();
+      const backend = CMS.getBackend();
+      const newEntry = await backend.createEntry('compositions', {
+        data: newEntryData,
+        raw: frontmatter
+      });
 
-            CMS.getBackend()
-              .unpublishedEntry('compositions', newEntry.slug)
-              .then(entry => {
-                CMS.entry.set(entry);
-              })
-              .catch(error => {
-                console.error('Error navigating to new entry:', error);
-                this.setState({ error: 'Failed to navigate to new entry' });
-              });
+      if (this._isMounted) {
+        this.setState({ isCreating: false, error: null });
+        await this.loadSections();
+
+        try {
+          const unpublishedEntry = await backend.unpublishedEntry('compositions', newEntry.slug);
+          CMS.entry.set(unpublishedEntry);
+        } catch (error) {
+          console.error('Error navigating to new entry:', error);
+          if (this._isMounted) {
+            this.setState({ error: 'Failed to navigate to new entry' });
           }
-        })
-        .catch(error => {
-          console.error('Error creating new section:', error);
-          if (this.mounted) {
-            this.setState({
-              isCreating: false,
-              error: 'Failed to create new section'
-            });
-          }
-        });
+        }
+      }
     } catch (error) {
-      console.error('Error processing new section:', error);
-      if (this.mounted) {
+      console.error('Error creating new section:', error);
+      if (this._isMounted) {
         this.setState({
           isCreating: false,
-          error: 'Error processing new section'
+          error: 'Failed to create new section'
         });
       }
     }
   },
 
-  handleSectionClick(slug) {
+  async handleSectionClick(slug) {
     if (!this.state.initialized) {
       this.setState({ error: 'CMS not initialized yet' });
       return;
     }
 
-    CMS.getBackend()
-      .unpublishedEntry('compositions', slug)
-      .then(entry => {
-        CMS.entry.set(entry);
-      })
-      .catch(error => {
-        console.error('Error loading section:', error);
+    try {
+      const backend = CMS.getBackend();
+      const entry = await backend.unpublishedEntry('compositions', slug);
+      CMS.entry.set(entry);
+    } catch (error) {
+      console.error('Error loading section:', error);
+      if (this._isMounted) {
         this.setState({ error: 'Failed to load section' });
-      });
+      }
+    }
   },
 
   render() {
     const entry = this.props.entry;
-    if (!entry) return null;
+    if (!entry?.get) return null;
 
     const data = entry.get('data');
-    if (!data) return null;
+    if (!data?.get) return null;
 
     const currentSection = parseInt(data.get('section') || '0', 10);
     const collectionType = data.get('collection_type');
@@ -198,7 +199,7 @@ ${newEntryData.body}`;
         !this.state.initialized && h('div', { className: 'loading-message' }, 'Initializing CMS...'),
         h('button', {
           className: 'new-section-button',
-          onClick: this.handleNewSection,
+          onClick: () => this.handleNewSection(),
           disabled: this.state.isCreating || !this.state.initialized
         }, this.state.isCreating ? 'Creating...' : 'New Section'),
         h('div', { className: 'section-list' },
@@ -219,8 +220,5 @@ ${newEntryData.body}`;
   }
 });
 
-// Export for browser global
+// Make component available globally
 window.PreviewComponent = PreviewComponent;
-
-// Export for module systems (if needed)
-// export default PreviewComponent;
