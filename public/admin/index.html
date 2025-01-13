@@ -75,92 +75,82 @@
   <body>
     <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
     <script>
+      // Initialize CMS first
+      CMS.init();
+
       const PreviewComponent = createClass({
         getInitialState() {
           return {
-            sections: [],
             isCreating: false
           };
         },
 
         componentDidMount() {
           this.mounted = true;
-          this.loadSections();
         },
 
         componentWillUnmount() {
           this.mounted = false;
         },
 
-        async loadSections() {
-          if (!this.props.entry) return;
-
-          try {
-            const currentEntry = this.props.entry;
-            const collectionType = currentEntry.get('data').get('collection_type');
-
-            // Get all entries from the collection
-            const allEntries = await this.props.collection.entriesLoaded;
-            if (!this.mounted) return;
-
-            // Filter and sort entries
-            const sections = allEntries
-              .filter(entry => entry.data && entry.data.collection_type === collectionType)
-              .map(entry => ({
-                section: entry.data.section,
-                slug: entry.slug
-              }))
-              .sort((a, b) => a.section - b.section);
-
-            this.setState({ sections });
-          } catch (error) {
-            console.error('Error loading sections:', error);
-          }
-        },
-
-        async handleNewSection() {
+        handleNewSection() {
           if (this.state.isCreating) return;
+
+          const entry = this.props.entry;
+          if (!entry) return;
+
           this.setState({ isCreating: true });
 
-          try {
-            const entry = this.props.entry;
-            const data = entry.get('data');
+          const data = entry.get('data');
+          if (!data) {
+            this.setState({ isCreating: false });
+            return;
+          }
 
-            const title = data.get('title');
-            const description = data.get('description');
-            const collectionType = data.get('collection_type');
-            const currentSection = parseInt(data.get('section'), 10);
+          try {
+            const title = data.get('title') || '';
+            const description = data.get('description') || '';
+            const collectionType = data.get('collection_type') || '';
+            const currentSection = parseInt(data.get('section') || '0', 10);
             const newSection = currentSection + 1;
 
             const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-            const safeTitle = title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-            const newSlug = `${timestamp}-${safeTitle}-section-${newSection}`;
+            const safeTitle = (title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+            const newSlug = timestamp + '-' + safeTitle + '-section-' + newSection;
 
-            // Create new entry content
             const newContent = [
               '---',
-              `title: ${title} - Section ${newSection}`,
-              `description: ${description}`,
-              `collection_type: ${collectionType}`,
-              `section: ${newSection}`,
+              'title: ' + title + ' - Section ' + newSection,
+              'description: ' + description,
+              'collection_type: ' + collectionType,
+              'section: ' + newSection,
               '---'
             ].join('\n');
 
-            // Save the new entry
-            await this.props.collection.createEntry(
-              'compositions',
-              {
-                path: `content/compositions/${newSlug}.md`,
+            fetch('/api/v1/compositions', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
                 slug: newSlug,
+                path: 'content/compositions/' + newSlug + '.md',
                 raw: newContent
+              })
+            })
+            .then(() => {
+              window.location.href = '/admin/#/collections/compositions/entries/' + newSlug;
+            })
+            .catch(error => {
+              console.error('Error creating section:', error);
+              alert('Failed to create new section. Please try again.');
+              if (this.mounted) {
+                this.setState({ isCreating: false });
               }
-            );
-
-            // Navigate to the new entry
-            window.location.href = `/admin/#/collections/compositions/entries/${newSlug}`;
+            });
           } catch (error) {
-            console.error('Error creating section:', error);
-            alert('Failed to create new section. Please try again.');
+            console.error('Error processing new section:', error);
+            alert('Failed to process new section. Please try again.');
             if (this.mounted) {
               this.setState({ isCreating: false });
             }
@@ -182,17 +172,6 @@
             h('div', { className: 'sidebar' },
               h('div', { className: 'collection-title' }, collectionTitle),
               h('div', { className: 'composition-title' }, data.get('title')),
-              h('div', { className: 'section-nav' },
-                this.state.sections.map(section =>
-                  h('button', {
-                    key: section.section,
-                    onClick: () => {
-                      window.location.href = `/admin/#/collections/compositions/entries/${section.slug}`;
-                    },
-                    className: `section-button${currentSection === section.section ? ' active' : ''}`
-                  }, `Section ${section.section}`)
-                )
-              ),
               h('button', {
                 className: 'new-section-button',
                 onClick: this.handleNewSection,
@@ -206,9 +185,6 @@
           );
         }
       });
-
-      // Initialize CMS
-      CMS.init();
 
       // Register preview template
       CMS.registerPreviewTemplate('compositions', PreviewComponent);
