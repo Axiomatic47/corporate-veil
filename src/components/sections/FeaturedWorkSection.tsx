@@ -30,7 +30,7 @@ export const FeaturedWorkSection = () => {
   const featuredWorks = [
     memorandum[0],
     corrective[0]
-  ].filter(Boolean); // Remove any undefined values
+  ].filter(Boolean);
 
   return (
     <section className="mt-32">
@@ -42,11 +42,7 @@ export const FeaturedWorkSection = () => {
               key={`${work.collection_type}-${work.id}`}
               id={work.id}
               title={work.title}
-              description={work.description}
-              literacyLevel={3}
-              onLiteracyChange={() => {}}
-              content={work.content}
-              showSlider={false}
+              section_title={work.section_title}
               collection={work.collection_type}
             />
           )

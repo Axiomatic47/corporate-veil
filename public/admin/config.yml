@@ -21,7 +21,6 @@ collections:
     preview_path: "composition/{{collection_type}}/section/1"
     fields:
       - {label: "Title", name: "title", widget: "string"}
-      - {label: "Description", name: "description", widget: "text"}
       - {label: "Type", name: "collection_type", widget: "select", options: ["memorandum", "corrective"]}
       - label: "Sections"
         name: "sections"
@@ -31,7 +30,6 @@ collections:
         summary: "{{fields.title}}"
         fields:
           - {label: "Title", name: "title", widget: "string"}
-          - {label: "Description", name: "description", widget: "text"}
-          - {label: "Basic Content (Level 1)", name: "content_level_1", widget: "markdown"}
-          - {label: "Intermediate Content (Level 3)", name: "content_level_3", widget: "markdown"}
-          - {label: "Advanced Content (Level 5)", name: "content_level_5", widget: "markdown"}
+          - {label: "Basic Content (Level 1)", name: "content_level_1", widget: "markdown", required: false, hint: "Optional - will default to intermediate content if left blank"}
+          - {label: "Intermediate Content (Level 3)", name: "content_level_3", widget: "markdown", required: true}
+          - {label: "Advanced Content (Level 5)", name: "content_level_5", widget: "markdown", required: false, hint: "Optional - will default to intermediate content if left blank"}

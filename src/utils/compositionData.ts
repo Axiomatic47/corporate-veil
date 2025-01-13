@@ -3,11 +3,9 @@ import { create } from 'zustand';
 export interface Composition {
   id: number;
   title: string;
-  description: string;
   collection_type: 'memorandum' | 'corrective';
   section: number;
   section_title: string;
-  content?: string;
   content_level_1: string;
   content_level_3: string;
   content_level_5: string;
