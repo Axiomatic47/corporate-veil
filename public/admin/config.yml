@@ -13,7 +13,7 @@ collections:
     format: "frontmatter"
     extension: "md"
     identifier_field: "title"
-    sortable_fields: ['title', 'section']
+    sortable_fields: ['title', 'section', 'collection_type']
     fields:
       - { 
           label: "Title", 
@@ -47,7 +47,9 @@ collections:
           name: "section",
           widget: "number",
           default: 1,
-          required: true
+          required: true,
+          min: 1,
+          max: 4
         }
       - { 
           label: "Basic Level Title", 
@@ -93,7 +95,9 @@ collections:
         field: collection_type
         pattern: "corrective"
     view_groups:
-      - label: "Section"
-        field: section
       - label: "Collection Type"
         field: collection_type
+      - label: "Section"
+        field: section
+      - label: "Reading Level"
+        field: reading_level
