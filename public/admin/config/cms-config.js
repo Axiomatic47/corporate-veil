@@ -1,19 +1,28 @@
 (() => {
   const cmsConfig = {
     config: {
+      load_config_file: false,
       local_backend: true,
       backend: {
-        name: 'git-gateway',
-        branch: 'main'
+        name: 'github',
+        repo: 'Axiomatic47/corporate-veil',
+        branch: 'main',
+        auth_endpoint: 'auth'
       },
+      publish_mode: 'editorial_workflow',
       media_folder: 'public/uploads',
       public_folder: '/uploads',
+      editor: {
+        preview: false
+      },
       collections: [
         {
           name: 'compositions',
           label: 'Compositions',
           folder: 'content/compositions',
           create: true,
+          sortable_fields: ['section'],
+          sort: 'section',
           identifier_field: 'title',
           fields: [
             {
@@ -24,14 +33,6 @@
                 { label: 'Memorandum', value: 'memorandum' },
                 { label: 'Corrective', value: 'corrective' }
               ],
-              required: true
-            },
-            {
-              label: 'Section',
-              name: 'section',
-              widget: 'number',
-              value_type: 'int',
-              min: 1,
               required: true
             },
             {

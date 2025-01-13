@@ -4,117 +4,169 @@
     let currentEntry = null;
     let currentReadingLevel = 3;
     let hasUnsavedChanges = false;
+    let draggedItem = null;
 
-    const createReadingLevelSelector = () => {
-      const container = document.createElement('div');
-      container.className = 'p-4 bg-[#1A1F2C] border-b border-white/10';
-      container.innerHTML = `
-        <div class="reading-level-selector">
-          <label class="block text-white mb-2">Reading Level:</label>
-          <select class="w-full bg-[#2A2F3C] text-white p-2 rounded border border-white/10">
-            <option value="1">Basic (Level 1)</option>
-            <option value="3" selected>Intermediate (Level 3)</option>
-            <option value="5">Advanced (Level 5)</option>
-          </select>
-        </div>
-      `;
+    const createSidebar = () => {
+      const sidebar = document.createElement('div');
+      sidebar.id = 'custom-sidebar';
+      sidebar.className = 'fixed left-0 top-0 bottom-0 w-64 bg-[#1A1F2C] text-white p-6 overflow-y-auto';
 
-      const select = container.querySelector('select');
-      select.value = currentReadingLevel;
-      select.addEventListener('change', (e) => {
-        currentReadingLevel = parseInt(e.target.value);
-        updateFormFields();
-      });
+      const title = document.createElement('h2');
+      title.className = 'text-lg font-medium mb-4';
+      title.textContent = 'Sections';
+      sidebar.appendChild(title);
 
-      return container;
-    };
+      const list = document.createElement('div');
+      list.className = 'space-y-2';
+      list.id = 'sections-list';
 
-    const updateFormFields = () => {
-      if (!currentEntry) return;
-
-      const form = document.querySelector('form');
-      if (!form) return;
-
-      // Update title and content based on reading level
-      ['title', 'content'].forEach(fieldName => {
-        const field = form.querySelector(`[name="${fieldName}"]`);
-        if (field) {
-          field.value = currentEntry.data[`${fieldName}_level_${currentReadingLevel}`] || '';
+      // Add drag and drop handlers
+      list.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        const afterElement = getDragAfterElement(list, e.clientY);
+        const draggable = document.querySelector('.dragging');
+        if (afterElement == null) {
+          list.appendChild(draggable);
+        } else {
+          list.insertBefore(draggable, afterElement);
         }
       });
+
+      currentEntries.forEach((entry, index) => {
+        const section = document.createElement('div');
+        section.className = `p-3 bg-[#2A2F3C] rounded-lg cursor-move ${
+          currentEntry?.data?.title === entry.data.title ? 'border-l-4 border-blue-500' : ''
+        }`;
+        section.draggable = true;
+        section.dataset.index = index;
+        section.innerHTML = `
+          <div class="flex items-center">
+            <span class="mr-2">≡</span>
+            <span>${entry.data.title}</span>
+          </div>
+        `;
+
+        section.addEventListener('dragstart', (e) => {
+          section.classList.add('dragging');
+          draggedItem = section;
+        });
+
+        section.addEventListener('dragend', async (e) => {
+          section.classList.remove('dragging');
+          const newIndex = Array.from(list.children).indexOf(section);
+          await updateSectionOrder(entry, newIndex);
+        });
+
+        section.addEventListener('click', () => {
+          window.CMS.entry.select(entry);
+        });
+
+        list.appendChild(section);
+      });
+
+      sidebar.appendChild(list);
+      return sidebar;
     };
 
-    const initializeSidebar = () => {
+    const getDragAfterElement = (container, y) => {
+      const draggableElements = [...container.querySelectorAll('[draggable]:not(.dragging)')];
+
+      return draggableElements.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+        if (offset < 0 && offset > closest.offset) {
+          return { offset: offset, element: child };
+        } else {
+          return closest;
+        }
+      }, { offset: Number.NEGATIVE_INFINITY }).element;
+    };
+
+    const updateSectionOrder = async (entry, newIndex) => {
       try {
-        // Wait for the CMS container to be ready
-        const cmsContainer = document.querySelector('.css-1gj57a0-AppMainContainer');
-        if (!cmsContainer) {
-          setTimeout(initializeSidebar, 100);
-          return;
+        // Update the section numbers
+        const updatedEntries = Array.from(document.querySelectorAll('#sections-list > div'));
+        const updates = updatedEntries.map((el, idx) => {
+          const entryIndex = parseInt(el.dataset.index);
+          const entry = currentEntries[entryIndex];
+          return {
+            ...entry,
+            data: {
+              ...entry.data,
+              section: idx + 1
+            }
+          };
+        });
+
+        // Save the updates
+        for (const updatedEntry of updates) {
+          await window.CMS.entry.persist(updatedEntry);
         }
 
-        console.log('CMS container found, initializing sidebar...');
-
-        // Add reading level selector
-        let selector = document.querySelector('.reading-level-selector');
-        if (!selector) {
-          selector = createReadingLevelSelector();
-          cmsContainer.insertBefore(selector, cmsContainer.firstChild);
-        }
-
-        // Add form change listeners
-        const form = document.querySelector('form');
-        if (form) {
-          form.addEventListener('change', () => {
-            hasUnsavedChanges = true;
-          });
-
-          form.addEventListener('submit', () => {
-            hasUnsavedChanges = false;
-          });
-        }
-
-        updateFormFields();
+        // Refresh the entries
+        currentEntries = updates;
+        initializeSidebar();
       } catch (error) {
-        console.error('Error in initializeSidebar:', error);
+        console.error('Error updating section order:', error);
       }
     };
 
-    // Register correct Decap CMS event handlers
-    try {
-      console.log('Registering CMS event handlers...');
-
-      // Listen for route changes
-      window.CMS.registerEventListener({
-        name: 'routeChange',
-        handler: () => {
-          console.log('Route changed, initializing sidebar...');
-          setTimeout(initializeSidebar, 500);
+    const initializeSidebar = async () => {
+      try {
+        // Get entries if not already loaded
+        if (!currentEntries.length) {
+          currentEntries = await window.CMS.getEntries({ collection_name: 'compositions' });
         }
-      });
 
-      // Listen for entry changes
-      window.CMS.registerEventListener({
-        name: 'beforePublish',
-        handler: () => {
-          hasUnsavedChanges = false;
-          return true;
+        // Sort entries by section number
+        currentEntries.sort((a, b) => a.data.section - b.data.section);
+
+        // Remove existing sidebar if present
+        const existingSidebar = document.getElementById('custom-sidebar');
+        if (existingSidebar) {
+          existingSidebar.remove();
         }
-      });
 
-    } catch (error) {
-      console.error('Error registering event handlers:', error);
-    }
+        // Create and append new sidebar
+        const sidebar = createSidebar();
+        document.body.appendChild(sidebar);
 
-    // Handle beforeunload
-    window.addEventListener('beforeunload', (e) => {
-      if (hasUnsavedChanges) {
-        e.preventDefault();
-        e.returnValue = '';
+        // Adjust main content area
+        const mainContent = document.querySelector('.css-1gj57a0-AppMainContainer');
+        if (mainContent) {
+          mainContent.style.marginLeft = '16rem';
+          mainContent.style.width = 'calc(100% - 16rem)';
+        }
+      } catch (error) {
+        console.error('Error initializing sidebar:', error);
+      }
+    };
+
+    // Register event handlers
+    window.CMS.registerEventListener({
+      name: 'preSave',
+      handler: async () => {
+        hasUnsavedChanges = false;
+        return true;
       }
     });
 
-    // Initial setup
+    window.CMS.registerEventListener({
+      name: 'entryLoaded',
+      handler: async (entry) => {
+        currentEntry = entry;
+        initializeSidebar();
+      }
+    });
+
+    window.CMS.registerEventListener({
+      name: 'entriesLoaded',
+      handler: async () => {
+        initializeSidebar();
+      }
+    });
+
+    // Initialize on load
     setTimeout(initializeSidebar, 1000);
   };
 

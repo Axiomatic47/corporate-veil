@@ -6,24 +6,25 @@
     <title>Content Manager</title>
     <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
     <style>
-      /* Override dark theme */
-      .css-1gj57a0-AppMainContainer input,
-      .css-1gj57a0-AppMainContainer textarea {
-        background: white !important;
-        color: black !important;
-        border: 1px solid #e2e8f0 !important;
+      .dragging {
+        opacity: 0.5;
+        border: 2px dashed #4a5568;
       }
 
-      .custom-admin-sidebar {
-        z-index: 100;
+      #custom-sidebar {
+        z-index: 1000;
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
       }
 
-      .reading-level-selector {
-        position: sticky;
-        top: 0;
-        z-index: 90;
-        background: #1A1F2C;
-        padding: 1rem;
+      /* Hide section number field */
+      [data-field-name="section"] {
+        display: none !important;
+      }
+
+      /* Override preview styles */
+      .css-1gj57a0-AppMainContainer {
+        margin-left: 16rem !important;
+        width: calc(100% - 16rem) !important;
       }
     </style>
   </head>
@@ -34,8 +35,19 @@
     <!-- Load handlers -->
     <script src="./components/EventHandlers.js"></script>
     <script>
-      window.addEventListener('load', () => {
+      window.addEventListener('load', async () => {
         console.log('Initializing CMS...');
+
+        // Initialize Netlify Identity
+        if (window.netlifyIdentity) {
+          window.netlifyIdentity.on('init', user => {
+            if (!user) {
+              window.netlifyIdentity.on('login', () => {
+                document.location.href = '/admin/';
+              });
+            }
+          });
+        }
 
         // Initialize CMS
         window.CMS.init({
@@ -43,9 +55,7 @@
         });
 
         // Initialize handlers
-        if (window.registerEventHandlers) {
-          window.registerEventHandlers();
-        }
+        window.registerEventHandlers();
       });
     </script>
   </body>
