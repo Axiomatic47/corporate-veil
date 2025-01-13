@@ -19,10 +19,10 @@ const AdminSidebar = ({ sections, currentSection, onSectionSelect, onSectionsReo
   };
 
   return (
-    <div className="w-64 min-h-screen bg-gray-100 p-4 border-r">
+    <div className="w-64 min-h-screen bg-sidebar p-4 border-r border-sidebar-border">
       <div className="mb-4">
-        <h2 className="text-lg font-semibold">Sections</h2>
-        <p className="text-sm text-gray-600 mt-1">Drag sections to reorder</p>
+        <h2 className="text-lg font-semibold text-sidebar-foreground">Sections</h2>
+        <p className="text-sm text-sidebar-foreground/70 mt-1">Drag sections to reorder</p>
       </div>
       <DragDropContext onDragEnd={handleDragEnd}>
         <Droppable droppableId="sections">
@@ -46,8 +46,8 @@ const AdminSidebar = ({ sections, currentSection, onSectionSelect, onSectionsReo
                       className={`
                         w-full text-left py-2 px-4 rounded transition-colors
                         ${currentSection?.title === section.title
-                          ? "bg-blue-500 text-white"
-                          : "hover:bg-gray-200"
+                          ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                          : "text-sidebar-foreground hover:bg-sidebar-accent/50"
                         }
                         ${snapshot.isDragging ? "shadow-lg" : ""}
                       `}
