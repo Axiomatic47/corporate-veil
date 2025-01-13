@@ -7,13 +7,19 @@
     <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
     <link href="./styles/main.css" rel="stylesheet" />
     <style>
+      /* Hide preview pane */
+      [class*="PreviewPaneContainer-"],
+      [class*="ControlPaneContainer-"] {
+        display: none !important;
+      }
+
       /* Hide section number field */
       [id*="section-field"],
       [id*="section-field-"] {
         display: none !important;
       }
 
-      /* Custom sidebar styles */
+      /* Custom sidebar */
       .custom-sidebar {
         position: fixed;
         left: 0;
@@ -38,23 +44,38 @@
 
       .sidebar-section.dragging {
         opacity: 0.5;
-        background: rgba(255, 255, 255, 0.2);
+      }
+
+      /* Main content adjustments */
+      main {
+        margin-left: 16rem !important;
+        width: calc(100% - 16rem) !important;
       }
     </style>
   </head>
   <body>
+    <!-- Decap CMS -->
     <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+
+    <!-- Config -->
+    <script src="./config/cms-config.js"></script>
+
+    <!-- Event Handlers -->
+    <script src="./components/EventHandlers.js"></script>
+
     <script>
-      // Initialize CMS
-      window.addEventListener('load', function() {
+      // Initialize CMS after window loads
+      window.addEventListener('load', () => {
+        // Initialize CMS
         CMS.init();
-        
-        // Initialize event handlers after CMS is ready
-        if (window.initializeEventHandlers) {
-          window.initializeEventHandlers();
-        }
+
+        // Wait for CMS to be ready before initializing handlers
+        setTimeout(() => {
+          if (window.registerEventHandlers) {
+            window.registerEventHandlers();
+          }
+        }, 1000);
       });
     </script>
-    <script src="./components/EventHandlers.js"></script>
   </body>
 </html>
