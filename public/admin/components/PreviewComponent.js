@@ -32,22 +32,32 @@ const PreviewComponent = createClass({
       const description = data.get('description') || '';
       const collectionType = data.get('collection_type') || '';
       const currentSection = parseInt(data.get('section') || '0', 10);
+      const body = data.get('body') || '';
       const newSection = currentSection + 1;
 
-      // Create new entry data
+      // Create new entry data with all fields from the current section
       const newEntryData = {
-        title: `${title} - Section ${newSection}`,
-        description: description,
+        title: title, // Keep the same title for continuity
+        description: description, // Keep the same description for continuity
         collection_type: collectionType,
         section: newSection,
-        body: ''
+        body: '' // Start with empty content for the new section
       };
+
+      // Create the frontmatter string with all fields
+      const frontmatter = `---
+title: ${newEntryData.title}
+description: ${newEntryData.description}
+collection_type: ${newEntryData.collection_type}
+section: ${newSection}
+---
+`;
 
       // Use CMS API to create new entry
       CMS.getBackend()
         .createEntry('compositions', {
           data: newEntryData,
-          raw: `---\ntitle: ${newEntryData.title}\ndescription: ${newEntryData.description}\ncollection_type: ${newEntryData.collection_type}\nsection: ${newSection}\n---\n`
+          raw: frontmatter
         })
         .then(newEntry => {
           if (this.mounted) {
