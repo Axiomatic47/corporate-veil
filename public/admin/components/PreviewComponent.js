@@ -2,13 +2,24 @@ const PreviewComponent = createClass({
   getInitialState() {
     return {
       isCreating: false,
-      sections: []
+      sections: [],
+      error: null
     };
   },
 
   componentDidMount() {
     this.mounted = true;
-    this.loadSections();
+    if (CMS && CMS.getBackend) {
+      this.loadSections();
+    } else {
+      console.warn('CMS backend not initialized yet');
+      // Retry after a short delay to allow CMS to initialize
+      setTimeout(() => {
+        if (this.mounted && CMS && CMS.getBackend) {
+          this.loadSections();
+        }
+      }, 1000);
+    }
   },
 
   componentWillUnmount() {
@@ -25,16 +36,28 @@ const PreviewComponent = createClass({
     const title = data.get('title');
     const collectionType = data.get('collection_type');
 
+    // Ensure CMS and backend are available
+    if (!CMS || !CMS.getBackend) {
+      console.error('CMS backend not available');
+      return;
+    }
+
     // Get all entries for the same composition
     CMS.getBackend()
       .entries('compositions')
       .then(entries => {
         if (!this.mounted) return;
 
+        if (!entries) {
+          console.warn('No entries found');
+          return;
+        }
+
         const sections = entries
           .filter(e => {
             const entryData = e.data;
-            return entryData.title === title && 
+            return entryData && 
+                   entryData.title === title && 
                    entryData.collection_type === collectionType;
           })
           .map(e => ({
@@ -43,10 +66,11 @@ const PreviewComponent = createClass({
           }))
           .sort((a, b) => a.section - b.section);
 
-        this.setState({ sections });
+        this.setState({ sections, error: null });
       })
       .catch(error => {
         console.error('Error loading sections:', error);
+        this.setState({ error: 'Failed to load sections' });
       });
   },
 
@@ -89,6 +113,16 @@ section: ${newSection}
 ---
 ${newEntryData.body}`;
 
+      // Ensure CMS and backend are available
+      if (!CMS || !CMS.getBackend) {
+        console.error('CMS backend not available');
+        this.setState({ 
+          isCreating: false,
+          error: 'CMS backend not available'
+        });
+        return;
+      }
+
       // Create new entry
       CMS.getBackend()
         .createEntry('compositions', {
@@ -97,31 +131,47 @@ ${newEntryData.body}`;
         })
         .then(newEntry => {
           if (this.mounted) {
-            this.setState({ isCreating: false });
+            this.setState({ isCreating: false, error: null });
             this.loadSections();
             // Navigate to the new entry
             CMS.getBackend()
               .unpublishedEntry('compositions', newEntry.slug)
               .then(entry => {
                 CMS.entry.set(entry);
+              })
+              .catch(error => {
+                console.error('Error navigating to new entry:', error);
+                this.setState({ error: 'Failed to navigate to new entry' });
               });
           }
         })
         .catch(error => {
           console.error('Error creating new section:', error);
           if (this.mounted) {
-            this.setState({ isCreating: false });
+            this.setState({ 
+              isCreating: false,
+              error: 'Failed to create new section'
+            });
           }
         });
     } catch (error) {
       console.error('Error processing new section:', error);
       if (this.mounted) {
-        this.setState({ isCreating: false });
+        this.setState({ 
+          isCreating: false,
+          error: 'Error processing new section'
+        });
       }
     }
   },
 
   handleSectionClick(slug) {
+    if (!CMS || !CMS.getBackend) {
+      console.error('CMS backend not available');
+      this.setState({ error: 'CMS backend not available' });
+      return;
+    }
+
     CMS.getBackend()
       .unpublishedEntry('compositions', slug)
       .then(entry => {
@@ -129,6 +179,7 @@ ${newEntryData.body}`;
       })
       .catch(error => {
         console.error('Error loading section:', error);
+        this.setState({ error: 'Failed to load section' });
       });
   },
 
@@ -147,6 +198,7 @@ ${newEntryData.body}`;
       h('div', { className: 'sidebar' },
         h('div', { className: 'collection-title' }, collectionTitle),
         h('div', { className: 'composition-title' }, data.get('title')),
+        this.state.error && h('div', { className: 'error-message' }, this.state.error),
         h('button', {
           className: 'new-section-button',
           onClick: this.handleNewSection,
