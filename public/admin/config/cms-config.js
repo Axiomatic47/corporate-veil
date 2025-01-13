@@ -39,67 +39,60 @@ const cmsConfig = {
             min: 1,
             required: true
           },
-          { label: 'Title', name: 'title', widget: 'string' },
-          { label: 'Description', name: 'description', widget: 'text' },
           {
-            label: 'Reading Level',
-            name: 'reading_level',
-            widget: 'select',
-            options: ['1', '3', '5'],
+            label: 'Title',
+            name: 'title',
+            widget: 'string',
             required: true
+          },
+          {
+            label: 'Description',
+            name: 'description',
+            widget: 'text',
+            required: true
+          },
+          {
+            label: 'Content',
+            name: 'content',
+            widget: 'markdown',
+            required: true
+          },
+          // Hidden fields for different reading levels
+          {
+            label: 'Title Level 1',
+            name: 'title_level_1',
+            widget: 'hidden',
           },
           {
             label: 'Content Level 1',
             name: 'content_level_1',
-            widget: 'markdown',
-            required: true
-          },
-          {
-            label: 'Content Level 3',
-            name: 'content_level_3',
-            widget: 'markdown',
-            required: true
-          },
-          {
-            label: 'Content Level 5',
-            name: 'content_level_5',
-            widget: 'markdown',
-            required: true
-          },
-          {
-            label: 'Title Level 1',
-            name: 'title_level_1',
-            widget: 'string',
-            required: true
+            widget: 'hidden',
           },
           {
             label: 'Title Level 3',
             name: 'title_level_3',
-            widget: 'string',
-            required: true
+            widget: 'hidden',
+          },
+          {
+            label: 'Content Level 3',
+            name: 'content_level_3',
+            widget: 'hidden',
           },
           {
             label: 'Title Level 5',
             name: 'title_level_5',
-            widget: 'string',
-            required: true
-          }
-        ],
-        sortable_fields: ['title', 'section'],
-        view_filters: [
-          {
-            label: 'Memorandum',
-            field: 'collection_type',
-            pattern: 'memorandum'
+            widget: 'hidden',
           },
           {
-            label: 'Corrective',
-            field: 'collection_type',
-            pattern: 'corrective'
+            label: 'Content Level 5',
+            name: 'content_level_5',
+            widget: 'hidden',
           }
         ]
       }
-    ]
+    ],
+    display_url: window.location.origin,
+    site_url: window.location.origin
   }
 };
 
