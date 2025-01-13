@@ -1,10 +1,14 @@
+// Import createClass if not using global React
+// const { createClass } = window.React || require('react');
+
 const PreviewComponent = createClass({
   getInitialState() {
     return {
       isCreating: false,
       sections: [],
       error: null,
-      initialized: false
+      initialized: false,
+      cmsReady: false
     };
   },
 
@@ -20,8 +24,8 @@ const PreviewComponent = createClass({
   waitForCMS() {
     if (!this.mounted) return;
 
-    if (CMS?.getBackend) {
-      this.setState({ initialized: true }, () => {
+    if (typeof CMS !== 'undefined' && CMS?.getBackend) {
+      this.setState({ initialized: true, cmsReady: true }, () => {
         this.loadSections();
       });
     } else {
@@ -40,7 +44,7 @@ const PreviewComponent = createClass({
     const title = data.get('title');
     const collectionType = data.get('collection_type');
 
-    if (!this.state.initialized) {
+    if (!this.state.initialized || !this.state.cmsReady) {
       console.warn('CMS not initialized yet');
       return;
     }
@@ -62,8 +66,8 @@ const PreviewComponent = createClass({
         const sections = response.entries
           .filter(e => {
             const entryData = e.data;
-            return entryData && 
-                   entryData.title === title && 
+            return entryData &&
+                   entryData.title === title &&
                    entryData.collection_type === collectionType;
           })
           .map(e => ({
@@ -126,7 +130,7 @@ ${newEntryData.body}`;
           if (this.mounted) {
             this.setState({ isCreating: false, error: null });
             this.loadSections();
-            
+
             CMS.getBackend()
               .unpublishedEntry('compositions', newEntry.slug)
               .then(entry => {
@@ -141,7 +145,7 @@ ${newEntryData.body}`;
         .catch(error => {
           console.error('Error creating new section:', error);
           if (this.mounted) {
-            this.setState({ 
+            this.setState({
               isCreating: false,
               error: 'Failed to create new section'
             });
@@ -150,7 +154,7 @@ ${newEntryData.body}`;
     } catch (error) {
       console.error('Error processing new section:', error);
       if (this.mounted) {
-        this.setState({ 
+        this.setState({
           isCreating: false,
           error: 'Error processing new section'
         });
@@ -215,4 +219,8 @@ ${newEntryData.body}`;
   }
 });
 
+// Export for browser global
 window.PreviewComponent = PreviewComponent;
+
+// Export for module systems (if needed)
+// export default PreviewComponent;

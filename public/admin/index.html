@@ -9,13 +9,25 @@
   </head>
   <body>
     <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
-    <script src="components/PreviewComponent.js"></script>
     <script>
       // Initialize CMS first
       CMS.init();
-      
-      // Register preview template after CMS initialization
-      CMS.registerPreviewTemplate('compositions', window.PreviewComponent);
+
+      // Wait for CMS to be fully initialized before registering components
+      const initializePreview = () => {
+        if (typeof CMS !== 'undefined' && CMS.getBackend) {
+          // Register preview template after CMS initialization
+          CMS.registerPreviewTemplate('compositions', window.PreviewComponent);
+        } else {
+          setTimeout(initializePreview, 1000);
+        }
+      };
+
+      // Load preview component script
+      const script = document.createElement('script');
+      script.src = 'components/PreviewComponent.js';
+      script.onload = initializePreview;
+      document.body.appendChild(script);
     </script>
   </body>
 </html>
