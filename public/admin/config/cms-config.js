@@ -2,9 +2,10 @@ const cmsConfig = {
   config: {
     load_config_file: false,
     backend: {
-      name: 'proxy',
+      name: 'github',
+      repo: 'Axiomatic47/corporate-veil',
       branch: 'main',
-      proxy_url: 'http://localhost:8081/api/v1'
+      base_url: 'https://api.netlify.com'
     },
     local_backend: {
       url: 'http://localhost:8081/api/v1'

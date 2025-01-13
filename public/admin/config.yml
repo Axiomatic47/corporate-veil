@@ -1,6 +1,6 @@
 backend:
   name: github
-  repo: your-username/your-repo-name # You'll need to replace this with your actual GitHub repository
+  repo: Axiomatic47/corporate-veil
   branch: main
   auth_endpoint: auth
   base_url: https://api.netlify.com
