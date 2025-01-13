@@ -2,31 +2,77 @@ import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 import { Slider } from "@/components/ui/slider";
 import { Header } from "@/components/Header";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
-// Mock data for sections
-const mockSections = [
-  {
-    id: 1,
-    title: "Introduction to Corporate Personhood",
-    content: "This section explores the fundamental concepts of corporate personhood and its historical development in constitutional law..."
-  },
-  {
-    id: 2,
-    title: "Legal Framework and Precedents",
-    content: "An examination of key legal cases and precedents that have shaped the current understanding of corporate rights..."
-  },
-  {
-    id: 3,
-    title: "Constitutional Implications",
-    content: "Analysis of how corporate personhood affects constitutional interpretations and citizen rights..."
-  },
-  {
-    id: 4,
-    title: "Modern Applications",
-    content: "Current applications and challenges of corporate personhood in contemporary legal contexts..."
-  }
-];
+// Mock data with different reading levels
+const mockSectionsData = {
+  1: [ // Basic reading level
+    {
+      id: 1,
+      title: "What is a Company?",
+      content: "A company is like a group of people working together. They make things or help people. Companies are special because the law treats them almost like real people."
+    },
+    {
+      id: 2,
+      title: "Company Rules",
+      content: "Companies must follow rules. These rules help keep everything fair. The rules say what companies can and cannot do."
+    },
+    {
+      id: 3,
+      title: "Company Money",
+      content: "Companies make and spend money. They keep track of all their money. This helps them make good choices about what to do."
+    },
+    {
+      id: 4,
+      title: "Companies Today",
+      content: "Today, companies are everywhere. They make the things we use. They give people jobs. They help make our world work better."
+    }
+  ],
+  3: [ // Intermediate reading level
+    {
+      id: 1,
+      title: "Introduction to Corporate Personhood",
+      content: "Corporate personhood is a legal concept that gives companies certain rights and responsibilities. This means companies can own property, make contracts, and be held accountable for their actions."
+    },
+    {
+      id: 2,
+      title: "Legal Framework and Precedents",
+      content: "The legal system has established important rules and examples that shape how companies operate. These precedents help guide business practices and corporate responsibilities."
+    },
+    {
+      id: 3,
+      title: "Financial Implications",
+      content: "Companies must manage their finances responsibly while considering various stakeholders. This includes proper accounting, investment decisions, and resource allocation."
+    },
+    {
+      id: 4,
+      title: "Modern Corporate Landscape",
+      content: "Today's corporate environment is complex and interconnected. Companies must navigate various challenges while maintaining ethical practices and sustainable growth."
+    }
+  ],
+  5: [ // Advanced reading level
+    {
+      id: 1,
+      title: "Theoretical Foundations of Corporate Personhood",
+      content: "The doctrine of corporate personhood encompasses complex legal and philosophical principles regarding the attribution of rights, responsibilities, and legal standing to corporate entities within constitutional frameworks."
+    },
+    {
+      id: 2,
+      title: "Jurisprudential Evolution and Legislative Framework",
+      content: "The development of corporate law through judicial interpretation and legislative action has established sophisticated precedents governing corporate conduct, liability, and stakeholder relationships."
+    },
+    {
+      id: 3,
+      title: "Fiscal Policy and Corporate Governance",
+      content: "Contemporary corporate governance necessitates sophisticated financial management strategies, incorporating stakeholder theory, agency considerations, and sustainable business practices."
+    },
+    {
+      id: 4,
+      title: "Contemporary Corporate Paradigms",
+      content: "Modern corporate entities operate within an intricate ecosystem of regulatory requirements, market forces, and societal expectations, necessitating adaptive strategies and robust governance frameworks."
+    }
+  ]
+};
 
 const CompositionPage = () => {
   const { compositionId = "", sectionId = "1" } = useParams();
@@ -50,7 +96,16 @@ const CompositionPage = () => {
     });
   };
 
-  const currentSectionData = mockSections.find(section => section.id === currentSection) || mockSections[0];
+  // Get the closest reading level (1, 3, or 5)
+  const getClosestReadingLevel = (level: number) => {
+    if (level <= 2) return 1;
+    if (level >= 4) return 5;
+    return 3;
+  };
+
+  const currentReadingLevel = getClosestReadingLevel(literacyLevel);
+  const currentSections = mockSectionsData[currentReadingLevel];
+  const currentSectionData = currentSections.find(section => section.id === currentSection) || currentSections[0];
 
   return (
     <div className="min-h-screen bg-[#0F1218]">
@@ -67,7 +122,7 @@ const CompositionPage = () => {
               </p>
             </div>
             <nav className="space-y-2">
-              {mockSections.map((section) => (
+              {currentSections.map((section) => (
                 <button
                   key={section.id}
                   onClick={() => handleSectionChange(section.id)}
