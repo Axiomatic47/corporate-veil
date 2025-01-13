@@ -7,14 +7,7 @@ const CustomSidebar = {
       return;
     }
 
-    // Wait for CMS to be ready
-    window.CMS.registerEventListener({
-      name: 'preSave',
-      handler: () => {
-        refreshSidebar();
-        return true;
-      },
-    });
+    let currentEntries = [];
 
     // Create and append sidebar
     const sidebar = document.createElement('div');
@@ -61,7 +54,7 @@ const CustomSidebar = {
       }
 
       .section-item {
-        padding: 8px;
+        padding: 12px;
         margin-bottom: 8px;
         background: white;
         border: 1px solid #ddd;
@@ -69,6 +62,7 @@ const CustomSidebar = {
         cursor: pointer;
         display: flex;
         align-items: center;
+        user-select: none;
       }
 
       .section-item:hover {
@@ -77,8 +71,25 @@ const CustomSidebar = {
 
       .section-item.dragging {
         opacity: 0.5;
+        background: #e0e0e0;
       }
 
+      .section-item.active {
+        background: #e3f2fd;
+        border-color: #2196f3;
+      }
+
+      .drag-handle {
+        margin-right: 8px;
+        color: #999;
+        cursor: grab;
+      }
+
+      .section-title {
+        flex-grow: 1;
+      }
+
+      /* Main content adjustment */
       .css-1gj57a0-AppMainContainer {
         margin-left: 250px !important;
         width: calc(100% - 250px) !important;
@@ -87,83 +98,60 @@ const CustomSidebar = {
 
     document.head.appendChild(styles);
 
-    // Add sidebar after a delay to ensure CMS is loaded
-    setTimeout(() => {
-      document.body.appendChild(sidebar);
+    // Add sidebar to page
+    document.body.appendChild(sidebar);
 
-      // Initialize handlers
-      initializeHandlers(sidebar);
+    // Initialize add section button
+    const addButton = sidebar.querySelector('#add-section');
+    addButton.addEventListener('click', async () => {
+      const store = window.CMS.store;
+      const collections = store.getState().collections;
+      const entries = collections.get('compositions')?.entries?.toJS() || [];
+      const nextSection = entries.length > 0 ? Math.max(...entries.map(e => e.data.section || 0)) + 1 : 1;
 
-      // Initial refresh
-      refreshSidebar();
-
-      // Adjust main content area
-      const mainContent = document.querySelector('[class*="AppMainContainer"]');
-      if (mainContent) {
-        mainContent.style.marginLeft = '250px';
-        mainContent.style.width = 'calc(100% - 250px)';
-      }
-    }, 1000);
-
-    function initializeHandlers(sidebar) {
-      const addButton = sidebar.querySelector('#add-section');
-      const sectionsList = sidebar.querySelector('#sections-list');
-
-      // Add section button handler
-      addButton.addEventListener('click', () => {
-        window.CMS.store.dispatch({
-          type: 'DRAFT_CREATE_NEW_ENTRY',
-          payload: {
-            collectionName: 'compositions',
-            data: {
-              collection_type: 'memorandum',
-              title: 'New Section',
-              section: getNextSectionNumber()
-            }
+      store.dispatch({
+        type: 'DRAFT_CREATE_NEW_ENTRY',
+        payload: {
+          collectionName: 'compositions',
+          data: {
+            collection_type: 'memorandum',
+            section: nextSection,
+            title: `Section ${nextSection}`,
+            content_level_1: '',
+            content_level_3: '',
+            content_level_5: ''
           }
-        });
-      });
-
-      // Drag and drop handlers
-      sectionsList.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        const dragging = document.querySelector('.section-item.dragging');
-        if (!dragging) return;
-
-        const afterElement = getDragAfterElement(sectionsList, e.clientY);
-        if (afterElement) {
-          sectionsList.insertBefore(dragging, afterElement);
-        } else {
-          sectionsList.appendChild(dragging);
         }
       });
-    }
+    });
 
-    function refreshSidebar() {
-      const sectionsList = document.querySelector('#sections-list');
-      if (!sectionsList) return;
-
-      const collections = window.CMS.store.getState().collections;
-      if (!collections) return;
-
+    // Update sections list
+    const updateSectionsList = () => {
+      const store = window.CMS.store;
+      const collections = store.getState().collections;
       const entries = collections.get('compositions')?.entries?.toJS() || [];
-      const sortedEntries = entries.sort((a, b) =>
-        (a.data.section || 0) - (b.data.section || 0)
-      );
+      currentEntries = entries.sort((a, b) => (a.data.section || 0) - (b.data.section || 0));
 
+      const sectionsList = sidebar.querySelector('#sections-list');
       sectionsList.innerHTML = '';
-      sortedEntries.forEach((entry, index) => {
+
+      currentEntries.forEach((entry, index) => {
         const section = document.createElement('div');
         section.className = 'section-item';
         section.draggable = true;
+        section.dataset.index = index;
         section.dataset.slug = entry.slug;
         section.innerHTML = `
-          <span style="margin-right: 8px;">≡</span>
-          ${entry.data.title || 'Untitled'}
+          <span class="drag-handle">≡</span>
+          <span class="section-title">${entry.data.title || 'Untitled Section'}</span>
         `;
 
+        // Click handler - select section
         section.addEventListener('click', () => {
-          window.CMS.store.dispatch({
+          document.querySelectorAll('.section-item').forEach(item => item.classList.remove('active'));
+          section.classList.add('active');
+
+          store.dispatch({
             type: 'SELECT_ENTRY',
             payload: {
               collection: 'compositions',
@@ -172,7 +160,12 @@ const CustomSidebar = {
           });
         });
 
-        section.addEventListener('dragstart', () => section.classList.add('dragging'));
+        // Drag handlers
+        section.addEventListener('dragstart', (e) => {
+          section.classList.add('dragging');
+          e.dataTransfer.effectAllowed = 'move';
+        });
+
         section.addEventListener('dragend', () => {
           section.classList.remove('dragging');
           updateSectionOrder();
@@ -180,21 +173,26 @@ const CustomSidebar = {
 
         sectionsList.appendChild(section);
       });
-    }
+    };
 
-    function getNextSectionNumber() {
-      const collections = window.CMS.store.getState().collections;
-      if (!collections) return 1;
+    // Enable drag and drop reordering
+    const sectionsList = sidebar.querySelector('#sections-list');
+    sectionsList.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      const dragging = document.querySelector('.section-item.dragging');
+      if (!dragging) return;
 
-      const entries = collections.get('compositions')?.entries?.toJS() || [];
-      return Math.max(...entries.map(e => e.data.section || 0), 0) + 1;
-    }
+      const afterElement = getDragAfterElement(sectionsList, e.clientY);
+      if (afterElement) {
+        sectionsList.insertBefore(dragging, afterElement);
+      } else {
+        sectionsList.appendChild(dragging);
+      }
+    });
 
-    function getDragAfterElement(container, y) {
-      const draggableElements = [
-        ...container.querySelectorAll('.section-item:not(.dragging)')
-      ];
-
+    // Helper function for drag and drop
+    const getDragAfterElement = (container, y) => {
+      const draggableElements = [...container.querySelectorAll('.section-item:not(.dragging)')];
       return draggableElements.reduce((closest, child) => {
         const box = child.getBoundingClientRect();
         const offset = y - box.top - box.height / 2;
@@ -204,29 +202,41 @@ const CustomSidebar = {
           return closest;
         }
       }, { offset: Number.NEGATIVE_INFINITY }).element;
-    }
+    };
 
-    function updateSectionOrder() {
-      const sectionsList = document.querySelector('#sections-list');
-      if (!sectionsList) return;
+    // Update section numbers after reordering
+    const updateSectionOrder = () => {
+      const sections = Array.from(document.querySelectorAll('.section-item'));
+      const store = window.CMS.store;
 
-      const sections = Array.from(sectionsList.querySelectorAll('.section-item'));
       sections.forEach((section, index) => {
-        const entry = window.CMS.store.getState().collections
-          .getIn(['compositions', 'entries'])
-          .find(e => e.get('slug') === section.dataset.slug);
-
-        if (entry && entry.getIn(['data', 'section']) !== index + 1) {
-          window.CMS.store.dispatch({
-            type: 'DRAFT_CREATE_FROM_ENTRY',
+        const entry = currentEntries[parseInt(section.dataset.index)];
+        if (entry && entry.data.section !== index + 1) {
+          store.dispatch({
+            type: 'ENTRY_PERSIST',
             payload: {
               collectionName: 'compositions',
-              entry: entry.setIn(['data', 'section'], index + 1).toJS()
+              entryDraft: {
+                ...entry,
+                data: {
+                  ...entry.data,
+                  section: index + 1
+                }
+              },
+              options: { raw: true }
             }
           });
         }
       });
-    }
+    };
+
+    // Subscribe to store changes
+    window.CMS.store.subscribe(() => {
+      updateSectionsList();
+    });
+
+    // Initial sections load
+    updateSectionsList();
   }
 };
 
