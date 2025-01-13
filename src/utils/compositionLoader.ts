@@ -1,83 +1,48 @@
 import { Composition } from './compositionData';
 
-const parseFrontMatter = (content: string): { data: any; content: string } => {
-  const frontMatterRegex = /^---\n([\s\S]*?)\n---\n([\s\S]*)$/;
-  const match = content.match(frontMatterRegex);
-  
-  if (!match) {
-    return {
-      data: {},
-      content: content.trim()
-    };
-  }
-
-  const [, frontMatter, body] = match;
-  const data = frontMatter.split('\n').reduce((acc: Record<string, any>, line) => {
-    const [key, ...values] = line.split(':');
-    if (key && values.length) {
-      const value = values.join(':').trim().replace(/^["']|["']$/g, ''); // Remove quotes if present
-      // Handle number values
-      acc[key.trim()] = /^\d+$/.test(value) ? parseInt(value, 10) : value;
-    }
-    return acc;
-  }, {});
-
-  return {
-    data,
-    content: body.trim()
-  };
-};
-
 export const loadCompositions = async (): Promise<Composition[]> => {
   try {
-    const modules = import.meta.glob('/content/compositions/*.md', { 
+    const compositions: Composition[] = [];
+
+    // Import all JSON files from the compositions directory
+    const modules = import.meta.glob('/content/compositions/*.json', {
       eager: true,
-      import: 'default',
-      as: 'string'
+      import: 'default'
     });
 
-    const compositions: Composition[] = [];
-    let id = 1;
-
     for (const path in modules) {
-      const content = modules[path] as string;
-      
-      try {
-        // Check if content is base64 encoded
-        if (content.startsWith('data:text/markdown;base64,')) {
-          const base64Content = content.replace('data:text/markdown;base64,', '');
-          const decodedContent = atob(base64Content);
-          const { data: frontmatter, content: body } = parseFrontMatter(decodedContent);
-          
-          compositions.push({
-            id,
-            title: frontmatter.title || 'Untitled',
-            description: frontmatter.description || '',
-            collection_type: frontmatter.collection_type || 'memorandum',
-            section: frontmatter.section || 1,
-            content: body
-          });
-        } else {
-          const { data: frontmatter, content: body } = parseFrontMatter(content);
-          
-          compositions.push({
-            id,
-            title: frontmatter.title || 'Untitled',
-            description: frontmatter.description || '',
-            collection_type: frontmatter.collection_type || 'memorandum',
-            section: frontmatter.section || 1,
-            content: body
-          });
-        }
-        
-        id++;
-      } catch (parseError) {
-        console.error(`Error parsing file ${path}:`, parseError);
-        continue;
-      }
+      const data = modules[path] as any;
+
+      // Process each section in the composition
+      const sections = (data.sections || []).map((section: any, index: number) => ({
+        id: index + 1,
+        title: section.title,
+        description: section.description,
+        collection_type: data.collection_type,
+        content: section[`content_level_3`], // Default to intermediate level
+        content_level_1: section.content_level_1,
+        content_level_3: section.content_level_3,
+        content_level_5: section.content_level_5,
+      }));
+
+      // Add each section as a separate composition entry
+      sections.forEach(section => {
+        compositions.push({
+          id: section.id,
+          title: data.title,
+          description: data.description,
+          collection_type: data.collection_type,
+          section: section.id,
+          content: section.content,
+          section_title: section.title,
+          content_level_1: section.content_level_1,
+          content_level_3: section.content_level_3,
+          content_level_5: section.content_level_5,
+        });
+      });
     }
 
-    // Sort compositions by section number
+    // Sort by section number
     compositions.sort((a, b) => a.section - b.section);
     
     return compositions;

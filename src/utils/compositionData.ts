@@ -6,7 +6,11 @@ export interface Composition {
   description: string;
   collection_type: 'memorandum' | 'corrective';
   section: number;
+  section_title: string;
   content?: string;
+  content_level_1: string;
+  content_level_3: string;
+  content_level_5: string;
 }
 
 interface CompositionStore {
@@ -41,24 +45,3 @@ export const useCompositionStore = create<CompositionStore>((set) => ({
     }
   }
 }));
-
-// Export compositionData as a computed value from the store
-export const compositionData = {
-  get memorandum() {
-    return useCompositionStore.getState().memorandum;
-  },
-  get corrective() {
-    return useCompositionStore.getState().corrective;
-  }
-};
-
-export const initializeCompositionData = async (): Promise<void> => {
-  const { loadCompositions } = await import('./compositionLoader');
-  try {
-    const compositions = await loadCompositions();
-    useCompositionStore.getState().setCompositions(compositions);
-  } catch (error) {
-    console.error('Failed to initialize composition data:', error);
-    throw error;
-  }
-};

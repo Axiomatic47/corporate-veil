@@ -3,8 +3,11 @@ import { useParams } from "react-router-dom";
 import { Slider } from "@/components/ui/slider";
 import { Header } from "@/components/Header";
 import { useToast } from "@/hooks/use-toast";
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import rehypeRaw from 'rehype-raw';
 
-// Mock data with different reading levels
+// Keep the original mock data structure
 const mockSectionsData = {
   1: [ // Basic reading level
     {
@@ -54,11 +57,32 @@ const mockSectionsData = {
     {
       id: 1,
       title: "Theoretical Foundations of Corporate Personhood",
-      content: "The doctrine of corporate personhood encompasses complex legal and philosophical principles regarding the attribution of rights, responsibilities, and legal standing to corporate entities within constitutional frameworks."
+      content: `# The Legal Framework
+
+The doctrine of corporate personhood encompasses complex legal and philosophical principles regarding the attribution of rights, responsibilities, and legal standing to corporate entities within constitutional frameworks.
+
+## Historical Context
+
+* Early development of corporate rights
+* Evolution through judicial interpretation
+* Modern implications and challenges
+
+## Key Principles
+
+1. Legal Autonomy
+2. Limited Liability
+3. Perpetual Existence
+4. Property Rights
+
+> "Corporate personhood represents a fundamental shift in how we understand the relationship between business entities and constitutional law."
+
+### Impact on Modern Business
+
+The implications of corporate personhood extend far beyond simple legal recognition...`
     },
     {
       id: 2,
-      title: "Jurisprudential Evolution and Legislative Framework",
+      title: "Jurisprudential Evolution",
       content: "The development of corporate law through judicial interpretation and legislative action has established sophisticated precedents governing corporate conduct, liability, and stakeholder relationships."
     },
     {
@@ -77,24 +101,13 @@ const mockSectionsData = {
 const CompositionPage = () => {
   const { compositionId = "", sectionId = "1" } = useParams();
   const [literacyLevel, setLiteracyLevel] = useState(3);
-  const [currentSection, setCurrentSection] = useState(parseInt(sectionId));
   const { toast } = useToast();
 
-  const handleSectionChange = (sectionId: number) => {
-    setCurrentSection(sectionId);
-    toast({
-      title: "Section Changed",
-      description: `Viewing section ${sectionId}`,
-    });
-  };
-
   const handleLiteracyChange = (value: number[]) => {
-    // Map the slider value to the nearest valid reading level
-    const validLevels = [1, 3, 5];
-    const nearestLevel = validLevels.reduce((prev, curr) => {
+    const nearestLevel = [1, 3, 5].reduce((prev, curr) => {
       return Math.abs(curr - value[0]) < Math.abs(prev - value[0]) ? curr : prev;
     });
-    
+
     setLiteracyLevel(nearestLevel);
     toast({
       title: "Reading Level Updated",
@@ -102,16 +115,9 @@ const CompositionPage = () => {
     });
   };
 
-  // Get the closest reading level (1, 3, or 5)
-  const getClosestReadingLevel = (level: number) => {
-    if (level <= 2) return 1;
-    if (level >= 4) return 5;
-    return 3;
-  };
-
-  const currentReadingLevel = getClosestReadingLevel(literacyLevel);
-  const currentSections = mockSectionsData[currentReadingLevel];
-  const currentSectionData = currentSections.find(section => section.id === currentSection) || currentSections[0];
+  // Get the correct section data
+  const sections = mockSectionsData[literacyLevel];
+  const currentSection = sections.find(section => section.id === parseInt(sectionId));
 
   return (
     <div className="min-h-screen bg-[#0F1218]">
@@ -128,12 +134,14 @@ const CompositionPage = () => {
               </p>
             </div>
             <nav className="space-y-2">
-              {currentSections.map((section) => (
+              {sections.map((section) => (
                 <button
                   key={section.id}
-                  onClick={() => handleSectionChange(section.id)}
+                  onClick={() => {
+                    window.location.href = `/composition/${compositionId}/section/${section.id}`;
+                  }}
                   className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${
-                    section.id === currentSection
+                    section.id === parseInt(sectionId)
                       ? "bg-sidebar-accent text-sidebar-accent-foreground"
                       : "text-sidebar-foreground/60 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
                   }`}
@@ -144,12 +152,12 @@ const CompositionPage = () => {
             </nav>
           </div>
         </div>
-        
+
         <div className="flex-1 p-8 text-white">
           <div className="max-w-3xl mx-auto">
             <div className="mb-8">
-              <h1 className="text-4xl font-serif mb-4">{currentSectionData.title}</h1>
-              
+              <h1 className="text-4xl font-serif mb-4">{currentSection?.title}</h1>
+
               <div className="flex items-center space-x-4 mb-8">
                 <span className="text-sm text-gray-300">Reading Level:</span>
                 <Slider
@@ -164,10 +172,34 @@ const CompositionPage = () => {
               </div>
             </div>
 
-            <div className="prose prose-invert max-w-none">
-              <p className="text-lg leading-relaxed">
-                {currentSectionData.content}
-              </p>
+            <div className="prose prose-invert prose-lg max-w-none">
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                rehypePlugins={[rehypeRaw]}
+                components={{
+                  h1: ({node, ...props}) => <h1 className="text-3xl font-serif mb-6" {...props} />,
+                  h2: ({node, ...props}) => <h2 className="text-2xl font-serif mb-4" {...props} />,
+                  h3: ({node, ...props}) => <h3 className="text-xl font-serif mb-3" {...props} />,
+                  p: ({node, ...props}) => <p className="mb-4 leading-relaxed" {...props} />,
+                  ul: ({node, ...props}) => <ul className="list-disc pl-6 mb-4" {...props} />,
+                  ol: ({node, ...props}) => <ol className="list-decimal pl-6 mb-4" {...props} />,
+                  li: ({node, ...props}) => <li className="mb-2" {...props} />,
+                  blockquote: ({node, ...props}) => (
+                    <blockquote className="border-l-4 border-gray-300 pl-4 italic my-4" {...props} />
+                  ),
+                  a: ({node, ...props}) => (
+                    <a className="text-blue-400 hover:text-blue-300 underline" {...props} />
+                  ),
+                  code: ({node, ...props}) => (
+                    <code className="bg-gray-800 rounded px-1 py-0.5" {...props} />
+                  ),
+                  pre: ({node, ...props}) => (
+                    <pre className="bg-gray-800 rounded p-4 overflow-x-auto my-4" {...props} />
+                  ),
+                }}
+              >
+                {currentSection?.content || ''}
+              </ReactMarkdown>
             </div>
           </div>
         </div>
