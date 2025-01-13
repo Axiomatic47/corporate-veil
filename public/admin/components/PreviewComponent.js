@@ -52,7 +52,6 @@ const PreviewComponent = createClass({
         if (!this.mounted) return;
 
         if (!response?.entries) {
-          console.warn('No entries found');
           return;
         }
 
