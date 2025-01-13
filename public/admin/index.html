@@ -4,44 +4,45 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Content Manager</title>
-    <link href="styles/main.css" rel="stylesheet" />
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+    <style>
+      /* Override dark theme */
+      .css-1gj57a0-AppMainContainer input,
+      .css-1gj57a0-AppMainContainer textarea {
+        background: white !important;
+        color: black !important;
+        border: 1px solid #e2e8f0 !important;
+      }
+
+      .custom-admin-sidebar {
+        z-index: 100;
+      }
+
+      .reading-level-selector {
+        position: sticky;
+        top: 0;
+        z-index: 90;
+        background: #1A1F2C;
+        padding: 1rem;
+      }
+    </style>
   </head>
   <body>
-    <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
     <!-- Load config first -->
     <script src="./config/cms-config.js"></script>
     <!-- Load handlers -->
     <script src="./components/EventHandlers.js"></script>
     <script>
-      // Add debugging
-      console.log('Loading admin interface...');
+      window.addEventListener('load', () => {
+        console.log('Initializing CMS...');
+        // Initialize CMS
+        window.CMS.init({
+          config: window.cmsConfig.config
+        });
 
-      window.addEventListener('load', async () => {
-        try {
-          console.log('Window loaded, initializing CMS...');
-
-          if (!window.cmsConfig) {
-            throw new Error('CMS config not loaded properly');
-          }
-
-          // Initialize CMS
-          console.log('Initializing CMS with config:', window.cmsConfig);
-          window.CMS.init({
-            config: window.cmsConfig.config
-          });
-
-          // Register handlers
-          console.log('Registering event handlers...');
-          if (window.registerEventHandlers) {
-            window.registerEventHandlers();
-          } else {
-            throw new Error('Event handlers not loaded properly');
-          }
-
-        } catch (error) {
-          console.error('Error initializing admin interface:', error);
+        // Initialize handlers
+        if (window.registerEventHandlers) {
+          window.registerEventHandlers();
         }
       });
     </script>
