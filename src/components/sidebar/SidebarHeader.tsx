@@ -6,8 +6,8 @@ interface SidebarHeaderProps {
 export const SidebarHeader = ({ collectionName, compositionTitle }: SidebarHeaderProps) => {
   return (
     <>
-      <h2 className="text-xl font-serif">{collectionName}</h2>
-      <h3 className="text-lg font-serif text-gray-300">{compositionTitle}</h3>
+      <h2 className="text-xl font-serif text-sidebar-foreground">{collectionName}</h2>
+      <h3 className="text-lg font-serif text-sidebar-foreground/70">{compositionTitle}</h3>
     </>
   );
 };
