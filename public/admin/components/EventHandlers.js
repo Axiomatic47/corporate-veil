@@ -1,4 +1,4 @@
-import AdminSidebar from './AdminSidebar';
+import AdminSidebar from './AdminSidebar.js';
 import { createRoot } from 'react-dom/client';
 
 const registerEventHandlers = () => {
@@ -8,7 +8,7 @@ const registerEventHandlers = () => {
   const initializeSidebar = async () => {
     try {
       console.log('Initializing sidebar...');
-      const entries = await CMS.getEntries({ collection_name: 'compositions' });
+      const entries = await window.CMS.getEntries({ collection_name: 'compositions' });
       currentEntries = entries;
       
       // Remove any existing sidebar
@@ -37,7 +37,7 @@ const registerEventHandlers = () => {
       
       console.log('Rendering sidebar with entries:', entries);
       
-      // Render sidebar
+      // Render sidebar using React 18's createRoot
       const root = createRoot(sidebarContainer);
       root.render(
         <AdminSidebar 
@@ -53,7 +53,7 @@ const registerEventHandlers = () => {
             console.log('Section selected:', section);
             const selectedEntry = entries.find(e => e.data.title === section.title);
             if (selectedEntry) {
-              await CMS.entry.select(selectedEntry);
+              await window.CMS.entry.select(selectedEntry);
             }
           }}
           onSectionsReorder={async (newOrder) => {
@@ -63,10 +63,10 @@ const registerEventHandlers = () => {
                 const entry = entries.find(e => e.data.title === item.title);
                 if (entry) {
                   entry.data.section = item.section;
-                  await CMS.entry.persist(entry);
+                  await window.CMS.entry.persist(entry);
                 }
               }
-              currentEntries = await CMS.getEntries({ collection_name: 'compositions' });
+              currentEntries = await window.CMS.getEntries({ collection_name: 'compositions' });
               initializeSidebar();
             } catch (error) {
               console.error('Error reordering sections:', error);
@@ -80,7 +80,7 @@ const registerEventHandlers = () => {
   };
 
   // Register event listeners
-  CMS.registerEventListener({
+  window.CMS.registerEventListener({
     name: 'preInit',
     handler: function() {
       console.log('PreInit event fired');
@@ -88,7 +88,7 @@ const registerEventHandlers = () => {
     }
   });
 
-  CMS.registerEventListener({
+  window.CMS.registerEventListener({
     name: 'entrySelected',
     handler: function(entry) {
       console.log('Entry selected:', entry);

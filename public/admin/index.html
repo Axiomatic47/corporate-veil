@@ -12,10 +12,12 @@
       import config from './config/cms-config.js';
       import registerEventHandlers from './components/EventHandlers.js';
       
-      // Initialize CMS
-      window.CMS.init(config);
+      // Initialize CMS with config
+      window.CMS.init({
+        config: config.config
+      });
       
-      // Register event handlers
+      // Register event handlers after CMS initialization
       registerEventHandlers();
     </script>
   </body>
