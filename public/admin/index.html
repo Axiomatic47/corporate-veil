@@ -8,15 +8,14 @@
     <link rel="stylesheet" href="styles/preview.css">
   </head>
   <body>
-    <!-- Load CMS -->
     <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
 
-    <!-- Define and register preview component -->
     <script>
       const PreviewComponent = createClass({
         getInitialState() {
           return {
             sections: [],
+            currentSection: null,
             error: null,
             loading: true
           };
@@ -55,6 +54,7 @@
               })
               .map(e => ({
                 section: e.getIn(['data', 'section']),
+                content: e.getIn(['data', 'body']),
                 slug: e.get('slug')
               }))
               .toJS()
@@ -62,6 +62,7 @@
 
             this.setState({
               sections,
+              currentSection: sections[0],
               loading: false,
               error: null
             });
@@ -81,9 +82,10 @@
           try {
             const data = entry.get('data');
             const currentSection = parseInt(data.get('section') || '0', 10);
+            const newSection = currentSection + 1;
 
             const newData = data.withMutations(map => {
-              map.set('section', currentSection + 1);
+              map.set('section', newSection);
             });
 
             if (CMS?.entry?.set) {
@@ -96,21 +98,8 @@
           }
         },
 
-        handleSectionClick(slug) {
-          const { entries } = this.props;
-          if (!entries) return;
-
-          try {
-            const compositions = entries.get('compositions');
-            const targetEntry = compositions.find(e => e.get('slug') === slug);
-
-            if (targetEntry && CMS?.entry?.set) {
-              CMS.entry.set(targetEntry);
-            }
-          } catch (error) {
-            console.error('Error switching sections:', error);
-            this.setState({ error: 'Failed to switch sections' });
-          }
+        handleSectionClick(section) {
+          this.setState({ currentSection: section });
         },
 
         render() {
@@ -120,47 +109,53 @@
           const data = entry.get('data');
           if (!data) return null;
 
-          const currentSection = parseInt(data.get('section') || '0', 10);
           const collectionType = data.get('collection_type');
           const collectionTitle = collectionType === 'memorandum'
             ? 'Memorandum and Manifestation'
             : 'Corrective Measures';
 
-          return h('div', { className: 'preview-container' },
-            h('div', { className: 'sidebar' },
-              h('div', { className: 'collection-title' }, collectionTitle),
-              h('div', { className: 'composition-title' }, data.get('title')),
-              this.state.error && h('div', { className: 'error-message' }, this.state.error),
-              this.state.loading
-                ? h('div', { className: 'loading-message' }, 'Loading sections...')
-                : h('div', { className: 'controls-container' },
-                    h('button', {
-                      className: 'new-section-button',
-                      onClick: () => this.handleNewSection()
-                    }, 'New Section'),
-                    h('div', { className: 'section-list' },
+          return h('div', { className: 'admin-layout' },
+            h('div', { className: 'navigation-sidebar' },
+              h('div', { className: 'sidebar-header' },
+                h('h2', { className: 'collection-title' }, collectionTitle),
+                h('h3', { className: 'composition-title' }, data.get('title'))
+              ),
+              h('div', { className: 'sections-container' },
+                this.state.loading 
+                  ? h('div', { className: 'loading' }, 'Loading sections...')
+                  : h('div', { className: 'sections-list' },
+                      h('button', {
+                        className: 'new-section-button',
+                        onClick: () => this.handleNewSection()
+                      }, '+ New Section'),
                       this.state.sections.map(section =>
                         h('button', {
                           key: section.section,
-                          className: `section-button ${section.section === currentSection ? 'active' : ''}`,
-                          onClick: () => this.handleSectionClick(section.slug)
+                          onClick: () => this.handleSectionClick(section),
+                          className: `section-button ${
+                            this.state.currentSection && 
+                            section.section === this.state.currentSection.section 
+                              ? 'active' 
+                              : ''
+                          }`
                         }, `Section ${section.section}`)
                       )
                     )
-                  )
+              )
             ),
-            h('div', { className: 'preview-content' },
-              h('h1', {}, data.get('title')),
-              h('div', { className: 'markdown-content' }, this.props.widgetFor('body'))
+            h('div', { className: 'content-area' },
+              h('div', { className: 'content-header' },
+                h('h1', {}, `Section ${this.state.currentSection?.section || ''}`)
+              ),
+              h('div', { className: 'content-body' },
+                this.state.currentSection?.content || 'Select a section to view content'
+              )
             )
           );
         }
       });
 
-      // Initialize CMS
       CMS.init();
-
-      // Register preview template after CMS is initialized
       CMS.registerPreviewTemplate('compositions', PreviewComponent);
     </script>
   </body>
