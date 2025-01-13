@@ -52,16 +52,21 @@
           .toJS()
           .sort((a, b) => a.section - b.section);
 
-        this.setState({
-          sections,
-          loading: false,
-          error: null
-        });
+        if (this.mounted) {
+          this.setState({
+            sections,
+            loading: false,
+            error: null
+          });
+        }
       } catch (error) {
-        this.setState({
-          error: 'Failed to load sections',
-          loading: false
-        });
+        console.error('Error loading sections:', error);
+        if (this.mounted) {
+          this.setState({
+            error: 'Failed to load sections',
+            loading: false
+          });
+        }
       }
     },
 
@@ -74,16 +79,24 @@
         const currentSection = parseInt(data.get('section') || '0', 10);
         const newSection = currentSection + 1;
 
+        const newData = data.set('section', newSection);
+        
         if (CMS?.entry?.set) {
-          CMS.entry.set('data', data.set('section', newSection));
+          const newEntry = entry.set('data', newData);
+          CMS.entry.set(newEntry);
+          
+          // Update local state to reflect the new section
+          this.setState(prevState => ({
+            sections: [...prevState.sections, { section: newSection, slug: entry.get('slug') }]
+          }));
         }
       } catch (error) {
+        console.error('Error creating section:', error);
         this.setState({ error: 'Failed to create new section' });
       }
     },
 
     handleSectionClick(section) {
-      this.setState({ currentSection: section });
       const { entries } = this.props;
       if (!entries) return;
 
@@ -95,8 +108,11 @@
 
         if (targetEntry && CMS?.entry?.set) {
           CMS.entry.set(targetEntry);
+          // Update current section in state without clearing sections array
+          this.setState({ currentSection: section });
         }
       } catch (error) {
+        console.error('Error switching sections:', error);
         this.setState({ error: 'Failed to switch sections' });
       }
     },
