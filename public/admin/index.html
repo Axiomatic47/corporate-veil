@@ -5,24 +5,42 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Content Manager</title>
     <link href="styles/main.css" rel="stylesheet" />
-    <!-- Add React dependencies -->
+    <link href="styles/preview.css" rel="stylesheet" />
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/react-beautiful-dnd@13.1.0/dist/react-beautiful-dnd.min.js"></script>
   </head>
   <body>
     <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
-    <script type="module">
-      import config from './config/cms-config.js';
-      import registerEventHandlers from './components/EventHandlers.js';
-      
-      // Initialize CMS with config
-      window.CMS.init({
-        config: config.config
+    <script>
+      // We'll load components after React and ReactBeautifulDnd are available
+      window.addEventListener('load', async () => {
+        try {
+          // Load admin sidebar
+          const adminSidebarResponse = await fetch('./components/AdminSidebar.js');
+          const adminSidebarText = await adminSidebarResponse.text();
+          eval(adminSidebarText);
+
+          // Load event handlers
+          const eventHandlersResponse = await fetch('./components/EventHandlers.js');
+          const eventHandlersText = await eventHandlersResponse.text();
+          eval(eventHandlersText);
+
+          // Load config
+          const configModule = await import('./config/cms-config.js');
+
+          // Initialize CMS
+          window.CMS.init({
+            config: configModule.default.config
+          });
+
+          // Register event handlers
+          registerEventHandlers();
+
+        } catch (error) {
+          console.error('Error loading admin components:', error);
+        }
       });
-      
-      // Register event handlers after CMS initialization
-      registerEventHandlers();
     </script>
   </body>
 </html>
