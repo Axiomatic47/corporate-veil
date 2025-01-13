@@ -1,21 +1,80 @@
 import AdminSidebar from './AdminSidebar';
 import useFormState from './FormStateManager';
+import { createRoot } from 'react-dom/client';
 
 const registerEventHandlers = () => {
   let currentEntries = [];
+  let currentEntry = null;
   
-  const initializeSidebar = async (collection) => {
+  const initializeSidebar = async () => {
     const entries = await CMS.getEntries({ collection_name: 'compositions' });
     currentEntries = entries;
     
-    const sidebarContainer = document.createElement('div');
-    sidebarContainer.id = 'admin-sidebar';
-    document.body.insertBefore(sidebarContainer, document.body.firstChild);
+    // Create sidebar container if it doesn't exist
+    let sidebarContainer = document.getElementById('admin-sidebar');
+    if (!sidebarContainer) {
+      sidebarContainer = document.createElement('div');
+      sidebarContainer.id = 'admin-sidebar';
+      document.body.insertBefore(sidebarContainer, document.body.firstChild);
+    }
     
+    // Adjust main content area
     const mainContent = document.querySelector('.css-1gj57a0-AppMainContainer');
     if (mainContent) {
       mainContent.style.marginLeft = '16rem';
     }
+
+    // Hide the "Previous Section Title" field since we're using the sidebar for ordering
+    const previousSectionField = document.querySelector('[data-field-name="previous_section"]');
+    if (previousSectionField) {
+      previousSectionField.style.display = 'none';
+    }
+    
+    // Render sidebar
+    const root = createRoot(sidebarContainer);
+    root.render(
+      <AdminSidebar 
+        sections={entries.map(entry => ({
+          title: entry.data.title,
+          section: entry.data.section
+        }))}
+        currentSection={currentEntry ? {
+          title: currentEntry.data.title,
+          section: currentEntry.data.section
+        } : null}
+        onSectionSelect={async (section) => {
+          const selectedEntry = entries.find(e => e.data.title === section.title);
+          if (selectedEntry) {
+            // Check for unsaved changes
+            const form = document.querySelector('form');
+            if (form && form.dirty) {
+              if (!window.confirm('You have unsaved changes. Are you sure you want to leave?')) {
+                return;
+              }
+            }
+            await CMS.entry.select(selectedEntry);
+          }
+        }}
+        onSectionsReorder={async (newOrder) => {
+          try {
+            // Update all entries with new section numbers
+            for (const item of newOrder) {
+              const entry = entries.find(e => e.data.title === item.title);
+              if (entry) {
+                entry.data.section = item.section;
+                await CMS.entry.persist(entry);
+              }
+            }
+            // Refresh the entries list
+            currentEntries = await CMS.getEntries({ collection_name: 'compositions' });
+            // Re-render sidebar
+            initializeSidebar();
+          } catch (error) {
+            console.error('Error reordering sections:', error);
+          }
+        }}
+      />
+    );
   };
 
   CMS.registerEventListener({
@@ -134,6 +193,15 @@ const registerEventHandlers = () => {
       if (form) {
         form.dirty = true;
       }
+    }
+  });
+
+  // Track current entry
+  CMS.registerEventListener({
+    name: 'entrySelected',
+    handler: function(entry) {
+      currentEntry = entry;
+      initializeSidebar();
     }
   });
 };
