@@ -15,6 +15,12 @@ const registerEventHandlers = () => {
     if (!sidebarContainer) {
       sidebarContainer = document.createElement('div');
       sidebarContainer.id = 'admin-sidebar';
+      sidebarContainer.style.position = 'fixed';
+      sidebarContainer.style.left = '0';
+      sidebarContainer.style.top = '0';
+      sidebarContainer.style.bottom = '0';
+      sidebarContainer.style.width = '16rem';
+      sidebarContainer.style.zIndex = '50';
       document.body.insertBefore(sidebarContainer, document.body.firstChild);
     }
     
@@ -22,6 +28,7 @@ const registerEventHandlers = () => {
     const mainContent = document.querySelector('.css-1gj57a0-AppMainContainer');
     if (mainContent) {
       mainContent.style.marginLeft = '16rem';
+      mainContent.style.width = 'calc(100% - 16rem)';
     }
 
     // Hide the "Previous Section Title" field since we're using the sidebar for ordering
