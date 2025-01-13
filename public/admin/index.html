@@ -6,48 +6,46 @@
     <title>Content Manager</title>
     <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
     <style>
-      /* Reset default styles */
-      * {
-        box-sizing: border-box;
+      /* Base styles */
+      body {
+        margin: 0;
+        background: #1A1F2C !important;
+        color: white !important;
       }
 
-      /* Hide preview pane */
-      [class*="SplitPane"][class*="horizontal"] > div:last-child {
-        display: none !important;
-      }
-      [class*="SplitPane"][class*="horizontal"] > div:first-child {
-        width: 100% !important;
-      }
-      [class*="PreviewPaneContainer"] {
-        display: none !important;
-      }
-
-      /* Custom form styles */
+      /* Form controls */
       [class*="ControlContainer"] {
         background: #2A2F3C !important;
-        padding: 1rem !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
         margin-bottom: 1rem !important;
+        padding: 1rem !important;
         border-radius: 4px !important;
       }
 
-      [class*="EditorControlBar"] {
-        background: #1A1F2C !important;
-      }
-
-      /* Input fields */
       input, textarea, select {
         background: #1A1F2C !important;
         border: 1px solid rgba(255, 255, 255, 0.1) !important;
         color: white !important;
         padding: 0.5rem !important;
+        border-radius: 4px !important;
+        width: 100% !important;
       }
 
       /* Labels */
-      [class*="FieldLabel"] {
+      label {
         color: white !important;
+        margin-bottom: 0.5rem !important;
+        display: block !important;
       }
 
-      /* Custom sidebar */
+      /* Main container */
+      [class*="AppMainContainer"] {
+        margin-left: 16rem !important;
+        padding: 2rem !important;
+        background: #1A1F2C !important;
+      }
+
+      /* Navigation */
       .custom-sidebar {
         position: fixed;
         left: 0;
@@ -55,62 +53,47 @@
         bottom: 0;
         width: 16rem;
         background: #1A1F2C;
-        color: white;
+        border-right: 1px solid rgba(255, 255, 255, 0.1);
         padding: 1rem;
         overflow-y: auto;
-        z-index: 100;
       }
 
-      /* Adjust main content */
-      [class*="AppMainContainer"] {
-        margin-left: 16rem !important;
-      }
-
-      /* Section buttons */
       .sidebar-section {
         padding: 0.75rem;
         margin-bottom: 0.5rem;
         background: rgba(255, 255, 255, 0.1);
         border-radius: 0.375rem;
         cursor: pointer;
-        user-select: none;
+        transition: background-color 0.2s;
       }
 
       .sidebar-section:hover {
         background: rgba(255, 255, 255, 0.2);
       }
 
-      .sidebar-section.active {
-        background: rgba(255, 255, 255, 0.3);
+      /* Markdown editor */
+      .Pane2 {
+        display: none !important;
+      }
+
+      [class*="ToolbarContainer"] {
+        background: #2A2F3C !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+      }
+
+      [class*="EditorContainer"] {
+        background: #1A1F2C !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        color: white !important;
       }
     </style>
   </head>
   <body>
     <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
-    <script src="./config/cms-config.js"></script>
     <script>
       window.addEventListener('load', function() {
         // Initialize CMS
         CMS.init();
-
-        // Wait for CMS to be ready
-        setTimeout(() => {
-          // Hide preview pane via DOM
-          const previewPane = document.querySelector('[class*="PreviewPaneContainer"]');
-          if (previewPane) {
-            previewPane.style.display = 'none';
-          }
-
-          // Initialize sidebar
-          fetch('./config.yml')
-            .then(response => response.text())
-            .then(config => {
-              // Create sidebar after config is loaded
-              const sidebar = document.createElement('div');
-              sidebar.className = 'custom-sidebar';
-              document.body.appendChild(sidebar);
-            });
-        }, 1000);
       });
     </script>
   </body>
