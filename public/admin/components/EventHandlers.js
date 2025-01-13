@@ -15,12 +15,6 @@ const registerEventHandlers = () => {
     if (!sidebarContainer) {
       sidebarContainer = document.createElement('div');
       sidebarContainer.id = 'admin-sidebar';
-      sidebarContainer.style.position = 'fixed';
-      sidebarContainer.style.left = '0';
-      sidebarContainer.style.top = '0';
-      sidebarContainer.style.bottom = '0';
-      sidebarContainer.style.width = '16rem';
-      sidebarContainer.style.zIndex = '50';
       document.body.insertBefore(sidebarContainer, document.body.firstChild);
     }
     
@@ -84,6 +78,7 @@ const registerEventHandlers = () => {
     );
   };
 
+  // Register event listeners
   CMS.registerEventListener({
     name: 'preSave',
     handler: async function(entry) {
