@@ -19,7 +19,7 @@ const registerEventHandlers = () => {
       // Create new sidebar container
       const sidebarContainer = document.createElement('div');
       sidebarContainer.id = 'admin-sidebar';
-      document.body.insertBefore(sidebarContainer, document.body.firstChild);
+      document.body.appendChild(sidebarContainer);
       
       // Adjust main content area
       const mainContent = document.querySelector('.css-1gj57a0-AppMainContainer');
@@ -78,6 +78,7 @@ const registerEventHandlers = () => {
   CMS.registerEventListener({
     name: 'preInit',
     handler: function() {
+      console.log('PreInit event fired');
       setTimeout(initializeSidebar, 1000);
     }
   });
@@ -85,6 +86,7 @@ const registerEventHandlers = () => {
   CMS.registerEventListener({
     name: 'entrySelected',
     handler: function(entry) {
+      console.log('Entry selected:', entry);
       currentEntry = entry;
       initializeSidebar();
     }
