@@ -26,12 +26,10 @@ collections:
           required: true
         }
       - {
-          label: "Section Number",
+          label: "Section",
           name: "section",
-          widget: "number",
-          value_type: "int",
-          min: 1,
-          required: true
+          widget: "hidden",
+          default: 1
         }
       - {
           label: "Title",
@@ -46,8 +44,20 @@ collections:
           required: true
         }
       - {
-          label: "Content",
-          name: "content",
+          label: "Content Level 1",
+          name: "content_level_1",
+          widget: "markdown",
+          required: true
+        }
+      - {
+          label: "Content Level 3",
+          name: "content_level_3",
+          widget: "markdown",
+          required: true
+        }
+      - {
+          label: "Content Level 5",
+          name: "content_level_5",
           widget: "markdown",
           required: true
         }

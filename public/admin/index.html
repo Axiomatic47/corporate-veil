@@ -5,12 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Content Manager</title>
     <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+    <link href="./styles/main.css" rel="stylesheet" />
     <style>
-      /* Hide preview pane */
-      [class*="PreviewPaneContainer"] {
-        display: none !important;
-      }
-
       /* Hide section number field */
       [id*="section-field"],
       [id*="section-field-"] {
@@ -44,36 +40,21 @@
         opacity: 0.5;
         background: rgba(255, 255, 255, 0.2);
       }
-
-      /* Main content adjustments */
-      .css-1gj57a0-AppMainContainer {
-        margin-left: 16rem !important;
-        width: calc(100% - 16rem) !important;
-      }
     </style>
   </head>
   <body>
     <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
-    <script src="./config/cms-config.js"></script>
-    <script src="./components/EventHandlers.js"></script>
     <script>
-      if (window.netlifyIdentity) {
-        window.netlifyIdentity.on("init", user => {
-          if (!user) {
-            window.netlifyIdentity.open();
-          }
-        });
-      }
-
-      window.addEventListener('load', () => {
-        console.log('Initializing CMS...');
-        window.CMS.init({
-          config: window.cmsConfig.config
-        });
-        if (window.registerEventHandlers) {
-          window.registerEventHandlers();
+      // Initialize CMS
+      window.addEventListener('load', function() {
+        CMS.init();
+        
+        // Initialize event handlers after CMS is ready
+        if (window.initializeEventHandlers) {
+          window.initializeEventHandlers();
         }
       });
     </script>
+    <script src="./components/EventHandlers.js"></script>
   </body>
 </html>

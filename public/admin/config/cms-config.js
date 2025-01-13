@@ -5,17 +5,10 @@
   const cmsConfig = {
     config: {
       local_backend: isLocalhost,
-      backend: isLocalhost ? {
+      backend: {
         name: 'git-gateway',
         branch: 'main',
-        local_backend: true
-      } : {
-        name: 'github',
-        repo: 'Axiomatic47/corporate-veil',
-        branch: 'main',
-        base_url: 'https://api.netlify.com',
-        auth_endpoint: 'auth',
-        auth_type: 'implicit'
+        local_backend: isLocalhost
       },
       media_folder: 'public/uploads',
       public_folder: '/uploads',
@@ -84,5 +77,5 @@
     }
   };
 
-  window.cmsConfig = cmsConfig;
+  window.CMS.init(cmsConfig);
 })();
