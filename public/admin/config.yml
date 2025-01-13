@@ -34,6 +34,17 @@ collections:
           required: true,
           hint: "Enter the section number (no maximum limit)"
         }
+      - {
+          label: "Previous Section Title",
+          name: "previous_section",
+          widget: "relation",
+          collection: "compositions",
+          search_fields: ["title"],
+          value_field: "title",
+          display_fields: ["title"],
+          required: false,
+          hint: "Select the section that comes before this one (leave empty if this is the first section)"
+        }
       - { 
           label: "Title", 
           name: "title", 

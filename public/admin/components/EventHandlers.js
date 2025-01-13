@@ -39,6 +39,21 @@ const registerEventHandlers = () => {
           throw new Error('A composition with this title, section, and type already exists.');
         }
 
+        // Validate previous section exists if specified
+        if (data.previous_section) {
+          const previousSectionExists = entries.some(e => {
+            const entryData = typeof e.get === 'function'
+              ? e.get('data')?.toJS()
+              : e.data;
+            return entryData?.title === data.previous_section &&
+                   entryData?.collection_type === data.collection_type;
+          });
+
+          if (!previousSectionExists) {
+            throw new Error('The specified previous section does not exist.');
+          }
+        }
+
         // Auto-generate titles if not provided
         if (!data.title_level_1) {
           data.title_level_1 = data.title;
