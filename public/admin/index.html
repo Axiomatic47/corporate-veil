@@ -14,8 +14,8 @@
       // Initialize CMS first
       CMS.init();
       
-      // Register preview template
-      CMS.registerPreviewTemplate('compositions', PreviewComponent);
+      // Register preview template after CMS initialization
+      CMS.registerPreviewTemplate('compositions', window.PreviewComponent);
     </script>
   </body>
 </html>

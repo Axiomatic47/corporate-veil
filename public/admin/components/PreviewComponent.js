@@ -103,4 +103,5 @@ const PreviewComponent = createClass({
   }
 });
 
-export default PreviewComponent;
+// Register the preview component globally
+window.PreviewComponent = PreviewComponent;
