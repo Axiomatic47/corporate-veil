@@ -1,76 +1,62 @@
-const AdminSidebar = ({ sections, currentSection, onSectionSelect, onSectionsReorder }) => {
+const AdminSidebar = ({ sections, currentSection, onSectionSelect }) => {
   const e = React.createElement;
 
-  const handleDragEnd = (result) => {
-    if (!result.destination) return;
+  // Group sections by collection type
+  const groupedSections = sections.reduce((acc, section) => {
+    const type = section.collection_type || 'memorandum';
+    if (!acc[type]) {
+      acc[type] = [];
+    }
+    acc[type].push(section);
+    return acc;
+  }, {});
 
-    const items = Array.from(sections);
-    const [reorderedItem] = items.splice(result.source.index, 1);
-    items.splice(result.destination.index, 0, reorderedItem);
-
-    const updatedItems = items.map((item, index) => ({
-      ...item,
-      section: index + 1
-    }));
-
-    onSectionsReorder(updatedItems);
+  // Helper to get the formatted title for each collection type
+  const getCollectionTitle = (type) => {
+    switch (type) {
+      case 'memorandum':
+        return 'Memorandum and Manifestation';
+      case 'corrective':
+        return 'Corrective Measures';
+      default:
+        return 'Documents';
+    }
   };
 
   return e('div', {
-    className: "fixed left-0 top-0 bottom-0 w-64 bg-white shadow-lg z-50"
+    className: "w-64 min-h-screen bg-[#1A1F2C] text-white"
   }, [
+    // Collection title
     e('div', {
       key: 'header',
-      className: "p-6 border-b border-gray-200"
+      className: "p-6 space-y-6"
     }, [
-      e('h2', {
-        className: "text-xl font-semibold text-gray-800"
-      }, 'Collections'),
-      e(window.ReactBeautifulDnd.DragDropContext, {
-        onDragEnd: handleDragEnd
+      e('div', {}, [
+        e('h2', {
+          className: "text-lg font-medium text-white mb-1"
+        }, getCollectionTitle(currentSection?.collection_type)),
+        e('p', {
+          className: "text-sm text-white/60"
+        }, "Understanding Corporate Personhood")
+      ]),
+      // Navigation section
+      e('nav', {
+        className: "space-y-2"
       },
-        e(window.ReactBeautifulDnd.Droppable, {
-          droppableId: "sections"
-        }, (provided) =>
-          e('div', {
-            ...provided.droppableProps,
-            ref: provided.innerRef,
-            className: "p-4 space-y-2 overflow-y-auto max-h-[calc(100vh-200px)]"
-          }, [
-            sections.map((section, index) =>
-              e(window.ReactBeautifulDnd.Draggable, {
-                key: section.title,
-                draggableId: section.title,
-                index
-              }, (dragProvided, snapshot) =>
-                e('div', {
-                  ref: dragProvided.innerRef,
-                  ...dragProvided.draggableProps,
-                  ...dragProvided.dragHandleProps,
-                  className: `w-full text-left py-3 px-4 rounded-md cursor-pointer ${
-                    currentSection?.title === section.title
-                      ? "bg-blue-50 text-blue-700"
-                      : "bg-white text-gray-700 hover:bg-gray-50"
-                  } ${snapshot.isDragging ? "shadow-lg" : ""}`,
-                  onClick: () => onSectionSelect(section)
-                }, [
-                  e('div', {
-                    className: "flex items-center"
-                  }, [
-                    e('span', {
-                      className: "mr-2 text-gray-400"
-                    }, '≡'),
-                    e('span', {
-                      className: "truncate"
-                    }, section.title)
-                  ])
-                ])
-              )
-            ),
-            provided.placeholder
-          ])
+        sections.map(section =>
+          e('button', {
+            key: section.title,
+            onClick: () => onSectionSelect(section),
+            className: `w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${
+              currentSection?.title === section.title
+                ? "bg-white/10 text-white"
+                : "text-white/60 hover:bg-white/5 hover:text-white"
+            }`
+          }, section.title)
         )
       )
     ])
   ]);
 };
+
+export default AdminSidebar;

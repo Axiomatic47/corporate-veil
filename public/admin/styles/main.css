@@ -5,8 +5,9 @@
   top: 0 !important;
   left: 16rem !important;
   width: calc(100% - 16rem) !important;
-  background: white !important;
-  border-bottom: 1px solid #e5e7eb !important;
+  background: #1A1F2C !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: white !important;
 }
 
 .css-1gj57a0-AppMainContainer {
@@ -14,6 +15,8 @@
   width: calc(100% - 16rem) !important;
   padding-top: 60px !important;
   min-height: 100vh !important;
+  background: #0F1218 !important;
+  color: white !important;
 }
 
 /* Sidebar specific styles */
@@ -23,21 +26,10 @@
   top: 0 !important;
   bottom: 0 !important;
   width: 16rem !important;
-  background: white !important;
-  border-right: 1px solid #e5e7eb !important;
+  background: #1A1F2C !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
   overflow-y: auto !important;
   z-index: 50 !important;
-  box-shadow: 4px 0 6px -1px rgba(0, 0, 0, 0.05) !important;
-}
-
-/* Fix dropdown positioning */
-.css-1j73xvq-ToolbarSubSectionFirst {
-  z-index: 45 !important;
-}
-
-/* Ensure editor has proper spacing */
-.css-1q6r8f2-StyledWrapper {
-  margin-top: 60px !important;
 }
 
 /* Fix dropdown menu positioning */
@@ -45,20 +37,26 @@
   position: sticky !important;
   top: 0 !important;
   z-index: 45 !important;
-  background: white !important;
+  background: #1A1F2C !important;
+  color: white !important;
 }
 
-/* Additional fixes for editor layout */
+/* Editor area styling */
 .css-1f7nhiq-CollectionMain {
   padding-top: 20px !important;
   padding-left: 24px !important;
   padding-right: 24px !important;
+  background: #0F1218 !important;
+  color: white !important;
 }
 
-/* Fix publish button visibility */
-.css-1a7rmj4-ToolbarSectionMain-ToolbarSection,
-.css-1a7rmj4-ToolbarSectionMain-ToolbarSection button {
-  display: flex !important;
-  visibility: visible !important;
-  opacity: 1 !important;
+/* Form field styling */
+input, textarea, select {
+  background: #2A2F3C !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: white !important;
+}
+
+label {
+  color: white !important;
 }
