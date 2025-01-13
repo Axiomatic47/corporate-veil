@@ -6,22 +6,46 @@
     <title>Content Manager</title>
     <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
     <style>
-      .dragging {
-        opacity: 0.5;
-        border: 2px dashed #4a5568;
-      }
-
-      #custom-sidebar {
-        z-index: 1000;
-        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-      }
-
-      /* Hide section number field */
-      [data-field-name="section"] {
+      /* Hide preview pane */
+      [class*="PreviewPaneContainer"] {
         display: none !important;
       }
 
-      /* Override preview styles */
+      /* Hide section number field */
+      [id*="section-field"],
+      [id*="section-field-"] {
+        display: none !important;
+      }
+
+      /* Custom sidebar styles */
+      .custom-sidebar {
+        position: fixed;
+        left: 0;
+        top: 48px;
+        bottom: 0;
+        width: 16rem;
+        background: #1A1F2C;
+        color: white;
+        padding: 1rem;
+        overflow-y: auto;
+        z-index: 100;
+      }
+
+      .sidebar-section {
+        padding: 0.75rem;
+        margin-bottom: 0.5rem;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 0.375rem;
+        cursor: move;
+        user-select: none;
+      }
+
+      .sidebar-section.dragging {
+        opacity: 0.5;
+        background: rgba(255, 255, 255, 0.2);
+      }
+
+      /* Main content adjustments */
       .css-1gj57a0-AppMainContainer {
         margin-left: 16rem !important;
         width: calc(100% - 16rem) !important;
@@ -30,32 +54,25 @@
   </head>
   <body>
     <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
-    <!-- Load config first -->
     <script src="./config/cms-config.js"></script>
-    <!-- Load handlers -->
     <script src="./components/EventHandlers.js"></script>
     <script>
-      window.addEventListener('load', async () => {
+      if (window.netlifyIdentity) {
+        window.netlifyIdentity.on("init", user => {
+          if (!user) {
+            window.netlifyIdentity.open();
+          }
+        });
+      }
+
+      window.addEventListener('load', () => {
         console.log('Initializing CMS...');
-
-        // Initialize Netlify Identity
-        if (window.netlifyIdentity) {
-          window.netlifyIdentity.on('init', user => {
-            if (!user) {
-              window.netlifyIdentity.on('login', () => {
-                document.location.href = '/admin/';
-              });
-            }
-          });
-        }
-
-        // Initialize CMS
         window.CMS.init({
           config: window.cmsConfig.config
         });
-
-        // Initialize handlers
-        window.registerEventHandlers();
+        if (window.registerEventHandlers) {
+          window.registerEventHandlers();
+        }
       });
     </script>
   </body>

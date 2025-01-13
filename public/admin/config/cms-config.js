@@ -1,17 +1,25 @@
 (() => {
+  const isLocalhost = window.location.hostname === 'localhost' ||
+                     window.location.hostname === '127.0.0.1';
+
   const cmsConfig = {
     config: {
-      load_config_file: false,
-      local_backend: true,
-      backend: {
+      local_backend: isLocalhost,
+      backend: isLocalhost ? {
+        name: 'git-gateway',
+        branch: 'main',
+        local_backend: true
+      } : {
         name: 'github',
         repo: 'Axiomatic47/corporate-veil',
         branch: 'main',
-        auth_endpoint: 'auth'
+        base_url: 'https://api.netlify.com',
+        auth_endpoint: 'auth',
+        auth_type: 'implicit'
       },
-      publish_mode: 'editorial_workflow',
       media_folder: 'public/uploads',
       public_folder: '/uploads',
+      publish_mode: 'simple',
       editor: {
         preview: false
       },
@@ -23,7 +31,6 @@
           create: true,
           sortable_fields: ['section'],
           sort: 'section',
-          identifier_field: 'title',
           fields: [
             {
               label: 'Collection Type',
@@ -34,6 +41,12 @@
                 { label: 'Corrective', value: 'corrective' }
               ],
               required: true
+            },
+            {
+              label: 'Section',
+              name: 'section',
+              widget: 'hidden',
+              default: 1
             },
             {
               label: 'Title',
@@ -48,8 +61,20 @@
               required: true
             },
             {
-              label: 'Content',
-              name: 'content',
+              label: 'Content (Level 1)',
+              name: 'content_level_1',
+              widget: 'markdown',
+              required: true
+            },
+            {
+              label: 'Content (Level 3)',
+              name: 'content_level_3',
+              widget: 'markdown',
+              required: true
+            },
+            {
+              label: 'Content (Level 5)',
+              name: 'content_level_5',
               widget: 'markdown',
               required: true
             }
@@ -59,6 +84,5 @@
     }
   };
 
-  // Make config available globally
   window.cmsConfig = cmsConfig;
 })();
