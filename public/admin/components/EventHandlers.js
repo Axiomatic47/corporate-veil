@@ -1,4 +1,23 @@
+import AdminSidebar from './AdminSidebar';
+import useFormState from './FormStateManager';
+
 const registerEventHandlers = () => {
+  let currentEntries = [];
+  
+  const initializeSidebar = async (collection) => {
+    const entries = await CMS.getEntries({ collection_name: 'compositions' });
+    currentEntries = entries;
+    
+    const sidebarContainer = document.createElement('div');
+    sidebarContainer.id = 'admin-sidebar';
+    document.body.insertBefore(sidebarContainer, document.body.firstChild);
+    
+    const mainContent = document.querySelector('.css-1gj57a0-AppMainContainer');
+    if (mainContent) {
+      mainContent.style.marginLeft = '16rem';
+    }
+  };
+
   CMS.registerEventListener({
     name: 'preSave',
     handler: async function(entry) {
@@ -74,7 +93,6 @@ const registerEventHandlers = () => {
     }
   });
 
-  // Add form initialization handler
   CMS.registerEventListener({
     name: 'preInit',
     handler: function() {
@@ -84,12 +102,37 @@ const registerEventHandlers = () => {
         previewPane.style.display = 'none';
       }
 
+      // Initialize sidebar after a short delay to ensure DOM is ready
+      setTimeout(() => {
+        initializeSidebar();
+      }, 500);
+
       // Enhance form layout
       const editor = document.querySelector('.cms-editor-visual');
       if (editor) {
         editor.style.maxWidth = '800px';
         editor.style.margin = '0 auto';
         editor.style.padding = '2rem';
+      }
+
+      // Add unsaved changes warning
+      window.addEventListener('beforeunload', (e) => {
+        const form = document.querySelector('form');
+        if (form && form.dirty) {
+          e.preventDefault();
+          e.returnValue = '';
+        }
+      });
+    }
+  });
+
+  // Handle form changes
+  CMS.registerEventListener({
+    name: 'change',
+    handler: function(e) {
+      const form = document.querySelector('form');
+      if (form) {
+        form.dirty = true;
       }
     }
   });
