@@ -1,3 +1,4 @@
+// compositionLoader.ts
 import { Composition } from './compositionData';
 
 export const loadCompositions = async (): Promise<Composition[]> => {
@@ -12,40 +13,32 @@ export const loadCompositions = async (): Promise<Composition[]> => {
 
     for (const path in modules) {
       const data = modules[path] as any;
+      console.log('Loading composition data:', data); // Debug log
 
       // Process each section in the composition
-      const sections = (data.sections || []).map((section: any, index: number) => ({
-        id: index + 1,
-        title: section.title,
-        description: section.description,
-        collection_type: data.collection_type,
-        content: section[`content_level_3`], // Default to intermediate level
-        content_level_1: section.content_level_1,
-        content_level_3: section.content_level_3,
-        content_level_5: section.content_level_5,
-      }));
-
-      // Add each section as a separate composition entry
-      sections.forEach(section => {
-        compositions.push({
-          id: section.id,
+      const sections = (data.sections || []).map((section: any, index: number) => {
+        console.log('Processing section:', section); // Debug log
+        return {
+          id: index + 1,
           title: data.title,
           description: data.description,
           collection_type: data.collection_type,
-          section: section.id,
-          content: section.content,
+          section: index + 1, // Match section number to index + 1
           section_title: section.title,
           content_level_1: section.content_level_1,
           content_level_3: section.content_level_3,
           content_level_5: section.content_level_5,
-        });
+        };
       });
+
+      // Add processed sections to compositions array
+      compositions.push(...sections);
     }
 
+    console.log('Final compositions array:', compositions); // Debug log
+
     // Sort by section number
-    compositions.sort((a, b) => a.section - b.section);
-    
-    return compositions;
+    return compositions.sort((a, b) => a.section - b.section);
   } catch (error) {
     console.error('Error loading compositions:', error);
     throw error;
