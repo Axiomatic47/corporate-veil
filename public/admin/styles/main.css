@@ -68,20 +68,23 @@
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1) !important;
 }
 
+/* Sidebar specific styles with !important to ensure they take precedence */
 #admin-sidebar {
-  position: fixed;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 16rem;
-  background: #f3f4f6;
-  border-right: 1px solid #e5e7eb;
-  overflow-y: auto;
-  z-index: 100;
+  position: fixed !important;
+  left: 0 !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  width: 16rem !important;
+  background: #f3f4f6 !important;
+  border-right: 1px solid #e5e7eb !important;
+  overflow-y: auto !important;
+  z-index: 100 !important;
 }
 
-.cms-editor-visual {
+/* Adjust main content area to account for sidebar */
+.css-1gj57a0-AppMainContainer {
   margin-left: 16rem !important;
+  width: calc(100% - 16rem) !important;
 }
 
 .unsaved-warning {
