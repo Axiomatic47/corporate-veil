@@ -1,111 +1,14 @@
-// /public/admin/components/CustomSidebar.js
+// CustomSidebar.js
+(() => {
+  const initSidebar = () => {
+    // Wait for CMS API to be ready
+    if (!window.CMS || !window.CMS.getState) {
+      setTimeout(initSidebar, 100);
+      return;
+    }
 
-const CustomSidebar = {
-  init: function() {
     let currentEntries = [];
     let isProcessingAction = false;
-
-    const createNewSection = async () => {
-      if (isProcessingAction) return;
-      isProcessingAction = true;
-
-      try {
-        const store = window.CMS.store;
-        const collections = store.getState().collections;
-        const entries = collections.get('compositions')?.entries?.toJS() || [];
-        const nextSection = entries.length > 0 ?
-          Math.max(...entries.map(e => e.data.section || 0)) + 1 : 1;
-
-        // Save current form state if needed
-        const currentEntry = store.getState().entryDraft;
-        if (currentEntry && currentEntry.get('hasChanged')) {
-          await store.dispatch({
-            type: 'ENTRY_PERSIST',
-            payload: {
-              collectionName: 'compositions',
-              entryDraft: currentEntry.toJS(),
-              options: { raw: true }
-            }
-          });
-        }
-
-        // Create new entry
-        await store.dispatch({
-          type: 'DRAFT_CREATE_NEW_ENTRY',
-          payload: {
-            collectionName: 'compositions',
-            data: {
-              collection_type: 'memorandum',
-              section: nextSection,
-              title: `New Section ${nextSection}`,
-              description: '',
-              content_level_1: '',
-              content_level_3: '',
-              content_level_5: ''
-            }
-          }
-        });
-
-        // Select the new entry after a short delay
-        setTimeout(() => {
-          const newEntries = store.getState().collections.get('compositions')?.entries?.toJS() || [];
-          const newEntry = newEntries.find(e => e.data.section === nextSection);
-          if (newEntry) {
-            store.dispatch({
-              type: 'DRAFT_CREATE_FROM_ENTRY',
-              payload: {
-                collectionName: 'compositions',
-                entry: newEntry
-              }
-            });
-          }
-        }, 500);
-      } catch (error) {
-        console.error('Error creating new section:', error);
-      } finally {
-        isProcessingAction = false;
-      }
-    };
-
-    const selectSection = async (entry) => {
-      if (isProcessingAction) return;
-      isProcessingAction = true;
-
-      try {
-        const store = window.CMS.store;
-
-        // Save current form state if needed
-        const currentEntry = store.getState().entryDraft;
-        if (currentEntry && currentEntry.get('hasChanged')) {
-          await store.dispatch({
-            type: 'ENTRY_PERSIST',
-            payload: {
-              collectionName: 'compositions',
-              entryDraft: currentEntry.toJS(),
-              options: { raw: true }
-            }
-          });
-        }
-
-        // Load selected entry
-        await store.dispatch({
-          type: 'DRAFT_CREATE_FROM_ENTRY',
-          payload: {
-            collectionName: 'compositions',
-            entry: entry
-          }
-        });
-
-        // Update UI
-        document.querySelectorAll('.section-item').forEach(item => {
-          item.classList.toggle('active', item.dataset.slug === entry.slug);
-        });
-      } catch (error) {
-        console.error('Error selecting section:', error);
-      } finally {
-        isProcessingAction = false;
-      }
-    };
 
     // Create sidebar elements
     const sidebar = document.createElement('div');
@@ -175,24 +78,9 @@ const CustomSidebar = {
         background: #f0f0f0;
       }
 
-      .section-item.dragging {
-        opacity: 0.5;
-        background: #e0e0e0;
-      }
-
       .section-item.active {
         background: #e3f2fd;
         border-color: #2196f3;
-      }
-
-      .drag-handle {
-        margin-right: 8px;
-        color: #999;
-        cursor: grab;
-      }
-
-      .section-title {
-        flex-grow: 1;
       }
 
       /* Main content adjustment */
@@ -205,141 +93,127 @@ const CustomSidebar = {
     document.head.appendChild(styles);
     document.body.appendChild(sidebar);
 
+    const createNewSection = async () => {
+      if (isProcessingAction) return;
+      isProcessingAction = true;
+
+      try {
+        const collections = window.CMS.getState().collections;
+        const entries = collections.get('compositions')?.entries?.toJS() || [];
+        const nextSection = entries.length > 0 ?
+          Math.max(...entries.map(e => e.data.section || 0)) + 1 : 1;
+
+        await window.CMS.store.dispatch({
+          type: 'DRAFT_CREATE_NEW_ENTRY',
+          payload: {
+            collectionName: 'compositions',
+            data: {
+              collection_type: 'memorandum',
+              section: nextSection,
+              title: `New Section ${nextSection}`,
+              description: '',
+              content_level_1: '',
+              content_level_3: '',
+              content_level_5: ''
+            }
+          }
+        });
+
+        updateSectionsList();
+      } catch (error) {
+        console.error('Error creating new section:', error);
+      } finally {
+        isProcessingAction = false;
+      }
+    };
+
+    const selectSection = async (entry) => {
+      if (isProcessingAction) return;
+      isProcessingAction = true;
+
+      try {
+        await window.CMS.store.dispatch({
+          type: 'DRAFT_CREATE_FROM_ENTRY',
+          payload: {
+            collectionName: 'compositions',
+            entry: entry
+          }
+        });
+
+        // Update UI
+        document.querySelectorAll('.section-item').forEach(item => {
+          item.classList.toggle('active', item.dataset.slug === entry.slug);
+        });
+      } catch (error) {
+        console.error('Error selecting section:', error);
+      } finally {
+        isProcessingAction = false;
+      }
+    };
+
     // Initialize add section button
     const addButton = sidebar.querySelector('#add-section');
     addButton.addEventListener('click', createNewSection);
 
     // Update sections list
     const updateSectionsList = () => {
-      const store = window.CMS.store;
-      const collections = store.getState().collections;
-      const entries = collections.get('compositions')?.entries?.toJS() || [];
-      currentEntries = entries.sort((a, b) => (a.data.section || 0) - (b.data.section || 0));
-
-      const sectionsList = sidebar.querySelector('#sections-list');
-      sectionsList.innerHTML = '';
-
-      currentEntries.forEach((entry, index) => {
-        const section = document.createElement('div');
-        section.className = 'section-item';
-        section.draggable = true;
-        section.dataset.index = index;
-        section.dataset.slug = entry.slug;
-        section.innerHTML = `
-          <span class="drag-handle">≡</span>
-          <span class="section-title">${entry.data.title || 'Untitled Section'}</span>
-        `;
-
-        // Set active state if this is the current entry
-        const currentSlug = store.getState().entryDraft?.get('entry')?.get('slug');
-        if (currentSlug === entry.slug) {
-          section.classList.add('active');
-        }
-
-        // Click handler
-        section.addEventListener('click', (e) => {
-          // Only handle click if not dragging
-          if (!section.classList.contains('dragging')) {
-            selectSection(entry);
-          }
-        });
-
-        // Drag handlers
-        section.addEventListener('dragstart', (e) => {
-          section.classList.add('dragging');
-          e.dataTransfer.effectAllowed = 'move';
-        });
-
-        section.addEventListener('dragend', () => {
-          section.classList.remove('dragging');
-          updateSectionOrder();
-        });
-
-        sectionsList.appendChild(section);
-      });
-
-      // Update add button state
-      addButton.disabled = isProcessingAction;
-    };
-
-    // Set up drag and drop
-    const sectionsList = sidebar.querySelector('#sections-list');
-    sectionsList.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      const dragging = document.querySelector('.section-item.dragging');
-      if (!dragging) return;
-
-      const afterElement = getDragAfterElement(sectionsList, e.clientY);
-      if (afterElement) {
-        sectionsList.insertBefore(dragging, afterElement);
-      } else {
-        sectionsList.appendChild(dragging);
-      }
-    });
-
-    const getDragAfterElement = (container, y) => {
-      const draggableElements = [...container.querySelectorAll('.section-item:not(.dragging)')];
-      return draggableElements.reduce((closest, child) => {
-        const box = child.getBoundingClientRect();
-        const offset = y - box.top - box.height / 2;
-        if (offset < 0 && offset > closest.offset) {
-          return { offset, element: child };
-        } else {
-          return closest;
-        }
-      }, { offset: Number.NEGATIVE_INFINITY }).element;
-    };
-
-    const updateSectionOrder = async () => {
-      if (isProcessingAction) return;
-      isProcessingAction = true;
-
       try {
-        const sections = Array.from(document.querySelectorAll('.section-item'));
-        const store = window.CMS.store;
+        const collections = window.CMS.getState().collections;
+        const entries = collections.get('compositions')?.entries?.toJS() || [];
+        currentEntries = entries.sort((a, b) => (a.data.section || 0) - (b.data.section || 0));
 
-        for (const [index, section] of sections.entries()) {
-          const entry = currentEntries[parseInt(section.dataset.index)];
-          if (entry && entry.data.section !== index + 1) {
-            await store.dispatch({
-              type: 'ENTRY_PERSIST',
-              payload: {
-                collectionName: 'compositions',
-                entryDraft: {
-                  ...entry,
-                  data: {
-                    ...entry.data,
-                    section: index + 1
-                  }
-                },
-                options: { raw: true }
-              }
-            });
+        const sectionsList = sidebar.querySelector('#sections-list');
+        sectionsList.innerHTML = '';
+
+        currentEntries.forEach((entry) => {
+          const section = document.createElement('div');
+          section.className = 'section-item';
+          section.dataset.slug = entry.slug;
+          section.innerHTML = `
+            <span class="section-title">${entry.data.title || 'Untitled Section'}</span>
+          `;
+
+          // Set active state if this is the current entry
+          const currentEntry = window.CMS.getState().entryDraft?.get('entry');
+          if (currentEntry && currentEntry.get('slug') === entry.slug) {
+            section.classList.add('active');
           }
-        }
+
+          section.addEventListener('click', () => selectSection(entry));
+          sectionsList.appendChild(section);
+        });
+
+        addButton.disabled = isProcessingAction;
       } catch (error) {
-        console.error('Error updating section order:', error);
-      } finally {
-        isProcessingAction = false;
-        updateSectionsList();
+        console.error('Error updating sections list:', error);
       }
     };
 
-    // Subscribe to store changes
-    window.CMS.store.subscribe(() => {
+    // Subscribe to store changes once CMS is ready
+    const unsubscribe = window.CMS.store.subscribe(() => {
       updateSectionsList();
     });
 
     // Initial sections load
     updateSectionsList();
-  }
-};
 
-// Initialize when the script loads
-if (window.CMS) {
-  CustomSidebar.init();
-} else {
+    // Cleanup on page unload
+    window.addEventListener('unload', () => {
+      if (unsubscribe) unsubscribe();
+    });
+  };
+
+  // Initialize when DecapCMS is ready
   window.addEventListener('load', () => {
-    CustomSidebar.init();
+    if (window.CMS) {
+      window.CMS.registerEventListener({
+        name: 'preSave',
+        handler: async (args) => {
+          console.log('Saving entry:', args);
+        },
+      });
+
+      initSidebar();
+    }
   });
-}
+})();
