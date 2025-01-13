@@ -1,34 +1,34 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
-import { useCompositionStore, initializeCompositionData } from "@/utils/compositionData";
-import { useToast } from "@/components/ui/use-toast";
+
+// Mock data for sections preview
+const mockSectionsPreview = [
+  {
+    id: 1,
+    title: "Introduction to Corporate Personhood",
+    description: "Fundamental concepts and historical development"
+  },
+  {
+    id: 2,
+    title: "Legal Framework and Precedents",
+    description: "Key cases and legal precedents"
+  },
+  {
+    id: 3,
+    title: "Constitutional Implications",
+    description: "Impact on constitutional interpretations"
+  },
+  {
+    id: 4,
+    title: "Modern Applications",
+    description: "Contemporary legal contexts and challenges"
+  }
+];
 
 const SectionsPage = () => {
   const { compositionId } = useParams();
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const { memorandum, corrective, initialized } = useCompositionStore();
-
-  useEffect(() => {
-    const loadData = async () => {
-      if (!initialized) {
-        try {
-          await initializeCompositionData();
-        } catch (error) {
-          toast({
-            title: "Error",
-            description: "Failed to load compositions",
-            variant: "destructive",
-          });
-        }
-      }
-    };
-
-    loadData();
-  }, [initialized, toast]);
-
-  const compositions = compositionId === "memorandum" ? memorandum : corrective;
 
   return (
     <div className="min-h-screen bg-[#0F1218] text-white">
@@ -48,14 +48,14 @@ const SectionsPage = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {compositions.map((composition) => (
+          {mockSectionsPreview.map((section) => (
             <div
-              key={composition.id}
+              key={section.id}
               className="bg-[#1A1F2C] rounded-lg p-8 border border-[#2A2F3C] cursor-pointer transition-all hover:bg-[#252A37]"
-              onClick={() => navigate(`/composition/${compositionId}/section/${composition.section}`)}
+              onClick={() => navigate(`/composition/${compositionId}/section/${section.id}`)}
             >
-              <h2 className="text-2xl font-serif mb-4">{composition.title}</h2>
-              <p className="text-gray-300 line-clamp-4">{composition.description}</p>
+              <h2 className="text-2xl font-serif mb-4">{section.title}</h2>
+              <p className="text-gray-300">{section.description}</p>
             </div>
           ))}
         </div>
