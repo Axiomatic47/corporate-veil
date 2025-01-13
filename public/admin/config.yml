@@ -11,53 +11,13 @@ collections:
     label: "Compositions"
     folder: "content/compositions"
     create: true
-    format: "frontmatter"
-    extension: "md"
     identifier_field: "title"
+    format: "frontmatter"
     fields:
-      - {
-          label: "Collection Type",
-          name: "collection_type",
-          widget: "select",
-          options: [
-            { label: "Memorandum", value: "memorandum" },
-            { label: "Corrective", value: "corrective" }
-          ],
-          required: true
-        }
-      - {
-          label: "Section",
-          name: "section",
-          widget: "hidden",
-          default: 1
-        }
-      - {
-          label: "Title",
-          name: "title",
-          widget: "string",
-          required: true
-        }
-      - {
-          label: "Description",
-          name: "description",
-          widget: "text",
-          required: true
-        }
-      - {
-          label: "Content Level 1",
-          name: "content_level_1",
-          widget: "markdown",
-          required: true
-        }
-      - {
-          label: "Content Level 3",
-          name: "content_level_3",
-          widget: "markdown",
-          required: true
-        }
-      - {
-          label: "Content Level 5",
-          name: "content_level_5",
-          widget: "markdown",
-          required: true
-        }
+      - {label: "Collection Type", name: "collection_type", widget: "select", options: ["memorandum", "corrective"]}
+      - {label: "Section", name: "section", widget: "number", value_type: "int", default: 1}
+      - {label: "Title", name: "title", widget: "string"}
+      - {label: "Description", name: "description", widget: "text"}
+      - {label: "Content (Level 1)", name: "content_level_1", widget: "markdown"}
+      - {label: "Content (Level 3)", name: "content_level_3", widget: "markdown"}
+      - {label: "Content (Level 5)", name: "content_level_5", widget: "markdown"}
