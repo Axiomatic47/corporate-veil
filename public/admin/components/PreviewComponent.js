@@ -1,4 +1,5 @@
-// PreviewComponent.js
+'use strict';
+
 const PreviewComponent = createClass({
   getInitialState() {
     return {
@@ -9,33 +10,49 @@ const PreviewComponent = createClass({
   },
 
   componentDidMount() {
-    if (this.props.entry) {
-      this.loadSections(this.props);
-    }
+    // Log mount for debugging
+    console.log('PreviewComponent mounted');
+    this.initializePreview();
   },
 
   componentDidUpdate(prevProps) {
-    // Only reload if we have an entry and it's different from the previous one
-    if (this.props.entry && this.props.entry !== prevProps.entry) {
-      this.loadSections(this.props);
+    if (this.props.entry !== prevProps.entry) {
+      this.initializePreview();
     }
   },
 
-  loadSections(props) {
-    if (!props.entry || !props.entries) return;
+  initializePreview() {
+    const { entry, entries } = this.props;
+    console.log('Initializing preview with entry:', entry?.toJS());
+    console.log('Available entries:', entries?.toJS());
+
+    if (!entry || !entries) {
+      console.log('Missing required props');
+      return;
+    }
+
+    this.loadSections();
+  },
+
+  loadSections() {
+    const { entry, entries } = this.props;
+    if (!entry || !entries) return;
 
     try {
-      const entry = props.entry;
+      console.log('Loading sections...');
       const data = entry.get('data');
       const title = data.get('title');
       const collectionType = data.get('collection_type');
 
-      // Get all entries from the compositions collection
-      const allEntries = props.entries.get('compositions');
-      if (!allEntries) return;
+      console.log('Current entry data:', { title, collectionType });
 
-      // Filter and sort sections
-      const sections = allEntries
+      const compositions = entries.get('compositions');
+      if (!compositions) {
+        console.log('No compositions found');
+        return;
+      }
+
+      const sections = compositions
         .filter(e => {
           const entryData = e.get('data');
           return entryData &&
@@ -49,64 +66,76 @@ const PreviewComponent = createClass({
         .toJS()
         .sort((a, b) => a.section - b.section);
 
+      console.log('Loaded sections:', sections);
+
       this.setState({
         sections,
-        error: null,
-        loading: false
+        loading: false,
+        error: null
       });
     } catch (error) {
       console.error('Error loading sections:', error);
       this.setState({
-        error: 'Failed to load sections',
+        error: error.message,
         loading: false
       });
     }
   },
 
   handleNewSection() {
+    console.log('Creating new section...');
     const { entry } = this.props;
     if (!entry) return;
 
     try {
       const data = entry.get('data');
       const currentSection = parseInt(data.get('section') || '0', 10);
+      const newSection = currentSection + 1;
 
-      // Create new entry data
+      console.log('Creating section:', newSection);
+
       const newData = data.withMutations(map => {
-        map.set('section', currentSection + 1);
+        map.set('section', newSection);
       });
 
-      // Update the entry in CMS
+      const newEntry = entry.set('data', newData);
+      
       if (CMS?.entry?.set) {
-        const newEntry = entry.set('data', newData);
         CMS.entry.set(newEntry);
+        console.log('New section created successfully');
+      } else {
+        throw new Error('CMS entry API not available');
       }
     } catch (error) {
-      console.error('Error creating section:', error);
-      this.setState({ error: 'Failed to create new section' });
+      console.error('Error creating new section:', error);
+      this.setState({ error: 'Failed to create new section: ' + error.message });
     }
   },
 
   handleSectionClick(slug) {
+    console.log('Switching to section:', slug);
     const { entries } = this.props;
     if (!entries) return;
 
     try {
-      // Find the entry with this slug
-      const allEntries = entries.get('compositions');
-      const targetEntry = allEntries.find(e => e.get('slug') === slug);
+      const compositions = entries.get('compositions');
+      const targetEntry = compositions.find(e => e.get('slug') === slug);
 
       if (targetEntry && CMS?.entry?.set) {
         CMS.entry.set(targetEntry);
+        console.log('Section switched successfully');
+      } else {
+        throw new Error('Target section not found');
       }
     } catch (error) {
       console.error('Error switching sections:', error);
-      this.setState({ error: 'Failed to switch sections' });
+      this.setState({ error: 'Failed to switch sections: ' + error.message });
     }
   },
 
   render() {
-    const entry = this.props.entry;
+    console.log('Rendering preview component...');
+    const { entry } = this.props;
     if (!entry) return null;
 
     const data = entry.get('data');
@@ -114,18 +143,24 @@ const PreviewComponent = createClass({
 
     const currentSection = parseInt(data.get('section') || '0', 10);
     const collectionType = data.get('collection_type');
-    const collectionTitle = collectionType === 'memorandum'
-      ? 'Memorandum and Manifestation'
+    const collectionTitle = collectionType === 'memorandum' 
+      ? 'Memorandum and Manifestation' 
       : 'Corrective Measures';
+
+    console.log('Render data:', {
+      currentSection,
+      collectionType,
+      sections: this.state.sections
+    });
 
     return h('div', { className: 'preview-container' },
       h('div', { className: 'sidebar' },
         h('div', { className: 'collection-title' }, collectionTitle),
         h('div', { className: 'composition-title' }, data.get('title')),
         this.state.error && h('div', { className: 'error-message' }, this.state.error),
-        this.state.loading
+        this.state.loading 
           ? h('div', { className: 'loading-message' }, 'Loading sections...')
-          : h('div', null,
+          : h('div', { className: 'controls-container' },
               h('button', {
                 className: 'new-section-button',
                 onClick: () => this.handleNewSection()
@@ -143,13 +178,11 @@ const PreviewComponent = createClass({
       ),
       h('div', { className: 'preview-content' },
         h('h1', {}, data.get('title')),
-        h('div', {}, this.props.widgetFor('body'))
+        h('div', { className: 'markdown-content' }, this.props.widgetFor('body'))
       )
     );
   }
 });
 
-// Register preview component
-if (typeof CMS !== 'undefined') {
-  CMS.registerPreviewTemplate('compositions', PreviewComponent);
-}
+// Register the preview component
+CMS.registerPreviewTemplate('compositions', PreviewComponent);

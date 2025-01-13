@@ -4,14 +4,55 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Content Manager</title>
-    <link rel="stylesheet" href="styles/preview.css">
     <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+    <link rel="stylesheet" href="styles/preview.css">
+    <style>
+      body {
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      }
+    </style>
   </head>
   <body>
-    <!-- Load CMS -->
     <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
-
-    <!-- Load preview component after CMS -->
+    <script>
+      // Initialize CMS with config
+      CMS.init({
+        config: {
+          backend: {
+            name: 'github',
+            repo: 'Axiomatic47/corporate-veil',
+            branch: 'main',
+            base_url: 'https://api.netlify.com',
+            auth_endpoint: 'auth'
+          },
+          media_folder: 'public/uploads',
+          public_folder: '/uploads',
+          collections: [{
+            name: 'compositions',
+            label: 'Compositions',
+            folder: 'content/compositions',
+            create: true,
+            format: 'frontmatter',
+            extension: 'md',
+            identifier_field: 'title',
+            fields: [
+              { label: 'Title', name: 'title', widget: 'string', required: true },
+              { label: 'Description', name: 'description', widget: 'text', required: true },
+              {
+                label: 'Collection Type',
+                name: 'collection_type',
+                widget: 'select',
+                options: ['memorandum', 'corrective'],
+                required: true
+              },
+              { label: 'Section', name: 'section', widget: 'hidden', default: 1 },
+              { label: 'Content', name: 'body', widget: 'markdown', required: true }
+            ]
+          }]
+        }
+      });
+    </script>
     <script src="components/PreviewComponent.js"></script>
   </body>
 </html>
