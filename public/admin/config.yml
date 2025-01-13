@@ -13,6 +13,7 @@ collections:
     format: "frontmatter"
     extension: "md"
     identifier_field: "title"
+    sortable_fields: ['title', 'section']
     fields:
       - { 
           label: "Title", 
@@ -91,3 +92,8 @@ collections:
       - label: "Corrective"
         field: collection_type
         pattern: "corrective"
+    view_groups:
+      - label: "Section"
+        field: section
+      - label: "Collection Type"
+        field: collection_type
