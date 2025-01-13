@@ -1,39 +1,39 @@
+// src/components/CompositionCard.tsx
+
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 interface CompositionCardProps {
-  id: number;
   title: string;
-  section_title: string;
-  collection?: string;
+  firstSectionTitle: string;
+  collection_type: string;
+  id: number;
 }
 
 const CompositionCard = ({
-  id,
   title,
-  section_title,
-  collection,
+  firstSectionTitle,
+  collection_type,
+  id
 }: CompositionCardProps) => {
   const navigate = useNavigate();
 
-  const handleCardClick = () => {
-    if (collection) {
-      navigate(`/composition/${collection}/section/${id}`);
-    }
+  const handleClick = () => {
+    navigate(`/composition/${collection_type}/section/${id}`);
   };
 
   return (
     <Card
       className="bg-[#1A1F2C] text-white border-none mb-6 cursor-pointer transition-all hover:bg-[#252A37]"
-      onClick={handleCardClick}
+      onClick={handleClick}
     >
       <CardHeader>
         <CardTitle className="text-2xl font-serif">{title}</CardTitle>
       </CardHeader>
       <CardContent>
         <p className="text-gray-300 text-lg">
-          {section_title}
+          {firstSectionTitle}
         </p>
       </CardContent>
     </Card>

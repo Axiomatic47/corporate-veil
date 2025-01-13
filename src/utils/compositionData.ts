@@ -1,4 +1,14 @@
+// src/utils/compositionData.ts
+
 import { create } from 'zustand';
+
+export interface Section {
+  title: string;
+  featured: boolean;
+  content_level_1: string;
+  content_level_3: string;
+  content_level_5: string;
+}
 
 export interface Composition {
   id: number;
@@ -6,9 +16,11 @@ export interface Composition {
   collection_type: 'memorandum' | 'corrective';
   section: number;
   section_title: string;
+  featured: boolean;
   content_level_1: string;
   content_level_3: string;
   content_level_5: string;
+  sections: Section[];
 }
 
 interface CompositionStore {

@@ -1,3 +1,5 @@
+// src/pages/CompositionPage.tsx
+
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Slider } from "@/components/ui/slider";
@@ -8,7 +10,7 @@ import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 import { useCompositionStore } from "@/utils/compositionData";
 
-const CompositionPage: React.FC = () => {
+const CompositionPage = () => {
   const { compositionId = "", sectionId = "1" } = useParams();
   const [literacyLevel, setLiteracyLevel] = useState(3);
   const { toast } = useToast();
@@ -26,8 +28,9 @@ const CompositionPage: React.FC = () => {
     });
   }, [sectionId]);
 
-  const sections = compositionId === "memorandum" ? memorandum : corrective;
-  const currentSection = sections.find(section => section.section === parseInt(sectionId));
+  const compositions = compositionId === "memorandum" ? memorandum : corrective;
+  const currentComposition = compositions[0]; // Assuming first composition for now
+  const currentSection = currentComposition?.sections?.[parseInt(sectionId) - 1];
 
   const handleSectionChange = (newSectionId: number) => {
     window.scrollTo({
@@ -79,7 +82,7 @@ const CompositionPage: React.FC = () => {
     }
   };
 
-  if (!currentSection) {
+  if (!currentSection || !currentComposition) {
     return (
       <div className="min-h-screen bg-[#0F1218] text-white p-8">
         <Header />
@@ -106,19 +109,20 @@ const CompositionPage: React.FC = () => {
               <h2 className="text-lg font-serif text-gray-300 mb-1">
                 {compositionId === "memorandum" ? "Memorandum and Manifestation" : "Corrective Measures"}
               </h2>
+              <h3 className="text-sm text-gray-400">{currentComposition.title}</h3>
             </div>
             <nav className="space-y-2">
-              {sections.map((section) => (
+              {currentComposition.sections.map((section, index) => (
                 <button
-                  key={section.section}
-                  onClick={() => handleSectionChange(section.section)}
+                  key={index}
+                  onClick={() => handleSectionChange(index + 1)}
                   className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${
-                    section.section === parseInt(sectionId)
+                    index + 1 === parseInt(sectionId)
                       ? "bg-[#252A37] text-white font-medium"
                       : "text-gray-400 hover:bg-[#252A37] hover:text-white"
                   }`}
                 >
-                  {section.section_title}
+                  {section.title}
                 </button>
               ))}
             </nav>
@@ -128,7 +132,7 @@ const CompositionPage: React.FC = () => {
         <div className="flex-1 p-8 text-gray-300">
           <div className="max-w-3xl mx-auto">
             <div className="mb-8">
-              <h1 className="text-3xl font-serif mb-4 text-gray-200 leading-snug">{currentSection.section_title}</h1>
+              <h1 className="text-3xl font-serif mb-4 text-gray-200 leading-snug">{currentSection.title}</h1>
 
               <div className="flex items-center space-x-4 mb-8">
                 <span className="text-sm text-gray-400">Reading Level:</span>

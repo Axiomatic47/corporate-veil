@@ -1,4 +1,5 @@
-// compositionLoader.ts
+// src/utils/compositionLoader.ts
+
 import { Composition } from './compositionData';
 
 export const loadCompositions = async (): Promise<Composition[]> => {
@@ -13,32 +14,28 @@ export const loadCompositions = async (): Promise<Composition[]> => {
 
     for (const path in modules) {
       const data = modules[path] as any;
-      console.log('Loading composition data:', data); // Debug log
+      console.log('Loading composition data:', data);
 
-      // Process each section in the composition
-      const sections = (data.sections || []).map((section: any, index: number) => {
-        console.log('Processing section:', section); // Debug log
-        return {
-          id: index + 1,
-          title: data.title,
-          description: data.description,
-          collection_type: data.collection_type,
-          section: index + 1, // Match section number to index + 1
-          section_title: section.title,
-          content_level_1: section.content_level_1,
-          content_level_3: section.content_level_3,
-          content_level_5: section.content_level_5,
-        };
-      });
+      // Use first section for the main preview
+      const firstSection = data.sections?.[0] || {};
+      const composition = {
+        id: 1,
+        title: data.title,
+        collection_type: data.collection_type,
+        section: 1,
+        section_title: firstSection.title || '',
+        featured: firstSection.featured || false,
+        content_level_1: firstSection.content_level_1 || '',
+        content_level_3: firstSection.content_level_3 || '',
+        content_level_5: firstSection.content_level_5 || '',
+        sections: data.sections || []
+      };
 
-      // Add processed sections to compositions array
-      compositions.push(...sections);
+      compositions.push(composition);
     }
 
-    console.log('Final compositions array:', compositions); // Debug log
-
-    // Sort by section number
-    return compositions.sort((a, b) => a.section - b.section);
+    console.log('Final compositions array:', compositions);
+    return compositions;
   } catch (error) {
     console.error('Error loading compositions:', error);
     throw error;
