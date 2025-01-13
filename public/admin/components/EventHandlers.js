@@ -28,7 +28,7 @@ const registerEventHandlers = () => {
         mainContent.style.width = 'calc(100% - 16rem)';
       }
 
-      // Hide the "Previous Section Title" field
+      // Hide the "Previous Section Title" field if it exists
       const previousSectionField = document.querySelector('[data-field-name="previous_section"]');
       if (previousSectionField) {
         previousSectionField.style.display = 'none';
