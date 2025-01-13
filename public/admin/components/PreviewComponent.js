@@ -26,7 +26,6 @@ const PreviewComponent = createClass({
         this.loadSections();
       });
     } else {
-      console.warn('CMS backend not initialized yet, retrying...');
       setTimeout(() => this.waitForCMS(), 1000);
     }
   },
@@ -41,10 +40,7 @@ const PreviewComponent = createClass({
     const title = data.get('title');
     const collectionType = data.get('collection_type');
 
-    if (!this.state.initialized) {
-      console.warn('CMS not initialized yet');
-      return;
-    }
+    if (!this.state.initialized) return;
 
     CMS.getBackend()
       .listEntries({
@@ -184,6 +180,8 @@ ${newEntryData.body}`;
       ? 'Memorandum and Manifestation' 
       : 'Corrective Measures';
 
+    const currentSection = parseInt(data.get('section') || '1', 10);
+
     return h('div', { className: 'w-64 min-h-screen bg-[#1A1F2C] text-white p-6' },
       h('div', { className: 'space-y-4' },
         h('div', null,
@@ -205,8 +203,8 @@ ${newEntryData.body}`;
               key: section.section,
               onClick: () => this.handleSectionClick(section.slug),
               className: `w-full px-3 py-2 rounded-md text-sm ${
-                parseInt(data.get('section')) === section.section
-                  ? 'bg-gray-700 text-white'
+                currentSection === section.section
+                  ? 'bg-white text-[#1A1F2C] font-medium'
                   : 'text-gray-400 hover:bg-gray-800 hover:text-white'
               }`
             }, `Section ${section.section}`)
