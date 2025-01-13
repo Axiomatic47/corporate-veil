@@ -17,6 +17,8 @@ collections:
     extension: "md"
     identifier_field: "title"
     sortable_fields: ['collection_type', 'section', 'title']
+    editor:
+      preview: false
     fields:
       - {
           label: "Collection Type",
@@ -38,26 +40,15 @@ collections:
           hint: "Enter the section number (no maximum limit)"
         }
       - {
-          label: "Previous Section Title",
-          name: "previous_section",
-          widget: "relation",
-          collection: "compositions",
-          search_fields: ["title"],
-          value_field: "title",
-          display_fields: ["title"],
-          required: false,
-          hint: "Select the section that comes before this one (leave empty if this is the first section)"
-        }
-      - { 
-          label: "Title", 
-          name: "title", 
+          label: "Title",
+          name: "title",
           widget: "string",
           required: true,
           hint: "Main title of the composition"
         }
-      - { 
-          label: "Description", 
-          name: "description", 
+      - {
+          label: "Description",
+          name: "description",
           widget: "text",
           required: true,
           hint: "Brief description of the composition's content"
@@ -122,28 +113,3 @@ collections:
           required: true,
           hint: "Title for reading level 5 (advanced)"
         }
-    view_filters:
-      - label: "Memorandum"
-        field: collection_type
-        pattern: "memorandum"
-      - label: "Corrective"
-        field: collection_type
-        pattern: "corrective"
-      - label: "Basic Level"
-        field: reading_level
-        pattern: "1"
-      - label: "Intermediate Level"
-        field: reading_level
-        pattern: "3"
-      - label: "Advanced Level"
-        field: reading_level
-        pattern: "5"
-    view_groups:
-      - label: Type
-        field: collection_type
-      - label: Section
-        field: section
-      - label: Reading Level
-        field: reading_level
-    editor:
-      preview: false
