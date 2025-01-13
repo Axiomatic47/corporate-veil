@@ -1,11 +1,10 @@
 (() => {
   const cmsConfig = {
     config: {
-      local_backend: true,  // Enable local backend
+      local_backend: true,
       backend: {
         name: 'git-gateway',
-        branch: 'main',
-        local_backend: true
+        branch: 'main'
       },
       media_folder: 'public/uploads',
       public_folder: '/uploads',
@@ -15,16 +14,16 @@
           label: 'Compositions',
           folder: 'content/compositions',
           create: true,
-          slug: '{{slug}}',
-          editor: {
-            preview: false
-          },
+          identifier_field: 'title',
           fields: [
             {
               label: 'Collection Type',
               name: 'collection_type',
               widget: 'select',
-              options: ['memorandum', 'corrective'],
+              options: [
+                { label: 'Memorandum', value: 'memorandum' },
+                { label: 'Corrective', value: 'corrective' }
+              ],
               required: true
             },
             {
@@ -52,37 +51,6 @@
               name: 'content',
               widget: 'markdown',
               required: true
-            },
-            // Hidden fields for different reading levels
-            {
-              label: 'Title Level 1',
-              name: 'title_level_1',
-              widget: 'hidden',
-            },
-            {
-              label: 'Content Level 1',
-              name: 'content_level_1',
-              widget: 'hidden',
-            },
-            {
-              label: 'Title Level 3',
-              name: 'title_level_3',
-              widget: 'hidden',
-            },
-            {
-              label: 'Content Level 3',
-              name: 'content_level_3',
-              widget: 'hidden',
-            },
-            {
-              label: 'Title Level 5',
-              name: 'title_level_5',
-              widget: 'hidden',
-            },
-            {
-              label: 'Content Level 5',
-              name: 'content_level_5',
-              widget: 'hidden',
             }
           ]
         }

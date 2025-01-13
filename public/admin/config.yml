@@ -1,10 +1,8 @@
 backend:
-  name: github
-  repo: Axiomatic47/corporate-veil
+  name: git-gateway
   branch: main
-  auth_endpoint: auth
-  base_url: https://api.netlify.com
 
+local_backend: true
 media_folder: "public/uploads"
 public_folder: "/uploads"
 
@@ -16,9 +14,6 @@ collections:
     format: "frontmatter"
     extension: "md"
     identifier_field: "title"
-    sortable_fields: ['collection_type', 'section', 'title']
-    editor:
-      preview: false
     fields:
       - {
           label: "Collection Type",
@@ -36,80 +31,23 @@ collections:
           widget: "number",
           value_type: "int",
           min: 1,
-          required: true,
-          hint: "Enter the section number (no maximum limit)"
+          required: true
         }
       - {
           label: "Title",
           name: "title",
           widget: "string",
-          required: true,
-          hint: "Main title of the composition"
+          required: true
         }
       - {
           label: "Description",
           name: "description",
           widget: "text",
-          required: true,
-          hint: "Brief description of the composition's content"
-        }
-      - {
-          label: "Reading Level",
-          name: "reading_level",
-          widget: "select",
-          options: [
-            { label: "Basic (Level 1)", value: "1" },
-            { label: "Intermediate (Level 3)", value: "3" },
-            { label: "Advanced (Level 5)", value: "5" }
-          ],
-          default: "3",
           required: true
         }
       - {
-          label: "Basic Content",
-          name: "content_level_1",
+          label: "Content",
+          name: "content",
           widget: "markdown",
-          required: true,
-          hint: "Content for reading level 1 (basic)",
-          minimal: true,
-          buttons: ["bold", "italic", "link"]
-        }
-      - {
-          label: "Basic Title",
-          name: "title_level_1",
-          widget: "string",
-          required: true,
-          hint: "Title for reading level 1 (basic)"
-        }
-      - {
-          label: "Intermediate Content",
-          name: "content_level_3",
-          widget: "markdown",
-          required: true,
-          hint: "Content for reading level 3 (intermediate)",
-          minimal: true,
-          buttons: ["bold", "italic", "link"]
-        }
-      - {
-          label: "Intermediate Title",
-          name: "title_level_3",
-          widget: "string",
-          required: true,
-          hint: "Title for reading level 3 (intermediate)"
-        }
-      - {
-          label: "Advanced Content",
-          name: "content_level_5",
-          widget: "markdown",
-          required: true,
-          hint: "Content for reading level 5 (advanced)",
-          minimal: true,
-          buttons: ["bold", "italic", "link"]
-        }
-      - {
-          label: "Advanced Title",
-          name: "title_level_5",
-          widget: "string",
-          required: true,
-          hint: "Title for reading level 5 (advanced)"
+          required: true
         }

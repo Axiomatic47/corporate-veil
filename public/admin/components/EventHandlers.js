@@ -4,7 +4,6 @@
     let currentEntry = null;
     let currentReadingLevel = 3;
     let hasUnsavedChanges = false;
-    let sidebarInitialized = false;
 
     const createReadingLevelSelector = () => {
       const container = document.createElement('div');
@@ -45,80 +44,67 @@
       });
     };
 
-    const attachFormListeners = () => {
-      const form = document.querySelector('form');
-      if (!form) return;
-
-      form.addEventListener('change', () => {
-        hasUnsavedChanges = true;
-      });
-
-      form.addEventListener('submit', () => {
-        hasUnsavedChanges = false;
-      });
-    };
-
     const initializeSidebar = () => {
       try {
-        console.log('Initializing sidebar...');
-
-        // Create sidebar container
-        let sidebarContainer = document.querySelector('.custom-admin-sidebar');
-        if (!sidebarContainer) {
-          sidebarContainer = document.createElement('div');
-          sidebarContainer.className = 'custom-admin-sidebar w-64 fixed left-0 top-0 bottom-0 bg-[#1A1F2C] text-white';
-          document.body.appendChild(sidebarContainer);
+        // Wait for the CMS container to be ready
+        const cmsContainer = document.querySelector('.css-1gj57a0-AppMainContainer');
+        if (!cmsContainer) {
+          setTimeout(initializeSidebar, 100);
+          return;
         }
 
-        // Add reading level selector to main content
-        const contentContainer = document.querySelector('.css-1gj57a0-AppMainContainer');
-        if (contentContainer) {
-          let selector = document.querySelector('.reading-level-selector');
-          if (!selector) {
-            selector = createReadingLevelSelector();
-            contentContainer.insertBefore(selector, contentContainer.firstChild);
-          }
+        console.log('CMS container found, initializing sidebar...');
 
-          // Adjust main content positioning
-          contentContainer.style.marginLeft = '16rem';
-          contentContainer.style.width = 'calc(100% - 16rem)';
+        // Add reading level selector
+        let selector = document.querySelector('.reading-level-selector');
+        if (!selector) {
+          selector = createReadingLevelSelector();
+          cmsContainer.insertBefore(selector, cmsContainer.firstChild);
         }
 
-        attachFormListeners();
+        // Add form change listeners
+        const form = document.querySelector('form');
+        if (form) {
+          form.addEventListener('change', () => {
+            hasUnsavedChanges = true;
+          });
+
+          form.addEventListener('submit', () => {
+            hasUnsavedChanges = false;
+          });
+        }
+
         updateFormFields();
       } catch (error) {
         console.error('Error in initializeSidebar:', error);
       }
     };
 
-    // Register the correct Decap CMS event handlers
-    window.CMS.registerEventListener({
-      name: 'mounted',
-      handler: () => {
-        console.log('CMS mounted');
-        setTimeout(initializeSidebar, 1000);
-      }
-    });
+    // Register correct Decap CMS event handlers
+    try {
+      console.log('Registering CMS event handlers...');
 
-    window.CMS.registerEventListener({
-      name: 'beforeEnter',
-      handler: () => {
-        console.log('Before entering editor');
-        if (hasUnsavedChanges) {
-          return window.confirm('You have unsaved changes. Continue anyway?');
+      // Listen for route changes
+      window.CMS.registerEventListener({
+        name: 'routeChange',
+        handler: () => {
+          console.log('Route changed, initializing sidebar...');
+          setTimeout(initializeSidebar, 500);
         }
-        return true;
-      }
-    });
+      });
 
-    window.CMS.registerEventListener({
-      name: 'entryLoaded',
-      handler: (entry) => {
-        console.log('Entry loaded:', entry);
-        currentEntry = entry;
-        updateFormFields();
-      }
-    });
+      // Listen for entry changes
+      window.CMS.registerEventListener({
+        name: 'beforePublish',
+        handler: () => {
+          hasUnsavedChanges = false;
+          return true;
+        }
+      });
+
+    } catch (error) {
+      console.error('Error registering event handlers:', error);
+    }
 
     // Handle beforeunload
     window.addEventListener('beforeunload', (e) => {
@@ -127,6 +113,9 @@
         e.returnValue = '';
       }
     });
+
+    // Initial setup
+    setTimeout(initializeSidebar, 1000);
   };
 
   // Make it available globally
