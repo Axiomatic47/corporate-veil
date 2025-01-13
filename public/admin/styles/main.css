@@ -1,32 +1,53 @@
-/* Fix dropdown positioning */
+/* Reset CMS styles that might interfere with sidebar */
 .css-1hvrgvd-CollectionTopBar {
-  z-index: 100;
-  position: fixed;
-  top: 0;
-  width: 100%;
-  background: white;
+  z-index: 40 !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 16rem !important;
+  width: calc(100% - 16rem) !important;
+  background: white !important;
 }
 
+.css-1gj57a0-AppMainContainer {
+  margin-left: 16rem !important;
+  width: calc(100% - 16rem) !important;
+  padding-top: 60px !important;
+}
+
+/* Sidebar specific styles */
+#admin-sidebar {
+  position: fixed !important;
+  left: 0 !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  width: 16rem !important;
+  background: white !important;
+  border-right: 1px solid #e5e7eb !important;
+  overflow-y: auto !important;
+  z-index: 50 !important;
+}
+
+/* Fix dropdown positioning */
 .css-1j73xvq-ToolbarSubSectionFirst {
-  z-index: 200;
+  z-index: 45 !important;
 }
 
 /* Ensure editor has proper spacing */
 .css-1q6r8f2-StyledWrapper {
-  margin-top: 60px;
+  margin-top: 60px !important;
 }
 
 /* Fix dropdown menu positioning */
 .css-2oej7z-ToolbarContainer {
-  position: sticky;
-  top: 0;
-  z-index: 300;
-  background: white;
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 45 !important;
+  background: white !important;
 }
 
 /* Additional fixes for editor layout */
 .css-1f7nhiq-CollectionMain {
-  padding-top: 20px;
+  padding-top: 20px !important;
 }
 
 /* Fix publish button visibility */
@@ -66,34 +87,4 @@
   border: 1px solid #ddd !important;
   border-radius: 4px !important;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1) !important;
-}
-
-/* Sidebar specific styles with !important to ensure they take precedence */
-#admin-sidebar {
-  position: fixed !important;
-  left: 0 !important;
-  top: 0 !important;
-  bottom: 0 !important;
-  width: 16rem !important;
-  background: #f3f4f6 !important;
-  border-right: 1px solid #e5e7eb !important;
-  overflow-y: auto !important;
-  z-index: 100 !important;
-}
-
-/* Adjust main content area to account for sidebar */
-.css-1gj57a0-AppMainContainer {
-  margin-left: 16rem !important;
-  width: calc(100% - 16rem) !important;
-}
-
-.unsaved-warning {
-  position: fixed;
-  bottom: 1rem;
-  right: 1rem;
-  background: #fef3c7;
-  border: 1px solid #f59e0b;
-  padding: 0.5rem 1rem;
-  border-radius: 0.375rem;
-  z-index: 50;
 }
