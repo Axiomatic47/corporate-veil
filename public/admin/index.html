@@ -5,158 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Content Manager</title>
     <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
-    <link rel="stylesheet" href="styles/preview.css">
   </head>
   <body>
     <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
-
     <script>
+      if (window.netlifyIdentity) {
+        window.netlifyIdentity.on("init", user => {
+          if (!user) {
+            window.netlifyIdentity.on("login", () => {
+              document.location.href = "/admin/";
+            });
+          }
+        });
+      }
+
       const PreviewComponent = createClass({
-        getInitialState() {
-          return {
-            sections: [],
-            currentSection: null,
-            error: null,
-            loading: true
-          };
-        },
-
-        componentDidMount() {
-          if (this.props.entry) {
-            this.loadSections();
-          }
-        },
-
-        componentDidUpdate(prevProps) {
-          if (this.props.entry !== prevProps.entry) {
-            this.loadSections();
-          }
-        },
-
-        loadSections() {
-          const { entry, entries } = this.props;
-          if (!entry || !entries) return;
-
-          try {
-            const data = entry.get('data');
-            const title = data.get('title');
-            const collectionType = data.get('collection_type');
-
-            const compositions = entries.get('compositions');
-            if (!compositions) return;
-
-            const sections = compositions
-              .filter(e => {
-                const entryData = e.get('data');
-                return entryData &&
-                       entryData.get('title') === title &&
-                       entryData.get('collection_type') === collectionType;
-              })
-              .map(e => ({
-                section: e.getIn(['data', 'section']),
-                content: e.getIn(['data', 'body']),
-                slug: e.get('slug')
-              }))
-              .toJS()
-              .sort((a, b) => a.section - b.section);
-
-            this.setState({
-              sections,
-              currentSection: sections[0],
-              loading: false,
-              error: null
-            });
-          } catch (error) {
-            console.error('Error loading sections:', error);
-            this.setState({
-              error: 'Failed to load sections',
-              loading: false
-            });
-          }
-        },
-
-        handleNewSection() {
-          const { entry } = this.props;
-          if (!entry) return;
-
-          try {
-            const data = entry.get('data');
-            const currentSection = parseInt(data.get('section') || '0', 10);
-            const newSection = currentSection + 1;
-
-            const newData = data.withMutations(map => {
-              map.set('section', newSection);
-            });
-
-            if (CMS?.entry?.set) {
-              const newEntry = entry.set('data', newData);
-              CMS.entry.set(newEntry);
-            }
-          } catch (error) {
-            console.error('Error creating section:', error);
-            this.setState({ error: 'Failed to create new section' });
-          }
-        },
-
-        handleSectionClick(section) {
-          this.setState({ currentSection: section });
-        },
-
         render() {
-          const { entry } = this.props;
-          if (!entry) return null;
-
+          const {entry} = this.props;
           const data = entry.get('data');
-          if (!data) return null;
-
-          const collectionType = data.get('collection_type');
-          const collectionTitle = collectionType === 'memorandum'
-            ? 'Memorandum and Manifestation'
-            : 'Corrective Measures';
-
-          return h('div', { className: 'admin-layout' },
-            h('div', { className: 'navigation-sidebar' },
-              h('div', { className: 'sidebar-header' },
-                h('h2', { className: 'collection-title' }, collectionTitle),
-                h('h3', { className: 'composition-title' }, data.get('title'))
-              ),
-              h('div', { className: 'sections-container' },
-                this.state.loading 
-                  ? h('div', { className: 'loading' }, 'Loading sections...')
-                  : h('div', { className: 'sections-list' },
-                      h('button', {
-                        className: 'new-section-button',
-                        onClick: () => this.handleNewSection()
-                      }, '+ New Section'),
-                      this.state.sections.map(section =>
-                        h('button', {
-                          key: section.section,
-                          onClick: () => this.handleSectionClick(section),
-                          className: `section-button ${
-                            this.state.currentSection && 
-                            section.section === this.state.currentSection.section 
-                              ? 'active' 
-                              : ''
-                          }`
-                        }, `Section ${section.section}`)
-                      )
-                    )
-              )
-            ),
-            h('div', { className: 'content-area' },
-              h('div', { className: 'content-header' },
-                h('h1', {}, `Section ${this.state.currentSection?.section || ''}`)
-              ),
-              h('div', { className: 'content-body' },
-                this.state.currentSection?.content || 'Select a section to view content'
-              )
+          
+          return h('div', {},
+            h('h1', {}, data.get('title')),
+            h('div', {}, data.get('description')),
+            h('div', {}, 
+              h('h3', {}, `Reading Level: ${data.get('reading_level')}`),
+              h('div', {}, data.get(`content_level_${data.get('reading_level')}`))
             )
           );
         }
       });
 
-      CMS.init();
-      CMS.registerPreviewTemplate('compositions', PreviewComponent);
+      CMS.registerPreviewTemplate("compositions", PreviewComponent);
     </script>
   </body>
 </html>
