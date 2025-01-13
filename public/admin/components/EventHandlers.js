@@ -7,6 +7,7 @@ const registerEventHandlers = () => {
   
   const initializeSidebar = async () => {
     try {
+      console.log('Initializing sidebar...');
       const entries = await CMS.getEntries({ collection_name: 'compositions' });
       currentEntries = entries;
       
@@ -34,6 +35,8 @@ const registerEventHandlers = () => {
         previousSectionField.style.display = 'none';
       }
       
+      console.log('Rendering sidebar with entries:', entries);
+      
       // Render sidebar
       const root = createRoot(sidebarContainer);
       root.render(
@@ -47,6 +50,7 @@ const registerEventHandlers = () => {
             section: currentEntry.data.section
           } : null}
           onSectionSelect={async (section) => {
+            console.log('Section selected:', section);
             const selectedEntry = entries.find(e => e.data.title === section.title);
             if (selectedEntry) {
               await CMS.entry.select(selectedEntry);
@@ -54,6 +58,7 @@ const registerEventHandlers = () => {
           }}
           onSectionsReorder={async (newOrder) => {
             try {
+              console.log('Reordering sections:', newOrder);
               for (const item of newOrder) {
                 const entry = entries.find(e => e.data.title === item.title);
                 if (entry) {
