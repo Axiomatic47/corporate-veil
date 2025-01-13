@@ -1,18 +1,19 @@
+import React from 'react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
 const AdminSidebar = ({ sections, currentSection, onSectionSelect, onSectionsReorder }) => {
   const handleDragEnd = (result) => {
     if (!result.destination) return;
-    
+
     const items = Array.from(sections);
     const [reorderedItem] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reorderedItem);
-    
+
     const updatedItems = items.map((item, index) => ({
       ...item,
       section: index + 1
     }));
-    
+
     onSectionsReorder(updatedItems);
   };
 
@@ -22,9 +23,9 @@ const AdminSidebar = ({ sections, currentSection, onSectionSelect, onSectionsReo
         <h2 className="text-xl font-semibold text-gray-800">Collections</h2>
         <div className="mt-4">
           <div className="relative">
-            <input 
-              type="text" 
-              placeholder="Search all" 
+            <input
+              type="text"
+              placeholder="Search all"
               className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
             />
             <svg className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -44,15 +45,15 @@ const AdminSidebar = ({ sections, currentSection, onSectionSelect, onSectionsReo
       <DragDropContext onDragEnd={handleDragEnd}>
         <Droppable droppableId="sections">
           {(provided) => (
-            <div 
+            <div
               {...provided.droppableProps}
               ref={provided.innerRef}
               className="p-4 space-y-2 overflow-y-auto max-h-[calc(100vh-200px)]"
             >
               {sections.map((section, index) => (
-                <Draggable 
-                  key={section.title} 
-                  draggableId={section.title} 
+                <Draggable
+                  key={section.title}
+                  draggableId={section.title}
                   index={index}
                 >
                   {(provided, snapshot) => (
