@@ -18,24 +18,6 @@
           }
         });
       }
-
-      const PreviewComponent = createClass({
-        render() {
-          const {entry} = this.props;
-          const data = entry.get('data');
-          
-          return h('div', {},
-            h('h1', {}, data.get('title')),
-            h('div', {}, data.get('description')),
-            h('div', {}, 
-              h('h3', {}, `Reading Level: ${data.get('reading_level')}`),
-              h('div', {}, data.get(`content_level_${data.get('reading_level')}`))
-            )
-          );
-        }
-      });
-
-      CMS.registerPreviewTemplate("compositions", PreviewComponent);
     </script>
   </body>
 </html>

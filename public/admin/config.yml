@@ -18,23 +18,20 @@ collections:
           label: "Title", 
           name: "title", 
           widget: "string",
-          required: true,
-          hint: "Enter the main title of the composition"
+          required: true
         }
       - { 
           label: "Description", 
           name: "description", 
           widget: "text",
-          required: true,
-          hint: "Brief description of the composition's purpose" 
+          required: true
         }
       - {
           label: "Collection Type",
           name: "collection_type",
           widget: "select",
           options: ["memorandum", "corrective"],
-          required: true,
-          hint: "Select whether this is a Memorandum or Corrective composition"
+          required: true
         }
       - {
           label: "Reading Level",
@@ -42,58 +39,50 @@ collections:
           widget: "select",
           options: ["1", "3", "5"],
           default: "3",
-          required: true,
-          hint: "Select the reading comprehension level (1=Basic, 3=Intermediate, 5=Advanced)"
+          required: true
         }
       - { 
           label: "Section",
           name: "section",
           widget: "number",
           default: 1,
-          required: true,
-          hint: "Numerical order of this section within the composition"
+          required: true
         }
       - { 
-          label: "Content Level 1", 
-          name: "content_level_1", 
-          widget: "markdown",
-          required: true,
-          hint: "Basic reading level content (Level 1)"
-        }
-      - { 
-          label: "Content Level 3", 
-          name: "content_level_3", 
-          widget: "markdown",
-          required: true,
-          hint: "Intermediate reading level content (Level 3)"
-        }
-      - { 
-          label: "Content Level 5", 
-          name: "content_level_5", 
-          widget: "markdown",
-          required: true,
-          hint: "Advanced reading level content (Level 5)"
-        }
-      - { 
-          label: "Section Title Level 1", 
+          label: "Basic Level Title", 
           name: "title_level_1", 
           widget: "string",
-          required: true,
-          hint: "Section title for basic reading level (Level 1)"
+          required: true
         }
       - { 
-          label: "Section Title Level 3", 
+          label: "Basic Level Content", 
+          name: "content_level_1", 
+          widget: "markdown",
+          required: true
+        }
+      - { 
+          label: "Intermediate Level Title", 
           name: "title_level_3", 
           widget: "string",
-          required: true,
-          hint: "Section title for intermediate reading level (Level 3)"
+          required: true
         }
       - { 
-          label: "Section Title Level 5", 
+          label: "Intermediate Level Content", 
+          name: "content_level_3", 
+          widget: "markdown",
+          required: true
+        }
+      - { 
+          label: "Advanced Level Title", 
           name: "title_level_5", 
           widget: "string",
-          required: true,
-          hint: "Section title for advanced reading level (Level 5)"
+          required: true
+        }
+      - { 
+          label: "Advanced Level Content", 
+          name: "content_level_5", 
+          widget: "markdown",
+          required: true
         }
     view_filters:
       - label: "Memorandum"
@@ -102,12 +91,3 @@ collections:
       - label: "Corrective"
         field: collection_type
         pattern: "corrective"
-      - label: "Reading Level 1"
-        field: reading_level
-        pattern: "1"
-      - label: "Reading Level 3"
-        field: reading_level
-        pattern: "3"
-      - label: "Reading Level 5"
-        field: reading_level
-        pattern: "5"
