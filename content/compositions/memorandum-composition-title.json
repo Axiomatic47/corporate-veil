@@ -1,0 +1,21 @@
+{
+  "title": "Memorandum Composition Title",
+  "description": "Memorandum Composition Description",
+  "collection_type": "memorandum",
+  "sections": [
+    {
+      "title": "Section Title",
+      "description": "Section Description",
+      "content_level_1": "Basic content",
+      "content_level_3": "Intermediate content",
+      "content_level_5": "Advanced content"
+    },
+    {
+      "title": "Section Title 2",
+      "description": "Section Description 2",
+      "content_level_1": "Basic Content 2",
+      "content_level_3": "Intermediate Cotnent 2",
+      "content_level_5": "Advanced Content 2"
+    }
+  ]
+}
