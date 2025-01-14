@@ -13,29 +13,33 @@ export const FeaturedWorkSection = () => {
     refreshCompositions();
   }, [refreshCompositions]);
 
-  // Get featured sections from both collections
+  // Get featured sections from both collections with their indices
   const getFeaturedSections = () => {
     const featured = [];
 
-    memorandum.forEach(comp => {
-      comp.sections.forEach((section, index) => {
+    memorandum.forEach((comp, compIndex) => {
+      comp.sections.forEach((section, sectionIndex) => {
         if (section.featured) {
           featured.push({
             ...section,
             collection: 'memorandum',
-            compositionId: index + 1
+            compositionIndex: compIndex + 1,
+            sectionIndex: sectionIndex + 1,
+            compositionTitle: comp.title
           });
         }
       });
     });
 
-    corrective.forEach(comp => {
-      comp.sections.forEach((section, index) => {
+    corrective.forEach((comp, compIndex) => {
+      comp.sections.forEach((section, sectionIndex) => {
         if (section.featured) {
           featured.push({
             ...section,
             collection: 'corrective',
-            compositionId: index + 1
+            compositionIndex: compIndex + 1,
+            sectionIndex: sectionIndex + 1,
+            compositionTitle: comp.title
           });
         }
       });
@@ -45,6 +49,10 @@ export const FeaturedWorkSection = () => {
   };
 
   const featuredSections = getFeaturedSections();
+
+  const handleReadMore = (section) => {
+    navigate(`/composition/${section.collection}/composition/${section.compositionIndex}/section/${section.sectionIndex}`);
+  };
 
   return (
     <div className="space-y-32">
@@ -78,7 +86,7 @@ export const FeaturedWorkSection = () => {
 
           <div className="mt-8 text-center">
             <button
-              onClick={() => navigate(`/composition/${section.collection}/section/${section.compositionId}`)}
+              onClick={() => handleReadMore(section)}
               className="text-blue-400 hover:text-blue-300 underline"
             >
               Read more in {section.collection === 'memorandum' ? 'Memorandum' : 'Corrective Measures'}
