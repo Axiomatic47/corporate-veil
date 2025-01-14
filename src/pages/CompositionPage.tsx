@@ -132,7 +132,7 @@ const CompositionPage = () => {
         <div className="flex-1 p-8 text-gray-300">
           <div className="max-w-3xl mx-auto">
             <div className="mb-8">
-              <h1 className="text-3xl font-serif mb-4 text-gray-200 leading-snug">{currentSection.title}</h1>
+<h1 className="text-3xl font-serif mb-4 text-gray-200 leading-snug text-center">{currentSection.title}</h1>
 
               <div className="flex items-center space-x-4 mb-8">
                 <span className="text-sm text-gray-400">Reading Level:</span>
