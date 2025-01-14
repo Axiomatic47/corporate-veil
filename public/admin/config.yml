@@ -2,14 +2,17 @@ backend:
   name: github
   repo: axiomaticjk/corporate-veil-main
   branch: main
-  base_url: http://localhost:8080
+  base_url: http://localhost:8081
 
 local_backend: true
-local_backend_url: http://localhost:8081/api/v1
+local_backend_url: http://localhost:8082
 
 media_folder: "public/uploads"
 public_folder: "/uploads"
 format: "json"
+
+editor:
+  preview: false
 
 collections:
   - name: "compositions"
@@ -31,6 +34,29 @@ collections:
         fields:
           - {label: "Title", name: "title", widget: "string"}
           - {label: "Featured on Homepage", name: "featured", widget: "boolean", default: false, required: false}
-          - {label: "Basic Content (Level 1)", name: "content_level_1", widget: "markdown", required: false, hint: "Optional - will default to intermediate content if left blank"}
-          - {label: "Intermediate Content (Level 3)", name: "content_level_3", widget: "markdown", required: true}
-          - {label: "Advanced Content (Level 5)", name: "content_level_5", widget: "markdown", required: false, hint: "Optional - will default to intermediate content if left blank"}
+          - label: "Basic Content (Level 1)"
+            name: "content_level_1"
+            widget: "markdown"
+            required: false
+            hint: "Optional - will default to intermediate content if left blank"
+            editor_components: ["bold", "italic", "link", "bulleted-list", "numbered-list", "quote"]
+            modes: ["rich_text", "raw"]
+            buttons: ["bold", "italic", "link", "bulleted-list", "numbered-list", "quote"]
+            sanitize_preview: false
+          - label: "Intermediate Content (Level 3)"
+            name: "content_level_3"
+            widget: "markdown"
+            required: true
+            editor_components: ["bold", "italic", "link", "bulleted-list", "numbered-list", "quote"]
+            modes: ["rich_text", "raw"]
+            buttons: ["bold", "italic", "link", "bulleted-list", "numbered-list", "quote"]
+            sanitize_preview: false
+          - label: "Advanced Content (Level 5)"
+            name: "content_level_5"
+            widget: "markdown"
+            required: false
+            hint: "Optional - will default to intermediate content if left blank"
+            editor_components: ["bold", "italic", "link", "bulleted-list", "numbered-list", "quote"]
+            modes: ["rich_text", "raw"]
+            buttons: ["bold", "italic", "link", "bulleted-list", "numbered-list", "quote"]
+            sanitize_preview: false

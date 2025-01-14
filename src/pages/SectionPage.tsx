@@ -1,5 +1,3 @@
-// src/pages/CompositionPage.tsx
-
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Slider } from "@/components/ui/slider";
@@ -10,8 +8,8 @@ import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 import { useCompositionStore } from "@/utils/compositionData";
 
-const CompositionPage = () => {
-  const { compositionId = "", sectionId = "1" } = useParams();
+const SectionPage = () => {
+  const { compositionId = "", compositionIndex = "1", sectionId = "1" } = useParams();
   const [literacyLevel, setLiteracyLevel] = useState(3);
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -29,7 +27,7 @@ const CompositionPage = () => {
   }, [sectionId]);
 
   const compositions = compositionId === "memorandum" ? memorandum : corrective;
-  const currentComposition = compositions[0]; // Assuming first composition for now
+  const currentComposition = compositions[parseInt(compositionIndex) - 1]; // Use compositionIndex to select correct composition
   const currentSection = currentComposition?.sections?.[parseInt(sectionId) - 1];
 
   const handleSectionChange = (newSectionId: number) => {
@@ -39,7 +37,7 @@ const CompositionPage = () => {
     });
 
     setTimeout(() => {
-      navigate(`/composition/${compositionId}/section/${newSectionId}`);
+      navigate(`/composition/${compositionId}/composition/${compositionIndex}/section/${newSectionId}`);
     }, 100);
   };
 
@@ -132,7 +130,9 @@ const CompositionPage = () => {
         <div className="flex-1 p-8 text-gray-300">
           <div className="max-w-3xl mx-auto">
             <div className="mb-8">
-<h1 className="text-3xl font-serif mb-4 text-gray-200 leading-snug text-center">{currentSection.title}</h1>
+              <h1 className="text-3xl font-serif mb-4 text-gray-200 leading-snug text-center">
+                {currentSection.title}
+              </h1>
 
               <div className="flex items-center space-x-4 mb-8">
                 <span className="text-sm text-gray-400">Reading Level:</span>
@@ -166,6 +166,14 @@ const CompositionPage = () => {
                   a: ({node, ...props}) => (
                     <a className="text-blue-400 hover:text-blue-300 underline" {...props} />
                   ),
+                  em: ({node, ...props}) => <em className="italic" {...props} />,
+                  strong: ({node, ...props}) => <strong className="font-bold" {...props} />,
+                  code: ({node, inline, ...props}) =>
+                    inline ? (
+                      <code className="bg-gray-800 px-1 rounded text-sm" {...props} />
+                    ) : (
+                      <code className="block bg-gray-800 p-4 rounded text-sm overflow-x-auto" {...props} />
+                    ),
                 }}
               >
                 {getContentForLevel()}
@@ -178,4 +186,4 @@ const CompositionPage = () => {
   );
 };
 
-export default CompositionPage;
+export default SectionPage;

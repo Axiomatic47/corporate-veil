@@ -5,8 +5,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useEffect } from 'react';
 import Index from "./pages/Index";
-import SectionsPage from "./pages/SectionsPage";
-import CompositionPage from "./pages/CompositionPage";
+import CompositionsPage from "./pages/CompositionsPage";
+import SectionPage from "./pages/SectionPage";
 import Contact from "./pages/Contact";
 import Partners from "./pages/Partners";
 import Donate from "./pages/Donate";
@@ -15,7 +15,6 @@ const queryClient = new QueryClient();
 
 const AdminPage = () => {
   useEffect(() => {
-    // Redirect to the admin page
     window.location.href = '/admin/index.html';
   }, []);
 
@@ -30,8 +29,8 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
-          <Route path="/composition/:compositionId" element={<SectionsPage />} />
-          <Route path="/composition/:compositionId/section/:sectionId" element={<CompositionPage />} />
+          <Route path="/composition/:compositionId" element={<CompositionsPage />} />
+          <Route path="/composition/:compositionId/composition/:compositionIndex/section/:sectionId" element={<SectionPage />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/partners" element={<Partners />} />
           <Route path="/donate" element={<Donate />} />
