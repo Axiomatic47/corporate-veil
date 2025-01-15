@@ -12,15 +12,14 @@ interface PageLayoutProps {
 export const PageLayout = ({ children, className = '' }: PageLayoutProps) => {
   const [pullDistance, setPullDistance] = useState(0);
   const lastScrollY = useRef(0);
+  const isScrolling = useRef(false);
   const animationFrame = useRef<number>();
   const contentRef = useRef<HTMLDivElement>(null);
-  const isScrolling = useRef(false);
   const scrollTimeout = useRef<NodeJS.Timeout>();
   const MAX_PULL_DISTANCE = 800;
 
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
-      // Clear any existing timeout
       if (scrollTimeout.current) {
         clearTimeout(scrollTimeout.current);
       }
@@ -35,11 +34,10 @@ export const PageLayout = ({ children, className = '' }: PageLayoutProps) => {
         isScrolling.current = true;
         setPullDistance(prev => Math.min(Math.max(prev - e.deltaY * 2, -MAX_PULL_DISTANCE), MAX_PULL_DISTANCE));
 
-        // Set a timeout to detect when scrolling stops
         scrollTimeout.current = setTimeout(() => {
           isScrolling.current = false;
           startReturnAnimation();
-        }, 150); // Adjust this delay as needed
+        }, 150);
       }
     };
 
@@ -72,7 +70,6 @@ export const PageLayout = ({ children, className = '' }: PageLayoutProps) => {
     };
 
     const startReturnAnimation = () => {
-      // Only start return animation if not actively scrolling
       if (!isScrolling.current) {
         if (animationFrame.current) {
           cancelAnimationFrame(animationFrame.current);
@@ -80,7 +77,6 @@ export const PageLayout = ({ children, className = '' }: PageLayoutProps) => {
 
         const animate = () => {
           if (isScrolling.current) {
-            // Cancel animation if scrolling resumes
             cancelAnimationFrame(animationFrame.current!);
             return;
           }
@@ -139,9 +135,9 @@ export const PageLayout = ({ children, className = '' }: PageLayoutProps) => {
         }}
       />
 
-      {/* Fixed header */}
+      {/* Fixed header with pull distance prop */}
       <div className="fixed top-0 left-0 right-0 z-50">
-        <Header />
+        <Header pullDistance={pullDistance} maxPullDistance={MAX_PULL_DISTANCE} />
       </div>
 
       {/* Elastic content */}
@@ -158,9 +154,9 @@ export const PageLayout = ({ children, className = '' }: PageLayoutProps) => {
         </main>
       </div>
 
-      {/* Fixed footer */}
+      {/* Fixed footer with pull distance prop */}
       <div className="fixed bottom-0 left-0 right-0 z-50">
-        <Footer />
+        <Footer pullDistance={pullDistance} maxPullDistance={MAX_PULL_DISTANCE} />
       </div>
     </>
   );
