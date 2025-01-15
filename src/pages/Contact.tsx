@@ -1,53 +1,95 @@
+// src/pages/Contact.tsx
+
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useNavigate } from "react-router-dom";
-import { Footer } from "@/components/Footer";
+import { PageLayout } from "@/components/PageLayout";
+import { cn } from "@/lib/utils";
+
+const BlurPanel = ({
+  children,
+  className
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) => {
+  return (
+    <div
+      className={cn(
+        "relative rounded-lg p-8 sm:p-12",
+        "backdrop-blur-md bg-black/80",
+        "border border-white/10",
+        "shadow-xl",
+        className
+      )}
+    >
+      {children}
+    </div>
+  );
+};
 
 const Contact = () => {
   const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real application, this would handle the form submission
+    // Handle form submission
     console.log("Form submitted");
   };
 
   return (
-    <div className="min-h-screen bg-[#1A1F2C] text-white flex flex-col">
+    <PageLayout>
       <div className="container mx-auto px-4 py-12 flex-grow">
-        <Button
-          variant="ghost"
-          className="text-white mb-8"
-          onClick={() => navigate("/")}
-        >
-          ← Back to Home
-        </Button>
-        
-        <h1 className="text-4xl font-serif mb-8">Contact Us</h1>
-        
-        <form onSubmit={handleSubmit} className="max-w-2xl space-y-6">
-          <div>
-            <label htmlFor="name" className="block mb-2">Name</label>
-            <Input id="name" className="bg-[#2A2F3C] border-none" />
-          </div>
-          
-          <div>
-            <label htmlFor="email" className="block mb-2">Email</label>
-            <Input id="email" type="email" className="bg-[#2A2F3C] border-none" />
-          </div>
-          
-          <div>
-            <label htmlFor="message" className="block mb-2">Message</label>
-            <Textarea id="message" className="bg-[#2A2F3C] border-none" rows={6} />
-          </div>
-          
-          <Button type="submit">Send Message</Button>
-        </form>
+        <BlurPanel>
+          <Button
+            variant="ghost"
+            className="text-white mb-8 hover:bg-white/10"
+            onClick={() => navigate("/")}
+          >
+            ← Back to Home
+          </Button>
+
+          <h1 className="text-4xl font-serif mb-8 text-white drop-shadow-lg">Contact Us</h1>
+
+          <form onSubmit={handleSubmit} className="max-w-2xl space-y-6">
+            <div>
+              <label htmlFor="name" className="block mb-2 text-white">Name</label>
+              <Input
+                id="name"
+                className="bg-black/50 border-white/20 text-white"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="email" className="block mb-2 text-white">Email</label>
+              <Input
+                id="email"
+                type="email"
+                className="bg-black/50 border-white/20 text-white"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="message" className="block mb-2 text-white">Message</label>
+              <Textarea
+                id="message"
+                className="bg-black/50 border-white/20 text-white"
+                rows={6}
+              />
+            </div>
+
+            <Button
+              type="submit"
+              className="bg-black/50 text-white border-2 border-white/20 hover:bg-black/60 hover:border-white/30"
+            >
+              Send Message
+            </Button>
+          </form>
+        </BlurPanel>
       </div>
-      <Footer />
-    </div>
+    </PageLayout>
   );
 };
 

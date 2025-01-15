@@ -2,7 +2,8 @@
 
 import { Button } from "@/components/ui/button";
 import { Home } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
 interface HeaderProps {
@@ -12,16 +13,33 @@ interface HeaderProps {
 
 export const Header = ({ pullDistance = 0, maxPullDistance = 800 }: HeaderProps) => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { toast } = useToast();
 
-  // Calculate opacity based on pull distance with a much lower minimum
+  // Calculate opacity based on pull distance
   const opacity = Math.max(0.02, 0.8 - (Math.abs(pullDistance) / (maxPullDistance * 0.7)));
   const blurAmount = Math.max(2, 12 - (Math.abs(pullDistance) / (maxPullDistance * 0.7)) * 10);
+
+  const handleHomeClick = () => {
+    if (location.pathname === '/') {
+      toast({
+        variant: "default",
+        className: cn(
+          "bg-black/50 backdrop-blur-md border border-white/20",
+          "text-white"
+        ),
+        description: "You're at home"
+      });
+    } else {
+      navigate('/');
+    }
+  };
 
   return (
     <header
       className={cn(
         "sticky top-0 w-full z-50 border-b transition-all duration-200",
-        "hover:bg-black/40 hover:backdrop-blur-md" // Add hover effect for better visibility when needed
+        "hover:bg-black/40 hover:backdrop-blur-md"
       )}
       style={{
         backgroundColor: `rgba(0, 0, 0, ${opacity})`,
@@ -43,7 +61,7 @@ export const Header = ({ pullDistance = 0, maxPullDistance = 800 }: HeaderProps)
           <Button
             variant="ghost"
             className="text-white hover:bg-white/10"
-            onClick={() => navigate("/")}
+            onClick={handleHomeClick}
           >
             <Home className="w-6 h-6" />
           </Button>
