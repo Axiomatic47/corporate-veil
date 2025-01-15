@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 export const HeroButtons = () => {
   const navigate = useNavigate();
-  
+
   return (
     <div className="flex flex-col sm:flex-row justify-center gap-6">
       <Button

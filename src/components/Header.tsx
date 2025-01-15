@@ -1,25 +1,30 @@
 import { Button } from "@/components/ui/button";
 import { Home } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { cn } from "@/lib/utils";
 
 export const Header = () => {
   const navigate = useNavigate();
-  
+
   return (
-    <header className="w-full bg-[#1A1F2C] py-4 px-8 flex justify-between items-center border-b border-[#2A2F3C]">
-      <button 
-        onClick={() => navigate("/")} 
-        className="text-2xl font-serif text-white hover:text-gray-300 transition-colors"
-      >
-        Corporate Veil
-      </button>
-      <Button 
-        variant="ghost" 
-        className="text-white hover:bg-[#2A2F3C]"
-        onClick={() => navigate("/")}
-      >
-        <Home className="w-6 h-6" />
-      </Button>
+    <header className="sticky top-0 w-full z-50 backdrop-blur-md bg-black/40 border-b border-white/10">
+      <div className="container mx-auto">
+        <div className="flex justify-between items-center py-4 px-8">
+          <button
+            onClick={() => navigate("/")}
+            className="text-2xl font-serif text-white hover:text-gray-300 transition-colors drop-shadow-lg"
+          >
+            Corporate Veil
+          </button>
+          <Button
+            variant="ghost"
+            className="text-white hover:bg-white/10"
+            onClick={() => navigate("/")}
+          >
+            <Home className="w-6 h-6" />
+          </Button>
+        </div>
+      </div>
     </header>
   );
 };
