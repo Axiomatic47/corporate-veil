@@ -3,21 +3,41 @@ import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+console.log('Environment Check:', {
+  hasUrl: !!supabaseUrl,
+  hasKey: !!supabaseKey,
+  envVars: import.meta.env
+});
+
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 export const GET = async (request) => {
   try {
+    console.log('Starting analytics GET request');
+
+    if (!supabaseUrl || !supabaseKey) {
+      console.error('Missing Supabase credentials');
+      throw new Error('Configuration error: Missing Supabase credentials');
+    }
+
     const now = new Date();
     const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const startOfWeek = new Date(now);
     startOfWeek.setDate(now.getDate() - now.getDay());
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
+    console.log('Querying Supabase...');
     const { data, error } = await supabase
       .from('page_views')
       .select('viewed_at');
 
-    if (error) throw error;
+    if (error) {
+      console.error('Supabase query error:', error);
+      throw error;
+    }
+
+    console.log('Got Supabase response:', { dataLength: data?.length });
 
     const views = {
       total: data?.length || 0,
@@ -26,6 +46,8 @@ export const GET = async (request) => {
       thisMonth: data?.filter(view => new Date(view.viewed_at) >= startOfMonth).length || 0
     };
 
+    console.log('Processed view counts:', views);
+
     return new Response(JSON.stringify(views), {
       headers: {
         'Content-Type': 'application/json',
@@ -33,35 +55,17 @@ export const GET = async (request) => {
       }
     });
   } catch (error) {
-    console.error('Error getting view counts:', error);
-    return new Response(JSON.stringify({ error: 'Failed to fetch analytics data' }), {
-      status: 500,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
-      }
+    console.error('Detailed error in analytics GET:', {
+      error,
+      message: error.message,
+      stack: error.stack
     });
-  }
-};
 
-export const POST = async (request) => {
-  try {
-    const { path } = await request.json();
-    const { error } = await supabase
-      .from('page_views')
-      .insert([{ path, viewed_at: new Date().toISOString() }]);
-
-    if (error) throw error;
-
-    return new Response(JSON.stringify({ success: true }), {
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
-      }
-    });
-  } catch (error) {
-    console.error('Error recording page view:', error);
-    return new Response(JSON.stringify({ error: 'Failed to record page view' }), {
+    return new Response(JSON.stringify({
+      error: 'Failed to fetch analytics data',
+      details: error.message,
+      stack: error.stack
+    }), {
       status: 500,
       headers: {
         'Content-Type': 'application/json',

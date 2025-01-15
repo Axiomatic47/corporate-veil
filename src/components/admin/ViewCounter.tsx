@@ -2,12 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { createClient } from '@supabase/supabase-js';
-
-// Initialize Supabase client
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-const supabase = createClient(supabaseUrl, supabaseKey);
+import { analyticsService } from '@/services/analyticsService';
 
 const ViewCounter = () => {
   const [views, setViews] = useState({
@@ -19,26 +14,8 @@ const ViewCounter = () => {
 
   const fetchViewCounts = async () => {
     try {
-      // Get all views
-      const { data: allViews, error } = await supabase
-        .from('page_views')
-        .select('viewed_at');
-
-      if (error) throw error;
-
-      if (!allViews) return;
-
-      const now = new Date();
-      const today = new Date(now.setHours(0, 0, 0, 0));
-      const thisWeek = new Date(now.setDate(now.getDate() - now.getDay()));
-      const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-
-      setViews({
-        total: allViews.length,
-        today: allViews.filter(view => new Date(view.viewed_at) >= today).length,
-        thisWeek: allViews.filter(view => new Date(view.viewed_at) >= thisWeek).length,
-        thisMonth: allViews.filter(view => new Date(view.viewed_at) >= thisMonth).length,
-      });
+      const viewCounts = await analyticsService.getViewCounts();
+      setViews(viewCounts);
     } catch (error) {
       console.error('Error fetching view counts:', error);
     }

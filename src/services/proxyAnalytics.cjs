@@ -1,24 +1,18 @@
-// src/services/analyticsService.ts
+const { createClient } = require('@supabase/supabase-js');
+require('dotenv').config();
 
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabaseUrl = process.env.VITE_SUPABASE_URL;
+const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-export interface ViewCount {
-  total: number;
-  today: number;
-  thisWeek: number;
-  thisMonth: number;
-}
-
-export const analyticsService = {
-  async getViewCounts(): Promise<ViewCount> {
+const analyticsService = {
+  async getViewCounts() {
     try {
+      // Get all views
       const { data: allViews, error } = await supabase
         .from('page_views')
-        .select('viewed_at');
+        .select('viewed_at')
+        .order('viewed_at', { ascending: false });
 
       if (error) throw error;
 
@@ -41,8 +35,9 @@ export const analyticsService = {
     }
   },
 
-  async recordPageView(path: string): Promise<void> {
+  async recordPageView(path) {
     try {
+      console.log('Recording page view for path:', path);
       const { error } = await supabase
         .from('page_views')
         .insert([{
@@ -51,8 +46,12 @@ export const analyticsService = {
         }]);
 
       if (error) throw error;
+      return true;
     } catch (error) {
       console.error('Error recording page view:', error);
+      return false;
     }
   }
 };
+
+module.exports = analyticsService;

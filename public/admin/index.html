@@ -11,7 +11,6 @@
     <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
     <script>
       function findHeader() {
-        // Try different possible header selectors
         const possibleSelectors = [
           '.css-12h6ic1-TopBar',
           '.css-1gj57a0-AppMainContainer',
@@ -30,7 +29,6 @@
           }
         }
 
-        // If no header found, return the first main content div
         const mainContent = document.querySelector('main') || document.querySelector('.content') || document.body;
         console.log('Using fallback container');
         return mainContent;
@@ -74,50 +72,51 @@
         }
       }
 
-async function updateAnalytics() {
-  try {
-    console.log('Fetching analytics data...');
-    const response = await fetch('/api/analytics', {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
+      async function updateAnalytics() {
+        try {
+          console.log('Fetching analytics data...');
+          const response = await fetch('/api/analytics', {
+            method: 'GET',
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+            }
+          });
+
+          if (!response.ok) {
+            console.error('Analytics response not ok:', response.status, response.statusText);
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          const data = await response.json();
+          console.log('Received analytics data:', data);
+
+          const elements = {
+            total: document.getElementById('total-views'),
+            today: document.getElementById('today-views'),
+            week: document.getElementById('week-views'),
+            month: document.getElementById('month-views')
+          };
+
+          if (elements.total && elements.today && elements.week && elements.month) {
+            elements.total.textContent = (data.total || 0).toLocaleString();
+            elements.today.textContent = (data.today || 0).toLocaleString();
+            elements.week.textContent = (data.thisWeek || 0).toLocaleString();
+            elements.month.textContent = (data.thisMonth || 0).toLocaleString();
+            console.log('Updated analytics display');
+          }
+        } catch (error) {
+          console.error('Error updating analytics:', error);
+          // Set default values on error
+          const elements = ['total-views', 'today-views', 'week-views', 'month-views'];
+          elements.forEach(id => {
+            const element = document.getElementById(id);
+            if (element) element.textContent = '0';
+          });
+        }
       }
-    });
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
-    console.log('Received analytics data:', data);
-
-    const elements = {
-      total: document.getElementById('total-views'),
-      today: document.getElementById('today-views'),
-      week: document.getElementById('week-views'),
-      month: document.getElementById('month-views')
-    };
-
-    if (elements.total && elements.today && elements.week && elements.month) {
-      elements.total.textContent = (data.total || 0).toLocaleString();
-      elements.today.textContent = (data.today || 0).toLocaleString();
-      elements.week.textContent = (data.thisWeek || 0).toLocaleString();
-      elements.month.textContent = (data.thisMonth || 0).toLocaleString();
-      console.log('Updated analytics display');
-    }
-  } catch (error) {
-    console.error('Error updating analytics:', error);
-    // Set default values on error
-    const elements = ['total-views', 'today-views', 'week-views', 'month-views'];
-    elements.forEach(id => {
-      const element = document.getElementById(id);
-      if (element) element.textContent = '0';
-    });
-  }
-}
-
-      // Use the correct event names
+      // Register CMS event listener
       CMS.registerEventListener({
         name: 'preSave',
         handler: () => {
@@ -126,11 +125,10 @@ async function updateAnalytics() {
         },
       });
 
-      // Also initialize when window loads
+      // Initialize when window loads
       window.addEventListener('load', () => {
         console.log('Window loaded');
         setTimeout(() => {
-          // Initialize after a delay to ensure CMS is loaded
           const initInterval = setInterval(() => {
             const header = findHeader();
             if (header) {
@@ -138,7 +136,6 @@ async function updateAnalytics() {
               initializeAnalytics();
             }
           }, 1000);
-          // Stop checking after 10 seconds
           setTimeout(() => clearInterval(initInterval), 10000);
         }, 2000);
       });
