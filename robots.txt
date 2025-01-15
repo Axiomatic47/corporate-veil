@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Sitemap: https://corporateveil.org/sitemap.xml
+
+Disallow: /admin/
+Disallow: /api/
