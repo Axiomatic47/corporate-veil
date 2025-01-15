@@ -1,6 +1,7 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react-swc'
-import path from "path"
+// vite.config.ts
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react-swc';
+import path from "path";
 
 export default defineConfig({
   plugins: [react()],
@@ -10,7 +11,13 @@ export default defineConfig({
     },
   },
   server: {
-    port: 8080
-  },
-  assetsInclude: ['**/*.md']
-})
+    port: 8080,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8081',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, '')
+      }
+    }
+  }
+});

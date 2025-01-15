@@ -23,6 +23,42 @@ const NavigationLayout = {
       overflow-y: auto;
     `;
 
+    // Create analytics container
+    const analyticsContainer = document.createElement('div');
+    analyticsContainer.id = 'analytics-container';
+    analyticsContainer.style.cssText = `
+      margin-bottom: 20px;
+      padding: 15px;
+      background: white;
+      border-radius: 4px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    `;
+
+    // Initialize view counter
+    const initializeViewCounter = async () => {
+      try {
+        const response = await fetch('/api/analytics/views');
+        const data = await response.json();
+
+        analyticsContainer.innerHTML = `
+          <h3 style="margin: 0 0 10px; font-size: 16px; font-weight: 600;">Site Analytics</h3>
+          <div style="display: grid; grid-template-columns: 1fr; gap: 8px;">
+            <div>
+              <div style="color: #666; font-size: 12px;">Total Views</div>
+              <div style="font-size: 18px; font-weight: 600;">${data.total}</div>
+            </div>
+            <div>
+              <div style="color: #666; font-size: 12px;">Today</div>
+              <div style="font-size: 18px; font-weight: 600;">${data.today}</div>
+            </div>
+          </div>
+        `;
+      } catch (error) {
+        console.error('Error fetching analytics:', error);
+        analyticsContainer.innerHTML = '<p style="color: #666;">Unable to load analytics</p>';
+      }
+    };
+
     // Add sections list
     const refreshSections = async () => {
       // Get entries from the store
@@ -43,8 +79,9 @@ const NavigationLayout = {
         </div>
       `).join('');
 
-      sidebar.innerHTML = `
-        <h2 style="margin-bottom: 16px;">Sections</h2>
+      const sectionsContainer = document.createElement('div');
+      sectionsContainer.innerHTML = `
+        <h2 style="margin: 16px 0; font-size: 18px;">Sections</h2>
         <button style="width: 100%; padding: 8px; margin-bottom: 16px; background: #2196f3; color: white; border: none; border-radius: 4px;">
           Add Section
         </button>
@@ -52,6 +89,11 @@ const NavigationLayout = {
           ${sectionsHtml}
         </div>
       `;
+
+      // Clear existing content and add new content
+      sidebar.innerHTML = '';
+      sidebar.appendChild(analyticsContainer);
+      sidebar.appendChild(sectionsContainer);
 
       // Add click handlers
       const sectionItems = sidebar.querySelectorAll('.section-item');
@@ -71,14 +113,27 @@ const NavigationLayout = {
           border: 1px solid #ddd;
           border-radius: 4px;
           cursor: pointer;
+          transition: background-color 0.2s;
         `;
+
+        // Add hover effect
+        item.addEventListener('mouseover', () => {
+          item.style.backgroundColor = '#f5f5f5';
+        });
+        item.addEventListener('mouseout', () => {
+          item.style.backgroundColor = 'white';
+        });
       });
     };
 
     // Initial render
+    initializeViewCounter();
     refreshSections();
 
-    // Subscribe to changes
+    // Update analytics every minute
+    setInterval(initializeViewCounter, 60000);
+
+    // Subscribe to changes for sections
     opts.store.subscribe(refreshSections);
 
     // Add to document

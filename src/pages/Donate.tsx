@@ -44,7 +44,7 @@ const Donate = () => {
   const navigate = useNavigate();
 
   return (
-    <PageLayout>
+    <PageLayout maxPullDistance={400}>
       <div className="container mx-auto px-4 py-12 flex-grow">
         <BlurPanel>
           <Button
@@ -57,12 +57,12 @@ const Donate = () => {
 
           <h1 className="text-4xl font-serif mb-8 text-white drop-shadow-lg">Support Our Work</h1>
 
-          <div className="max-w-3xl space-y-8">
+          <div className="max-w-3xl mx-auto space-y-8">
             <p className="text-xl text-gray-300">
               Your donation helps us continue our mission of making corporate law and constitutional rights accessible to everyone.
             </p>
 
-            <div className="grid md:grid-cols-3 gap-4">
+            <div className="grid md:grid-cols-3 gap-4 justify-center">
               <DonationButton amount="$10" />
               <DonationButton amount="$25" />
               <DonationButton amount="$50" />
