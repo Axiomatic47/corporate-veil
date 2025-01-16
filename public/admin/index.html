@@ -7,8 +7,15 @@
     <link rel="stylesheet" href="styles/featured-widget.css" />
   </head>
   <body>
-    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
-    <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+    <!-- Load Netlify Identity widget only in production -->
+    <script>
+      if (window.location.hostname !== "localhost") {
+        var script = document.createElement('script');
+        script.src = "https://identity.netlify.com/v1/netlify-identity-widget.js";
+        document.body.appendChild(script);
+      }
+    </script>
+    <script src="https://unpkg.com/decap-cms@^3.5.0/dist/decap-cms.js"></script>
     <script>
       function findHeader() {
         const possibleSelectors = [
@@ -125,6 +132,28 @@
         },
       });
 
+      // Function to increment view count
+      async function incrementViewCount() {
+        try {
+          const response = await fetch('/api/increment-view', {
+            method: 'POST',
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ source: 'page_load' })
+          });
+
+          if (!response.ok) {
+            console.error('View count increment failed:', response.status, response.statusText);
+          } else {
+            console.log('View count incremented');
+          }
+        } catch (error) {
+          console.error('Error incrementing view count:', error);
+        }
+      }
+
       // Initialize when window loads
       window.addEventListener('load', () => {
         console.log('Window loaded');
@@ -138,22 +167,28 @@
           }, 1000);
           setTimeout(() => clearInterval(initInterval), 10000);
         }, 2000);
+
+        // Check if the user is not logged in before incrementing view count
+        if (window.netlifyIdentity) {
+          window.netlifyIdentity.on("init", user => {
+            console.log('Netlify identity initialized');
+            if (!user) {
+              // User is not logged in, increment view count
+              incrementViewCount();
+            } else {
+              console.log('Logged in user - not incrementing view count');
+            }
+          });
+
+          window.netlifyIdentity.on("login", () => {
+            console.log('User logged in - not incrementing view count');
+          });
+        } else {
+          // If Netlify Identity is not loaded (local dev), assume not logged in
+          console.log('Netlify Identity not loaded - incrementing view count');
+          incrementViewCount();
+        }
       });
-
-      // Initialize on netlify identity events
-      if (window.netlifyIdentity) {
-        window.netlifyIdentity.on("init", user => {
-          console.log('Netlify identity initialized');
-          if (user) {
-            setTimeout(initializeAnalytics, 1000);
-          }
-        });
-
-        window.netlifyIdentity.on("login", () => {
-          console.log('User logged in');
-          setTimeout(initializeAnalytics, 1000);
-        });
-      }
     </script>
   </body>
 </html>
