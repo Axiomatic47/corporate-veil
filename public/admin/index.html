@@ -7,8 +7,15 @@
     <link rel="stylesheet" href="styles/featured-widget.css" />
   </head>
   <body>
-    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
-    <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+    <!-- Load Netlify Identity widget only in production -->
+    <script>
+      if (window.location.hostname !== "localhost") {
+        var script = document.createElement('script');
+        script.src = "https://identity.netlify.com/v1/netlify-identity-widget.js";
+        document.body.appendChild(script);
+      }
+    </script>
+    <script src="https://unpkg.com/decap-cms@^3.5.0/dist/decap-cms.js"></script>
     <script>
       function findHeader() {
         const possibleSelectors = [
@@ -140,8 +147,8 @@
         }, 2000);
       });
 
-      // Initialize on netlify identity events
-      if (window.netlifyIdentity) {
+      // Initialize on Netlify Identity events only in production
+      if (window.netlifyIdentity && window.location.hostname !== "localhost") {
         window.netlifyIdentity.on("init", user => {
           console.log('Netlify identity initialized');
           if (user) {
@@ -153,6 +160,12 @@
           console.log('User logged in');
           setTimeout(initializeAnalytics, 1000);
         });
+      } else {
+        // Skipping Netlify Identity in local dev
+        if (window.netlifyIdentity) {
+          console.log('Local development mode - Skipping login setup');
+          initializeAnalytics();
+        }
       }
     </script>
   </body>
