@@ -113,27 +113,41 @@ const SectionPage = () => {
   return (
     <PageLayout>
       <div className="flex relative">
-        {/* Mobile Menu Button */}
+        {/* Sidebar Pull Tab */}
         {isMobile && (
-          <button
+          <div
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
             className={cn(
-              "fixed z-50 p-2 m-4 rounded-lg",
-              "backdrop-blur-md bg-black/80 border border-white/10",
+              "fixed z-50 h-full flex items-center cursor-pointer",
               "transition-all duration-200",
-              "text-gray-200 hover:bg-black/90",
               isSidebarOpen ? "left-[256px]" : "left-0"
             )}
           >
-            {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
+            <div className="h-32 flex items-center">
+              <div className={cn(
+                "w-1 h-full backdrop-blur-md bg-white/10",
+                "transition-opacity duration-200",
+                isSidebarOpen ? "opacity-0" : "opacity-100"
+              )} />
+              <div className={cn(
+                "px-2 py-8 backdrop-blur-md bg-black/40 border border-white/10",
+                "rounded-r-lg -ml-px",
+                "transition-colors duration-200",
+                "hover:bg-black/60"
+              )}>
+                <div className="rotate-0 transition-transform duration-200">
+                  {isSidebarOpen ? <X size={16} /> : <Menu size={16} />}
+                </div>
+              </div>
+            </div>
+          </div>
         )}
 
         {/* Sidebar */}
         <div
           className={cn(
             "w-64 min-h-[calc(100vh-4rem)] backdrop-blur-md bg-black/80 border-r border-white/10",
-            "fixed lg:relative z-40 transition-all duration-300 ease-in-out",
+            "fixed lg:relative z-40 transition-all duration-300 ease-in-out h-full overflow-y-auto",
             isMobile ? (isSidebarOpen ? "left-0" : "-left-64") : "left-0"
           )}
         >
