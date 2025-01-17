@@ -8,13 +8,17 @@ import rehypeRaw from 'rehype-raw';
 import { useCompositionStore } from "@/utils/compositionData";
 import { PageLayout } from "@/components/PageLayout";
 import { cn } from "@/lib/utils";
+import { Menu, X } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const SectionPage = () => {
   const { compositionId = "", compositionIndex = "1", sectionId = "1" } = useParams();
   const [literacyLevel, setLiteracyLevel] = useState(3);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
   const { memorandum, corrective, refreshCompositions } = useCompositionStore();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     refreshCompositions();
@@ -31,11 +35,16 @@ const SectionPage = () => {
   const currentComposition = compositions[parseInt(compositionIndex) - 1];
   const currentSection = currentComposition?.sections?.[parseInt(sectionId) - 1];
 
+  // Close sidebar on mobile when changing sections
   const handleSectionChange = (newSectionId: number) => {
     window.scrollTo({
       top: 0,
       behavior: 'smooth'
     });
+
+    if (isMobile) {
+      setIsSidebarOpen(false);
+    }
 
     setTimeout(() => {
       navigate(`/composition/${compositionId}/composition/${compositionIndex}/section/${newSectionId}`);
@@ -103,8 +112,31 @@ const SectionPage = () => {
 
   return (
     <PageLayout>
-      <div className="flex">
-        <div className="w-64 min-h-[calc(100vh-4rem)] backdrop-blur-md bg-black/80 border-r border-white/10">
+      <div className="flex relative">
+        {/* Mobile Menu Button */}
+        {isMobile && (
+          <button
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            className={cn(
+              "fixed z-50 p-2 m-4 rounded-lg",
+              "backdrop-blur-md bg-black/80 border border-white/10",
+              "transition-all duration-200",
+              "text-gray-200 hover:bg-black/90",
+              isSidebarOpen ? "left-[256px]" : "left-0"
+            )}
+          >
+            {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        )}
+
+        {/* Sidebar */}
+        <div
+          className={cn(
+            "w-64 min-h-[calc(100vh-4rem)] backdrop-blur-md bg-black/80 border-r border-white/10",
+            "fixed lg:relative z-40 transition-all duration-300 ease-in-out",
+            isMobile ? (isSidebarOpen ? "left-0" : "-left-64") : "left-0"
+          )}
+        >
           <div className="p-6 space-y-6">
             <div>
               <h2 className="text-lg font-serif text-white drop-shadow-lg mb-1">
@@ -130,7 +162,11 @@ const SectionPage = () => {
           </div>
         </div>
 
-        <div className="flex-1 p-8 text-gray-200">
+        {/* Main Content */}
+        <div className={cn(
+          "flex-1 p-8 text-gray-200 transition-all duration-300",
+          isMobile && isSidebarOpen ? "ml-64" : "ml-0"
+        )}>
           <div className="max-w-3xl mx-auto backdrop-blur-md bg-black/80 p-8 rounded-lg border border-white/10">
             <div className="mb-8">
               <h1 className="text-3xl font-serif mb-4 text-white drop-shadow-lg leading-snug text-center">
