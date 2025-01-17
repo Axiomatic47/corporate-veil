@@ -19,15 +19,16 @@ export const PageLayout = ({ children, className = '' }: PageLayoutProps) => {
   const MAX_PULL_DISTANCE = 800;
 
   useEffect(() => {
-    const handleWheel = (e: WheelEvent) => {
+const handleWheel = (e: WheelEvent) => {
       if (scrollTimeout.current) {
         clearTimeout(scrollTimeout.current);
       }
 
       const element = contentRef.current;
       const isAtTop = window.scrollY === 0;
+      // Adjust bottom detection to account for viewport height
       const isAtBottom = element &&
-        window.innerHeight + window.scrollY >= document.documentElement.scrollHeight;
+        window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 10; // Add small buffer
 
       if ((isAtTop && e.deltaY < 0) || (isAtBottom && e.deltaY > 0)) {
         e.preventDefault();
