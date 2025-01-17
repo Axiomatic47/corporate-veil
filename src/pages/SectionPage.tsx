@@ -110,22 +110,18 @@ const SectionPage = () => {
   }
 
   return (
-    <>
-      {/* Fixed Pull Tab - Always visible */}
+    <PageLayout>
+      {/* Mobile Pull Tab */}
       {isMobile && (
         <div
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-          style={{ top: "48px" }}  // Adjusted to account for header
           className={cn(
-            "fixed z-[100] h-[calc(100vh-48px)]", // Adjusted height to account for header
+            "fixed z-[100] top-16 h-[calc(100vh-64px)]",
             "transition-all duration-200",
             isSidebarOpen ? "left-[256px]" : "left-0"
           )}
         >
-          {/* Full height border line */}
           <div className="h-full w-1 bg-white/30" />
-
-          {/* Menu bump/tab */}
           <div className="absolute top-1/2 -translate-y-1/2 -right-6">
             <div className={cn(
               "flex items-center justify-center",
@@ -144,16 +140,18 @@ const SectionPage = () => {
         </div>
       )}
 
-      <PageLayout>
-        <div className="flex relative">
-          {/* Sidebar */}
-          <div
-            className={cn(
-              "w-64 min-h-[calc(100vh-4rem)] backdrop-blur-md bg-black/80 border-r border-white/10",
-              "fixed lg:relative z-40 transition-all duration-300 ease-in-out h-full overflow-y-auto",
-              isMobile ? (isSidebarOpen ? "left-0" : "-left-64") : "left-0"
-            )}
-          >
+      <div className="flex min-h-screen">
+        {/* Sidebar */}
+        <div
+          className={cn(
+            "w-64 min-h-screen bg-black/80 border-r border-white/10",
+            "backdrop-blur-md z-40 transition-all duration-300",
+            isMobile ? (isSidebarOpen ? "fixed left-0 top-16" : "fixed -left-64 top-16") : ""
+          )}
+        >
+          {/* Navigation container */}
+          <div className="sticky top-0">
+            {/* Header section */}
             <div className="p-6 space-y-6">
               <div>
                 <h2 className="text-lg font-serif text-white drop-shadow-lg mb-1">
@@ -161,6 +159,8 @@ const SectionPage = () => {
                 </h2>
                 <h3 className="text-sm text-gray-200">{currentComposition.title}</h3>
               </div>
+
+              {/* Navigation links */}
               <nav className="space-y-2">
                 {currentComposition.sections.map((section, index) => (
                   <button
@@ -178,107 +178,107 @@ const SectionPage = () => {
               </nav>
             </div>
           </div>
+        </div>
 
-          {/* Main Content */}
-          <div className={cn(
-            "flex-1 p-8 text-gray-200 transition-all duration-300",
-            isMobile && isSidebarOpen ? "ml-64" : "ml-0"
-          )}>
-            <div className="max-w-3xl mx-auto backdrop-blur-md bg-black/80 p-8 rounded-lg border border-white/10">
-              <div className="mb-8">
-                <h1 className="text-3xl font-serif mb-4 text-white drop-shadow-lg leading-snug text-center">
-                  {currentSection.title}
-                </h1>
+        {/* Main Content */}
+        <div className={cn(
+          "flex-1 p-8",
+          isMobile && isSidebarOpen ? "ml-64" : ""
+        )}>
+          <div className="max-w-3xl mx-auto backdrop-blur-md bg-black/80 p-8 rounded-lg border border-white/10">
+            <div className="mb-8">
+              <h1 className="text-3xl font-serif mb-4 text-white drop-shadow-lg leading-snug text-center">
+                {currentSection.title}
+              </h1>
 
-                <div className="flex items-center space-x-4 mb-8 bg-black/40 p-4 rounded-lg backdrop-blur-sm">
-                  <span className="text-sm text-gray-200">Reading Level:</span>
-                  <Slider
-                    value={[literacyLevel]}
-                    max={5}
-                    min={1}
-                    step={2}
-                    onValueChange={handleLiteracyChange}
-                    className="w-48"
-                  />
-                  <span className="text-sm text-gray-200">{literacyLevel}</span>
-                </div>
+              <div className="flex items-center space-x-4 mb-8 bg-black/40 p-4 rounded-lg backdrop-blur-sm">
+                <span className="text-sm text-gray-200">Reading Level:</span>
+                <Slider
+                  value={[literacyLevel]}
+                  max={5}
+                  min={1}
+                  step={2}
+                  onValueChange={handleLiteracyChange}
+                  className="w-48"
+                />
+                <span className="text-sm text-gray-200">{literacyLevel}</span>
               </div>
+            </div>
 
-              <div className="prose prose-invert prose-lg max-w-none">
-                <ReactMarkdown
-                  remarkPlugins={[remarkGfm]}
-                  rehypePlugins={[rehypeRaw]}
-                  components={{
-                    h1: ({node, ...props}) => <h1 className="text-3xl font-serif mb-6 text-white drop-shadow-lg" {...props} />,
-                    h2: ({node, ...props}) => <h2 className="text-2xl font-serif mb-4 text-white drop-shadow-lg" {...props} />,
-                    h3: ({node, ...props}) => <h3 className="text-xl font-serif mb-3 text-white drop-shadow-lg" {...props} />,
-                    p: ({node, ...props}) => <p className="mb-4 leading-relaxed text-gray-200 drop-shadow" {...props} />,
-                    ul: ({node, ...props}) => <ul className="list-disc pl-6 mb-4 text-gray-200" {...props} />,
-                    ol: ({node, ...props}) => <ol className="list-decimal pl-6 mb-4 text-gray-200" {...props} />,
-                    li: ({node, ...props}) => <li className="mb-2 text-gray-200" {...props} />,
-                    blockquote: ({node, ...props}) => (
-                      <blockquote className="border-l-4 border-white/20 pl-4 italic my-4 text-gray-200 backdrop-blur-sm bg-black/40 p-4 rounded-r-lg" {...props} />
+            <div className="prose prose-invert prose-lg max-w-none">
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                rehypePlugins={[rehypeRaw]}
+                components={{
+                  h1: ({node, ...props}) => <h1 className="text-3xl font-serif mb-6 text-white drop-shadow-lg" {...props} />,
+                  h2: ({node, ...props}) => <h2 className="text-2xl font-serif mb-4 text-white drop-shadow-lg" {...props} />,
+                  h3: ({node, ...props}) => <h3 className="text-xl font-serif mb-3 text-white drop-shadow-lg" {...props} />,
+                  p: ({node, ...props}) => <p className="mb-4 leading-relaxed text-gray-200 drop-shadow" {...props} />,
+                  ul: ({node, ...props}) => <ul className="list-disc pl-6 mb-4 text-gray-200" {...props} />,
+                  ol: ({node, ...props}) => <ol className="list-decimal pl-6 mb-4 text-gray-200" {...props} />,
+                  li: ({node, ...props}) => <li className="mb-2 text-gray-200" {...props} />,
+                  blockquote: ({node, ...props}) => (
+                    <blockquote className="border-l-4 border-white/20 pl-4 italic my-4 text-gray-200 backdrop-blur-sm bg-black/40 p-4 rounded-r-lg" {...props} />
+                  ),
+                  a: ({node, ...props}) => (
+                    <a className="text-blue-400 hover:text-blue-300 underline" {...props} />
+                  ),
+                  em: ({node, ...props}) => <em className="italic text-gray-200" {...props} />,
+                  strong: ({node, ...props}) => <strong className="font-bold text-white drop-shadow" {...props} />,
+                  code: ({node, inline, ...props}) =>
+                    inline ? (
+                      <code className="bg-black/50 px-1 rounded text-sm backdrop-blur-sm" {...props} />
+                    ) : (
+                      <code className="block bg-black/50 p-4 rounded text-sm overflow-x-auto backdrop-blur-sm" {...props} />
                     ),
-                    a: ({node, ...props}) => (
-                      <a className="text-blue-400 hover:text-blue-300 underline" {...props} />
-                    ),
-                    em: ({node, ...props}) => <em className="italic text-gray-200" {...props} />,
-                    strong: ({node, ...props}) => <strong className="font-bold text-white drop-shadow" {...props} />,
-                    code: ({node, inline, ...props}) =>
-                      inline ? (
-                        <code className="bg-black/50 px-1 rounded text-sm backdrop-blur-sm" {...props} />
-                      ) : (
-                        <code className="block bg-black/50 p-4 rounded text-sm overflow-x-auto backdrop-blur-sm" {...props} />
-                      ),
-                  }}
-                >
-                  {getContentForLevel()}
-                </ReactMarkdown>
+                }}
+              >
+                {getContentForLevel()}
+              </ReactMarkdown>
 
-                {/* Section Navigation */}
-                <div className="mt-12 pt-6 border-t border-white/10">
-                  <div className="flex justify-between items-center">
-                    <button
-                      onClick={() => handleSectionChange(parseInt(sectionId) - 1)}
-                      className={cn(
-                        "px-4 py-2 flex items-center space-x-2 rounded-lg",
-                        "backdrop-blur-md bg-black/40 border border-white/10",
-                        "transition-all duration-200",
-                        "text-gray-200 hover:bg-black/60",
-                        parseInt(sectionId) <= 1 ? "opacity-50 cursor-not-allowed" : "hover:scale-105"
-                      )}
-                      disabled={parseInt(sectionId) <= 1}
-                    >
-                      <span>←</span>
-                      <span>Previous Section</span>
-                    </button>
+              {/* Section Navigation */}
+              <div className="mt-12 pt-6 border-t border-white/10">
+                <div className="flex justify-between items-center">
+                  <button
+                    onClick={() => handleSectionChange(parseInt(sectionId) - 1)}
+                    className={cn(
+                      "px-4 py-2 flex items-center space-x-2 rounded-lg",
+                      "backdrop-blur-md bg-black/40 border border-white/10",
+                      "transition-all duration-200",
+                      "text-gray-200 hover:bg-black/60",
+                      parseInt(sectionId) <= 1 ? "opacity-50 cursor-not-allowed" : "hover:scale-105"
+                    )}
+                    disabled={parseInt(sectionId) <= 1}
+                  >
+                    <span>←</span>
+                    <span>Previous Section</span>
+                  </button>
 
-                    <div className="text-gray-200">
-                      Section {sectionId} of {currentComposition.sections.length}
-                    </div>
-
-                    <button
-                      onClick={() => handleSectionChange(parseInt(sectionId) + 1)}
-                      className={cn(
-                        "px-4 py-2 flex items-center space-x-2 rounded-lg",
-                        "backdrop-blur-md bg-black/40 border border-white/10",
-                        "transition-all duration-200",
-                        "text-gray-200 hover:bg-black/60",
-                        parseInt(sectionId) >= currentComposition.sections.length ? "opacity-50 cursor-not-allowed" : "hover:scale-105"
-                      )}
-                      disabled={parseInt(sectionId) >= currentComposition.sections.length}
-                    >
-                      <span>Next Section</span>
-                      <span>→</span>
-                    </button>
+                  <div className="text-gray-200">
+                    Section {sectionId} of {currentComposition.sections.length}
                   </div>
+
+                  <button
+                    onClick={() => handleSectionChange(parseInt(sectionId) + 1)}
+                    className={cn(
+                      "px-4 py-2 flex items-center space-x-2 rounded-lg",
+                      "backdrop-blur-md bg-black/40 border border-white/10",
+                      "transition-all duration-200",
+                      "text-gray-200 hover:bg-black/60",
+                      parseInt(sectionId) >= currentComposition.sections.length ? "opacity-50 cursor-not-allowed" : "hover:scale-105"
+                    )}
+                    disabled={parseInt(sectionId) >= currentComposition.sections.length}
+                  >
+                    <span>Next Section</span>
+                    <span>→</span>
+                  </button>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </PageLayout>
-    </>
+      </div>
+    </PageLayout>
   );
 };
 
