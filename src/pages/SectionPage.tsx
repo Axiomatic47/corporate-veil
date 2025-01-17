@@ -112,37 +112,37 @@ const SectionPage = () => {
   return (
     <PageLayout>
       <div className="flex relative">
-        {/* Sidebar Pull Tab */}
-        {isMobile && (
-          <div
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className={cn(
-              "fixed z-50 h-full flex items-center cursor-pointer",
-              "transition-all duration-200",
-              isSidebarOpen ? "left-[256px]" : "left-0"
-            )}
-          >
-            <div className="h-32 flex items-center">
-              <div className={cn(
-                "w-2 h-full bg-white/20",
-                "backdrop-blur-md shadow-lg",
-                "transition-opacity duration-200",
-                isSidebarOpen ? "opacity-0" : "opacity-100"
-              )} />
-              <div className={cn(
-                "px-2 py-8 bg-white/10",
-                "backdrop-blur-md border border-white/20",
-                "rounded-r-lg -ml-px",
-                "transition-colors duration-200",
-                "hover:bg-white/20"
-              )}>
-                <div className="text-white/80">
-                  {isSidebarOpen ? <X size={16} /> : <Menu size={16} />}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+{/* Sidebar Pull Tab */}
+{isMobile && (
+  <div
+    onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+    className={cn(
+      "fixed z-50 h-full flex items-center cursor-pointer",
+      "transition-all duration-200",
+      isSidebarOpen ? "left-[256px]" : "left-0"
+    )}
+  >
+    {/* Full height border line */}
+    <div className="h-full w-1 bg-white/30" />
+
+    {/* Menu bump/tab in the middle */}
+    <div className="absolute top-1/2 -translate-y-1/2 -right-6">
+      <div className={cn(
+        "flex items-center justify-center",
+        "w-7 h-16",
+        "bg-white/30",
+        "rounded-r-md",
+        "-ml-px",
+        "transition-colors duration-200",
+        "hover:bg-white/40"
+      )}>
+        <div className="text-white">
+          {isSidebarOpen ? <X size={16} /> : <Menu size={16} />}
+        </div>
+      </div>
+    </div>
+  </div>
+)}
 
         {/* Sidebar */}
         <div
