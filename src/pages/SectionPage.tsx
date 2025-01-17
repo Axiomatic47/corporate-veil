@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 import { Menu, X } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-const SectionPage: React.FC = () => {
+const SectionPage = () => {
   const { compositionId = "", compositionIndex = "1", sectionId = "1" } = useParams();
   const [literacyLevel, setLiteracyLevel] = useState(3);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -36,6 +36,11 @@ const SectionPage: React.FC = () => {
   const currentSection = currentComposition?.sections?.[parseInt(sectionId) - 1];
 
   const handleSectionChange = (newSectionId: number) => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+
     if (isMobile) {
       setIsSidebarOpen(false);
     }
@@ -105,18 +110,22 @@ const SectionPage: React.FC = () => {
   }
 
   return (
-    <PageLayout>
-      {/* Fixed Pull Tab for Mobile */}
+    <>
+      {/* Fixed Pull Tab - Always visible */}
       {isMobile && (
         <div
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          style={{ top: "48px" }}  // Adjusted to account for header
           className={cn(
-            "fixed z-[100] top-16 h-[calc(100vh-64px)]",
+            "fixed z-[100] h-[calc(100vh-48px)]", // Adjusted height to account for header
             "transition-all duration-200",
             isSidebarOpen ? "left-[256px]" : "left-0"
           )}
         >
+          {/* Full height border line */}
           <div className="h-full w-1 bg-white/30" />
+
+          {/* Menu bump/tab */}
           <div className="absolute top-1/2 -translate-y-1/2 -right-6">
             <div className={cn(
               "flex items-center justify-center",
@@ -135,20 +144,16 @@ const SectionPage: React.FC = () => {
         </div>
       )}
 
-      {/* Main Layout */}
-      <div className="min-h-screen flex">
-        {/* Fixed Sidebar */}
-        <aside
-          className={cn(
-            "fixed top-16 left-0",
-            "w-64 h-[calc(100vh-64px)]",
-            "bg-black/80 border-r border-white/10",
-            "backdrop-blur-md z-40",
-            "transition-transform duration-300",
-            isMobile ? (isSidebarOpen ? "translate-x-0" : "-translate-x-full") : "translate-x-0"
-          )}
-        >
-          <div className="h-full overflow-y-auto no-scrollbar">
+      <PageLayout>
+        <div className="flex relative">
+          {/* Sidebar */}
+          <div
+            className={cn(
+              "w-64 min-h-[calc(100vh-4rem)] backdrop-blur-md bg-black/80 border-r border-white/10",
+              "fixed lg:relative z-40 transition-all duration-300 ease-in-out h-full overflow-y-auto",
+              isMobile ? (isSidebarOpen ? "left-0" : "-left-64") : "left-0"
+            )}
+          >
             <div className="p-6 space-y-6">
               <div>
                 <h2 className="text-lg font-serif text-white drop-shadow-lg mb-1">
@@ -173,16 +178,12 @@ const SectionPage: React.FC = () => {
               </nav>
             </div>
           </div>
-        </aside>
 
-        {/* Main Content Area */}
-        <main
-          className={cn(
-            "flex-1 min-h-screen transition-all duration-300",
-            isMobile ? (isSidebarOpen ? "pl-64" : "pl-0") : "pl-64"
-          )}
-        >
-          <div className="p-8">
+          {/* Main Content */}
+          <div className={cn(
+            "flex-1 p-8 text-gray-200 transition-all duration-300",
+            isMobile && isSidebarOpen ? "ml-64" : "ml-0"
+          )}>
             <div className="max-w-3xl mx-auto backdrop-blur-md bg-black/80 p-8 rounded-lg border border-white/10">
               <div className="mb-8">
                 <h1 className="text-3xl font-serif mb-4 text-white drop-shadow-lg leading-snug text-center">
@@ -275,9 +276,9 @@ const SectionPage: React.FC = () => {
               </div>
             </div>
           </div>
-        </main>
-      </div>
-    </PageLayout>
+        </div>
+      </PageLayout>
+    </>
   );
 };
 
