@@ -140,15 +140,17 @@ const SectionPage = () => {
       )}
 
       <PageLayout>
-        <div className="flex relative flex-grow">
+        <div className="flex min-h-screen">
           {/* Fixed Sidebar Container */}
           <div
             className={cn(
-              "fixed top-16 bottom-0 w-64 bg-black/80 border-r border-white/10",
-              "backdrop-blur-md z-40 transition-all duration-300",
-              isMobile ? (isSidebarOpen ? "left-0" : "-left-64") : "left-0 lg:relative"
+              "fixed top-16 left-0 w-64",
+              "h-[calc(100vh-64px)]",
+              "bg-black/80 border-r border-white/10",
+              "backdrop-blur-md z-40",
+              "transition-all duration-300",
+              isMobile ? (isSidebarOpen ? "translate-x-0" : "-translate-x-full") : "translate-x-0"
             )}
-            style={{ height: 'calc(100vh - 4rem)' }}
           >
             {/* Scrollable Sidebar Content */}
             <div className="h-full overflow-y-auto">
@@ -181,8 +183,8 @@ const SectionPage = () => {
           {/* Main Content */}
           <div
             className={cn(
-              "flex-1 transition-all duration-300 min-h-screen",
-              "lg:ml-64",
+              "flex-1",
+              "transition-all duration-300",
               isMobile ? (isSidebarOpen ? "ml-64" : "ml-0") : "ml-64"
             )}
           >
