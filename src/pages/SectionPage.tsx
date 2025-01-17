@@ -117,7 +117,7 @@ const SectionPage = () => {
   <div
     onClick={() => setIsSidebarOpen(!isSidebarOpen)}
     className={cn(
-      "fixed z-50 h-full flex items-center cursor-pointer",
+      "fixed z-50 h-full flex cursor-pointer",
       "transition-all duration-200",
       isSidebarOpen ? "left-[256px]" : "left-0"
     )}
@@ -125,14 +125,13 @@ const SectionPage = () => {
     {/* Full height border line */}
     <div className="h-full w-1 bg-white/30" />
 
-    {/* Menu bump/tab in the middle */}
-    <div className="absolute top-1/2 -translate-y-1/2 -right-6">
+    {/* Menu bump/tab - fixed in viewport center */}
+    <div className="fixed left-0 top-1/2 -translate-y-1/2">
       <div className={cn(
         "flex items-center justify-center",
         "w-7 h-16",
         "bg-white/30",
         "rounded-r-md",
-        "-ml-px",
         "transition-colors duration-200",
         "hover:bg-white/40"
       )}>
