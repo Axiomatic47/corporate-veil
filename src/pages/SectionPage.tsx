@@ -35,7 +35,6 @@ const SectionPage = () => {
   const currentComposition = compositions[parseInt(compositionIndex) - 1];
   const currentSection = currentComposition?.sections?.[parseInt(sectionId) - 1];
 
-  // Close sidebar on mobile when changing sections
   const handleSectionChange = (newSectionId: number) => {
     window.scrollTo({
       top: 0,
@@ -125,17 +124,19 @@ const SectionPage = () => {
           >
             <div className="h-32 flex items-center">
               <div className={cn(
-                "w-1 h-full backdrop-blur-md bg-white/10",
+                "w-2 h-full bg-white/20",
+                "backdrop-blur-md shadow-lg",
                 "transition-opacity duration-200",
                 isSidebarOpen ? "opacity-0" : "opacity-100"
               )} />
               <div className={cn(
-                "px-2 py-8 backdrop-blur-md bg-black/40 border border-white/10",
+                "px-2 py-8 bg-white/10",
+                "backdrop-blur-md border border-white/20",
                 "rounded-r-lg -ml-px",
                 "transition-colors duration-200",
-                "hover:bg-black/60"
+                "hover:bg-white/20"
               )}>
-                <div className="rotate-0 transition-transform duration-200">
+                <div className="text-white/80">
                   {isSidebarOpen ? <X size={16} /> : <Menu size={16} />}
                 </div>
               </div>
