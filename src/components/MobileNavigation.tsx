@@ -1,4 +1,3 @@
-// src/components/MobileNavigation.tsx
 import React from 'react';
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -12,18 +11,7 @@ export const useMobileNavigation = () => {
     if (!isMobile) {
       setIsSidebarOpen(false);
     }
-
-    // Lock body scroll when sidebar is open on mobile
-    if (isMobile && isSidebarOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
-  }, [isMobile, isSidebarOpen]);
+  }, [isMobile]);
 
   return {
     isSidebarOpen,
@@ -47,7 +35,7 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
 
   if (!isMobile) {
     return (
-      <div className="w-64 h-[calc(100vh-4rem)] border-r border-white/10 bg-black/80 backdrop-blur-md overflow-y-auto sticky top-16">
+      <div className="w-64 min-h-[calc(100vh-4rem)] border-r border-white/10 bg-black/80 backdrop-blur-md overflow-y-auto">
         {children}
       </div>
     );
@@ -55,50 +43,60 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
 
   return (
     <>
-      {/* Vertical Bar Indicator */}
-      <div
-        className={cn(
-          "fixed z-50 top-16 h-[calc(100vh-4rem)]",
-          "transition-all duration-300",
-          isSidebarOpen ? "left-64" : "left-0"
-        )}
-      >
-        {/* Vertical Line */}
-        <div className="h-full w-1 bg-white/20" />
+      {/* Pull Tab */}
+      <div className="fixed top-16 left-0 h-screen pointer-events-none z-50">
+        {/* The line that is always visible */}
+        <div
+          className={cn(
+            "absolute h-full w-1 bg-white/20 transition-transform duration-300",
+            isSidebarOpen ? "translate-x-64" : "translate-x-0"
+          )}
+        />
 
-        {/* Toggle Button */}
-        <button
-          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-          className="absolute top-1/2 -translate-y-1/2 -right-6"
+        {/* The clickable button */}
+        <div
+          className={cn(
+            "absolute top-1/3 pointer-events-auto",
+            "transition-transform duration-300",
+            isSidebarOpen ? "translate-x-64" : "translate-x-0"
+          )}
         >
-          <div className={cn(
-            "flex items-center justify-center",
-            "w-7 h-16",
-            "bg-white/30",
-            "rounded-r-md",
-            "-ml-px",
-            "transition-colors duration-200",
-            "hover:bg-white/40"
-          )}>
-            <div className="text-white">
-              {isSidebarOpen ? <X size={16} /> : <Menu size={16} />}
+          <button
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            className="relative flex items-center"
+          >
+            <div className={cn(
+              "flex items-center justify-center",
+              "w-7 h-16",
+              "bg-white/30",
+              "rounded-r-md",
+              "-ml-px",
+              "transition-colors duration-200",
+              "hover:bg-white/40"
+            )}>
+              <div className="text-white">
+                {isSidebarOpen ? <X size={16} /> : <Menu size={16} />}
+              </div>
             </div>
-          </div>
-        </button>
+          </button>
+        </div>
       </div>
 
-      {/* Sidebar */}
+      {/* Navigation Panel */}
       <div
         className={cn(
-          "fixed top-16 left-0 w-64 h-[calc(100vh-4rem)]",
+          "fixed top-16 left-0 bottom-0 w-64",
           "bg-black/80 backdrop-blur-md",
           "border-r border-white/10",
-          "z-40 transition-transform duration-300",
-          "overflow-y-auto",
+          "transition-transform duration-300 ease-in-out",
+          "z-40",
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        {children}
+        {/* Scrollable Container */}
+        <div className="h-full overflow-y-auto pb-16">
+          {children}
+        </div>
       </div>
 
       {/* Backdrop */}
