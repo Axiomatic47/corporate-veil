@@ -44,62 +44,58 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
   }
 
   return (
-    <>
-      {/* Fixed elements container */}
-      <div className="fixed inset-y-16 left-0 z-50">
-        {/* Vertical Bar */}
-        <div className="absolute inset-0 w-1 bg-white/20" />
+    <div className="fixed inset-0 pointer-events-none z-40" style={{ top: '4rem' }}>
+      {/* Vertical Bar */}
+      <div className="absolute left-0 top-0 bottom-0 w-1 bg-white/20 pointer-events-none" />
 
-        {/* Toggle Button - Always centered in viewport */}
-        <div className="fixed left-0 top-1/2 -translate-y-1/2">
-          <button
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className={cn(
-              "transition-transform duration-300",
-              isSidebarOpen && "translate-x-64"
-            )}
-          >
-            <div className={cn(
-              "flex items-center justify-center",
-              "w-7 h-16",
-              "bg-white/30",
-              "rounded-r-md",
-              "-ml-px",
-              "transition-colors duration-200",
-              "hover:bg-white/40"
-            )}>
-              {isSidebarOpen ? <X size={16} /> : <Menu size={16} />}
-            </div>
-          </button>
-        </div>
+      {/* Center Tab Container */}
+      <div className="absolute left-0 top-0 bottom-0 flex items-center">
+        <button
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          className={cn(
+            "pointer-events-auto",
+            "transition-transform duration-300",
+            isSidebarOpen && "translate-x-64"
+          )}
+        >
+          <div className={cn(
+            "flex items-center justify-center",
+            "w-7 h-16",
+            "bg-white/30",
+            "rounded-r-md",
+            "-ml-px",
+            "transition-colors duration-200",
+            "hover:bg-white/40"
+          )}>
+            {isSidebarOpen ? <X size={16} /> : <Menu size={16} />}
+          </div>
+        </button>
       </div>
 
-      {/* Navigation Panel - Fixed in viewport with scrollable content */}
+      {/* Navigation Panel */}
       <div
         className={cn(
-          "fixed top-16 left-0 bottom-0 w-64",
+          "absolute left-0 top-0 bottom-0 w-64",
           "bg-black/80 backdrop-blur-md",
           "border-r border-white/10",
-          "z-40 transition-transform duration-300",
+          "pointer-events-auto",
+          "transition-transform duration-300",
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        {/* Scrollable container for navigation content */}
         <div className="h-full overflow-y-auto">
-          <div className="p-6 space-y-6">
-            {children}
-          </div>
+          {children}
         </div>
       </div>
 
       {/* Backdrop */}
       {isSidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-30"
+          className="absolute inset-0 bg-black/50 pointer-events-auto"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
-    </>
+    </div>
   );
 };
 
