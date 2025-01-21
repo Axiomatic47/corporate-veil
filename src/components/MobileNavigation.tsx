@@ -44,60 +44,48 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
   }
 
   return (
-    <div className="relative">
-      {/* Fixed Container for Line and Tab */}
-      <div className="fixed top-16 left-0 h-[calc(100vh-4rem)] z-50">
-        {/* Vertical Line */}
-        <div
-          className={cn(
-            "absolute inset-0 w-1 bg-white/20",
-            "transition-transform duration-300",
-            isSidebarOpen ? "translate-x-64" : "translate-x-0"
-          )}
-        />
+    <>
+      {/* Vertical Bar */}
+      <div className="fixed inset-y-16 left-0 w-1 bg-white/20 z-40" />
 
-        {/* Centered Toggle Button */}
-        <div
-          className={cn(
-            "absolute top-1/2 -translate-y-1/2",
-            "transition-transform duration-300",
-            isSidebarOpen ? "translate-x-64" : "translate-x-0"
-          )}
-        >
-          <button
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className={cn(
-              "flex items-center justify-center",
-              "w-7 h-16",
-              "bg-white/30 hover:bg-white/40",
-              "rounded-r-md",
-              "-ml-px",
-              "transition-colors duration-200"
-            )}
-          >
+      {/* Toggle Button */}
+      <button
+        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+        className={cn(
+          "fixed z-50 left-0 top-1/2 -translate-y-1/2",
+          "transition-transform duration-300",
+          isSidebarOpen && "translate-x-64"
+        )}
+      >
+        <div className="relative flex items-center">
+          <div className={cn(
+            "flex items-center justify-center",
+            "w-7 h-16",
+            "bg-white/30",
+            "rounded-r-md",
+            "-ml-px",
+            "transition-colors duration-200",
+            "hover:bg-white/40"
+          )}>
             {isSidebarOpen ? <X size={16} /> : <Menu size={16} />}
-          </button>
+          </div>
         </div>
-      </div>
+      </button>
 
-      {/* Fixed Navigation Panel */}
+      {/* Navigation Panel */}
       <div
         className={cn(
           "fixed top-16 left-0 w-64 h-[calc(100vh-4rem)]",
           "bg-black/80 backdrop-blur-md",
           "border-r border-white/10",
-          "transition-transform duration-300 z-40",
+          "z-40 transition-transform duration-300",
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        {/* Scrollable Navigation Content */}
         <div className="h-full overflow-y-auto">
           {children}
         </div>
       </div>
-
-      {/* Main Content Spacer for Desktop */}
-      {!isMobile && <div className="w-64" />}
 
       {/* Backdrop */}
       {isSidebarOpen && (
@@ -106,7 +94,7 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
-    </div>
+    </>
   );
 };
 
