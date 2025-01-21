@@ -11,7 +11,18 @@ export const useMobileNavigation = () => {
     if (!isMobile) {
       setIsSidebarOpen(false);
     }
-  }, [isMobile]);
+
+    // Lock body scroll when sidebar is open on mobile
+    if (isMobile && isSidebarOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isMobile, isSidebarOpen]);
 
   return {
     isSidebarOpen,
@@ -33,60 +44,70 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
 }) => {
   const isMobile = useIsMobile();
 
-  if (!isMobile) return <>{children}</>;
+  if (!isMobile) {
+    return (
+      <div className="w-64 min-h-screen border-r border-white/10 bg-black/80 backdrop-blur-md">
+        {children}
+      </div>
+    );
+  }
 
   return (
-    <div className="relative">
-      {/* Pull Bar */}
+    <>
+      {/* Pull Tab */}
       <div
-        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
         className={cn(
-          "fixed z-50 h-full flex items-center cursor-pointer",
-          "transition-all duration-200 ease-in-out",
-          isSidebarOpen ? "left-[256px]" : "left-0"
+          "fixed z-50 top-16 transition-all duration-300 ease-in-out",
+          isSidebarOpen ? "left-64" : "left-0"
         )}
       >
-        <div className="h-32 flex items-center">
-          {/* Vertical Bar */}
+        <button
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          className="group relative flex items-center"
+        >
+          {/* Vertical Line */}
           <div className={cn(
-            "w-1 h-full backdrop-blur-md bg-white/10",
+            "w-1 h-32 bg-white/20",
             "transition-opacity duration-200",
             isSidebarOpen ? "opacity-0" : "opacity-100"
           )} />
 
           {/* Toggle Button */}
           <div className={cn(
-            "px-2 py-8 backdrop-blur-md bg-black/40 border border-white/10",
-            "rounded-r-lg -ml-px",
+            "absolute right-0 translate-x-full",
+            "p-2 backdrop-blur-md bg-black/40",
+            "border border-white/10 rounded-r-lg -ml-px",
             "transition-colors duration-200",
-            "hover:bg-black/60"
+            "hover:bg-black/60 group-hover:bg-black/60"
           )}>
-            <div className="rotate-0 transition-transform duration-200">
-              {isSidebarOpen ? <X size={16} /> : <Menu size={16} />}
-            </div>
+            {isSidebarOpen ? <X size={16} /> : <Menu size={16} />}
           </div>
-        </div>
+        </button>
       </div>
 
-      {/* Sidebar Content */}
+      {/* Sidebar */}
       <div
         className={cn(
-          "w-64 min-h-[calc(100vh-4rem)] backdrop-blur-md bg-black/80 border-r border-white/10",
-          "fixed lg:relative z-40 transition-all duration-300 ease-in-out h-full overflow-y-auto",
+          "fixed top-16 bottom-0 w-64 z-40",
+          "transition-all duration-300 ease-in-out",
+          "bg-black/80 backdrop-blur-md",
+          "border-r border-white/10",
           isSidebarOpen ? "left-0" : "-left-64"
         )}
       >
-        {children}
+        <div className="h-full overflow-y-auto">
+          {children}
+        </div>
       </div>
 
-      {/* Backdrop for mobile */}
+      {/* Backdrop Overlay */}
       {isSidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-30 lg:hidden"
+          className="fixed inset-0 bg-black/50 z-30"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
-    </div>
+    </>
   );
 };
 
