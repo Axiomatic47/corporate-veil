@@ -8,7 +8,7 @@ import rehypeRaw from 'rehype-raw';
 import { useCompositionStore } from "@/utils/compositionData";
 import { PageLayout } from "@/components/PageLayout";
 import { cn } from "@/lib/utils";
-import MobileNavigation, { useMobileNavigation } from "@/components/MobileNavigation";
+import MobileNavigation, { useMobileNavigation } from "@/components/MobileNavigation.tsx";
 
 const SectionPage = () => {
   const { compositionId = "", compositionIndex = "1", sectionId = "1" } = useParams();
