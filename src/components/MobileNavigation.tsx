@@ -45,32 +45,34 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
 
   return (
     <>
-      {/* Vertical Bar */}
+      {/* Vertical Bar - Full height, fixed to viewport */}
       <div className="fixed inset-y-16 left-0 w-1 bg-white/20 z-40" />
 
-      {/* Toggle Button */}
-      <button
-        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-        className={cn(
-          "fixed z-50 left-0 top-1/2 -translate-y-1/2",
-          "transition-transform duration-300",
-          isSidebarOpen && "translate-x-64"
-        )}
-      >
-        <div className="relative flex items-center">
-          <div className={cn(
-            "flex items-center justify-center",
-            "w-7 h-16",
-            "bg-white/30",
-            "rounded-r-md",
-            "-ml-px",
-            "transition-colors duration-200",
-            "hover:bg-white/40"
-          )}>
-            {isSidebarOpen ? <X size={16} /> : <Menu size={16} />}
-          </div>
+      {/* Toggle Button - Fixed to viewport center */}
+      <div className="fixed left-0 top-0 h-screen pointer-events-none z-50">
+        <div className="sticky top-1/2">
+          <button
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            className={cn(
+              "pointer-events-auto",
+              "transition-transform duration-300",
+              isSidebarOpen && "translate-x-64"
+            )}
+          >
+            <div className={cn(
+              "flex items-center justify-center",
+              "w-7 h-16",
+              "bg-white/30",
+              "rounded-r-md",
+              "-ml-px",
+              "transition-colors duration-200",
+              "hover:bg-white/40"
+            )}>
+              {isSidebarOpen ? <X size={16} /> : <Menu size={16} />}
+            </div>
+          </button>
         </div>
-      </button>
+      </div>
 
       {/* Navigation Panel */}
       <div
