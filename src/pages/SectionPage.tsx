@@ -8,17 +8,15 @@ import rehypeRaw from 'rehype-raw';
 import { useCompositionStore } from "@/utils/compositionData";
 import { PageLayout } from "@/components/PageLayout";
 import { cn } from "@/lib/utils";
-import { Menu, X } from "lucide-react";
-import { useIsMobile } from "@/hooks/use-mobile";
+import MobileNavigation, { useMobileNavigation } from "@/components/MobileNavigation";
 
 const SectionPage = () => {
   const { compositionId = "", compositionIndex = "1", sectionId = "1" } = useParams();
   const [literacyLevel, setLiteracyLevel] = useState(3);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
   const { memorandum, corrective, refreshCompositions } = useCompositionStore();
-  const isMobile = useIsMobile();
+  const { isSidebarOpen, setIsSidebarOpen, isMobile } = useMobileNavigation();
 
   useEffect(() => {
     refreshCompositions();
@@ -111,74 +109,37 @@ const SectionPage = () => {
 
   return (
     <PageLayout>
-      {/* Mobile Pull Tab */}
-      {isMobile && (
-        <div
-          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-          className={cn(
-            "fixed z-[100] top-16 h-[calc(100vh-64px)]",
-            "transition-all duration-200",
-            isSidebarOpen ? "left-[256px]" : "left-0"
-          )}
-        >
-          <div className="h-full w-1 bg-white/30" />
-          <div className="absolute top-1/2 -translate-y-1/2 -right-6">
-            <div className={cn(
-              "flex items-center justify-center",
-              "w-7 h-16",
-              "bg-white/30",
-              "rounded-r-md",
-              "-ml-px",
-              "transition-colors duration-200",
-              "hover:bg-white/40"
-            )}>
-              <div className="text-white">
-                {isSidebarOpen ? <X size={16} /> : <Menu size={16} />}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
       <div className="flex min-h-screen">
-        {/* Sidebar */}
-        <div
-          className={cn(
-            "w-64 min-h-screen bg-black/80 border-r border-white/10",
-            "backdrop-blur-md z-40 transition-all duration-300",
-            isMobile ? (isSidebarOpen ? "fixed left-0 top-16" : "fixed -left-64 top-16") : ""
-          )}
+        <MobileNavigation
+          isSidebarOpen={isSidebarOpen}
+          setIsSidebarOpen={setIsSidebarOpen}
         >
-          {/* Navigation container */}
-          <div className="sticky top-0">
-            {/* Header section */}
-            <div className="p-6 space-y-6">
-              <div>
-                <h2 className="text-lg font-serif text-white drop-shadow-lg mb-1">
-                  {compositionId === "memorandum" ? "Memorandum and Manifestation" : "Corrective Measures"}
-                </h2>
-                <h3 className="text-sm text-gray-200">{currentComposition.title}</h3>
-              </div>
-
-              {/* Navigation links */}
-              <nav className="space-y-2">
-                {currentComposition.sections.map((section, index) => (
-                  <button
-                    key={index}
-                    onClick={() => handleSectionChange(index + 1)}
-                    className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${
-                      index + 1 === parseInt(sectionId)
-                        ? "bg-white/20 text-white font-medium backdrop-blur-md"
-                        : "text-gray-200 hover:bg-white/10 hover:text-white"
-                    }`}
-                  >
-                    {section.title}
-                  </button>
-                ))}
-              </nav>
+          <div className="p-6 space-y-6">
+            <div>
+              <h2 className="text-lg font-serif text-white drop-shadow-lg mb-1">
+                {compositionId === "memorandum" ? "Memorandum and Manifestation" : "Corrective Measures"}
+              </h2>
+              <h3 className="text-sm text-gray-200">{currentComposition.title}</h3>
             </div>
+
+            <nav className="space-y-2">
+              {currentComposition.sections.map((section, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleSectionChange(index + 1)}
+                  className={cn(
+                    "w-full text-left px-3 py-2 rounded-md text-sm transition-colors",
+                    index + 1 === parseInt(sectionId)
+                      ? "bg-white/20 text-white font-medium backdrop-blur-md"
+                      : "text-gray-200 hover:bg-white/10 hover:text-white"
+                  )}
+                >
+                  {section.title}
+                </button>
+              ))}
+            </nav>
           </div>
-        </div>
+        </MobileNavigation>
 
         {/* Main Content */}
         <div className={cn(
