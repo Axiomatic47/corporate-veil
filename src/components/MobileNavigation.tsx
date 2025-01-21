@@ -45,16 +45,16 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
 
   return (
     <>
-      {/* Vertical Bar - Full height, fixed to viewport */}
-      <div className="fixed inset-y-16 left-0 w-1 bg-white/20 z-40" />
+      {/* Fixed elements container */}
+      <div className="fixed inset-y-16 left-0 z-50">
+        {/* Vertical Bar */}
+        <div className="absolute inset-0 w-1 bg-white/20" />
 
-      {/* Toggle Button - Fixed to viewport center */}
-      <div className="fixed left-0 top-0 h-screen pointer-events-none z-50">
-        <div className="sticky top-1/2">
+        {/* Toggle Button - Always centered in viewport */}
+        <div className="fixed left-0 top-1/2 -translate-y-1/2">
           <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
             className={cn(
-              "pointer-events-auto",
               "transition-transform duration-300",
               isSidebarOpen && "translate-x-64"
             )}
@@ -74,18 +74,21 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
         </div>
       </div>
 
-      {/* Navigation Panel */}
+      {/* Navigation Panel - Fixed in viewport with scrollable content */}
       <div
         className={cn(
-          "fixed top-16 left-0 w-64 h-[calc(100vh-4rem)]",
+          "fixed top-16 left-0 bottom-0 w-64",
           "bg-black/80 backdrop-blur-md",
           "border-r border-white/10",
           "z-40 transition-transform duration-300",
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
+        {/* Scrollable container for navigation content */}
         <div className="h-full overflow-y-auto">
-          {children}
+          <div className="p-6 space-y-6">
+            {children}
+          </div>
         </div>
       </div>
 
