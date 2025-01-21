@@ -12,7 +12,18 @@ export const useMobileNavigation = () => {
     if (!isMobile) {
       setIsSidebarOpen(false);
     }
-  }, [isMobile]);
+
+    // Lock body scroll when sidebar is open on mobile
+    if (isMobile && isSidebarOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isMobile, isSidebarOpen]);
 
   return {
     isSidebarOpen,
@@ -36,7 +47,7 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
 
   if (!isMobile) {
     return (
-      <div className="w-64 h-[calc(100vh-4rem)] border-r border-white/10 bg-black/80 backdrop-blur-md overflow-y-auto">
+      <div className="w-64 h-[calc(100vh-4rem)] border-r border-white/10 bg-black/80 backdrop-blur-md overflow-y-auto sticky top-16">
         {children}
       </div>
     );
@@ -44,25 +55,39 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
 
   return (
     <>
-      {/* Pull Tab */}
-      <div className="fixed top-16 left-0 h-full z-50 flex items-stretch">
-        {/* Handle */}
-        <div
+      {/* Vertical Bar Indicator */}
+      <div
+        className={cn(
+          "fixed z-50 top-16 h-[calc(100vh-4rem)]",
+          "transition-all duration-300",
+          isSidebarOpen ? "left-64" : "left-0"
+        )}
+      >
+        {/* Vertical Line */}
+        <div className="h-full w-1 bg-white/20" />
+
+        {/* Toggle Button */}
+        <button
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-          className={cn(
-            "w-6 flex items-center justify-center cursor-pointer",
-            "transition-all duration-300",
-            isSidebarOpen ? "translate-x-64" : "translate-x-0"
-          )}
+          className="absolute top-1/2 -translate-y-1/2 -right-6"
         >
-          <div className="w-1 h-32 bg-white/20" />
-          <div className="absolute right-0 p-2 bg-black/40 backdrop-blur-md border border-white/10 rounded-r-lg">
-            {isSidebarOpen ? <X size={16} /> : <Menu size={16} />}
+          <div className={cn(
+            "flex items-center justify-center",
+            "w-7 h-16",
+            "bg-white/30",
+            "rounded-r-md",
+            "-ml-px",
+            "transition-colors duration-200",
+            "hover:bg-white/40"
+          )}>
+            <div className="text-white">
+              {isSidebarOpen ? <X size={16} /> : <Menu size={16} />}
+            </div>
           </div>
-        </div>
+        </button>
       </div>
 
-      {/* Fixed Sidebar */}
+      {/* Sidebar */}
       <div
         className={cn(
           "fixed top-16 left-0 w-64 h-[calc(100vh-4rem)]",
