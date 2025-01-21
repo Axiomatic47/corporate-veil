@@ -110,36 +110,36 @@ const SectionPage = () => {
   return (
     <PageLayout>
       <div className="flex min-h-screen">
-        <MobileNavigation
-          isSidebarOpen={isSidebarOpen}
-          setIsSidebarOpen={setIsSidebarOpen}
-        >
-          <div className="px-6 py-4">
-            <div className="mb-6">
-              <h2 className="text-lg font-serif text-white drop-shadow-lg mb-1">
-                {compositionId === "memorandum" ? "Memorandum and Manifestation" : "Corrective Measures"}
-              </h2>
-              <h3 className="text-sm text-gray-200">{currentComposition.title}</h3>
-            </div>
+<MobileNavigation
+  isSidebarOpen={isSidebarOpen}
+  setIsSidebarOpen={setIsSidebarOpen}
+>
+  <div className="p-6">
+    <div>
+      <h2 className="text-lg font-serif text-white drop-shadow-lg mb-1">
+        {compositionId === "memorandum" ? "Memorandum and Manifestation" : "Corrective Measures"}
+      </h2>
+      <h3 className="text-sm text-gray-200">{currentComposition.title}</h3>
+    </div>
 
-            <nav className="space-y-2">
-              {currentComposition.sections.map((section, index) => (
-                <button
-                  key={index}
-                  onClick={() => handleSectionChange(index + 1)}
-                  className={cn(
-                    "w-full text-left px-3 py-2 rounded-md text-sm transition-colors",
-                    index + 1 === parseInt(sectionId)
-                      ? "bg-white/20 text-white font-medium backdrop-blur-md"
-                      : "text-gray-200 hover:bg-white/10 hover:text-white"
-                  )}
-                >
-                  {section.title}
-                </button>
-              ))}
-            </nav>
-          </div>
-        </MobileNavigation>
+    <nav className="mt-6 space-y-2 pb-16">
+      {currentComposition.sections.map((section, index) => (
+        <button
+          key={index}
+          onClick={() => handleSectionChange(index + 1)}
+          className={cn(
+            "w-full text-left px-3 py-2 rounded-md text-sm transition-colors",
+            index + 1 === parseInt(sectionId)
+              ? "bg-white/20 text-white font-medium backdrop-blur-md"
+              : "text-gray-200 hover:bg-white/10 hover:text-white"
+          )}
+        >
+          {section.title}
+        </button>
+      ))}
+    </nav>
+  </div>
+</MobileNavigation>
 
         <main className={cn(
           "flex-1 min-h-screen",
