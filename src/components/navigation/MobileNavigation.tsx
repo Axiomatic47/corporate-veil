@@ -33,45 +33,41 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
 }) => {
   const isMobile = useIsMobile();
 
-  if (!isMobile) return <>{children}</>;
+  if (!isMobile) {
+    return (
+      <div className="w-64 h-[calc(100vh-4rem)] border-r border-white/10 bg-black/80 backdrop-blur-md overflow-y-auto">
+        {children}
+      </div>
+    );
+  }
 
   return (
-    <div className="relative">
-      {/* Pull Tab - Fixed position */}
-      <div
-        className={cn(
-          "fixed top-16 z-50",
-          "transition-all duration-200 ease-in-out",
-          isSidebarOpen ? "left-64" : "left-0"
-        )}
-      >
-        <button
+    <>
+      {/* Pull Tab */}
+      <div className="fixed top-16 left-0 h-full z-50 flex items-stretch">
+        {/* Handle */}
+        <div
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-          className="flex items-center"
+          className={cn(
+            "w-6 flex items-center justify-center cursor-pointer",
+            "transition-all duration-300",
+            isSidebarOpen ? "translate-x-64" : "translate-x-0"
+          )}
         >
-          {/* Vertical Line */}
-          <div className="w-1 h-screen bg-white/20" />
-
-          {/* Toggle Button */}
-          <div className={cn(
-            "p-2 backdrop-blur-md bg-black/40",
-            "border border-white/10 rounded-r-lg -ml-px",
-            "transition-colors duration-200",
-            "hover:bg-black/60"
-          )}>
+          <div className="w-1 h-32 bg-white/20" />
+          <div className="absolute right-0 p-2 bg-black/40 backdrop-blur-md border border-white/10 rounded-r-lg">
             {isSidebarOpen ? <X size={16} /> : <Menu size={16} />}
           </div>
-        </button>
+        </div>
       </div>
 
-      {/* Sidebar - Fixed position */}
+      {/* Fixed Sidebar */}
       <div
         className={cn(
-          "fixed top-16 left-0 z-40",
-          "w-64 h-screen",
-          "transition-transform duration-200 ease-in-out",
+          "fixed top-16 left-0 w-64 h-[calc(100vh-4rem)]",
           "bg-black/80 backdrop-blur-md",
           "border-r border-white/10",
+          "z-40 transition-transform duration-300",
           "overflow-y-auto",
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}
@@ -86,7 +82,7 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
-    </div>
+    </>
   );
 };
 
