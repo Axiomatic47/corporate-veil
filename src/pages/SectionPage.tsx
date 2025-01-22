@@ -109,21 +109,21 @@ const SectionPage = () => {
 
   return (
     <PageLayout>
-      <div className="flex min-h-screen">
+      <div className="flex">
         <MobileNavigation
           isSidebarOpen={isSidebarOpen}
           setIsSidebarOpen={setIsSidebarOpen}
         >
-          <div className="fixed w-64 h-[calc(100vh-4rem)] overflow-y-auto bg-black/80 backdrop-blur-md">
-            <div className="p-6 space-y-6">
-              <div>
+          <div className="fixed w-64 h-[calc(100vh-4rem)] overflow-y-auto scrollbar-none">
+            <div className="p-6">
+              <div className="mb-6">
                 <h2 className="text-lg font-serif text-white drop-shadow-lg mb-1">
                   {compositionId === "memorandum" ? "Memorandum and Manifestation" : "Corrective Measures"}
                 </h2>
                 <h3 className="text-sm text-gray-200">{currentComposition.title}</h3>
               </div>
 
-              <nav className="space-y-2 pb-16"> {/* Added padding to ensure last items are visible */}
+              <nav className="space-y-2 pb-16">
                 {currentComposition.sections.map((section, index) => (
                   <button
                     key={index}
@@ -145,7 +145,7 @@ const SectionPage = () => {
 
         {/* Main Content */}
         <main className={cn(
-          "flex-1 overflow-y-auto",
+          "flex-1 overflow-y-auto min-h-screen",
           isMobile && isSidebarOpen ? "ml-64" : ""
         )}>
           <div className="p-8">

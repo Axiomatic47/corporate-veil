@@ -44,20 +44,26 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
   }
 
   return (
-    <>
+    <div className="fixed inset-0 isolate" style={{ top: '64px', touchAction: 'none', pointerEvents: 'none' }}>
       {/* Vertical Bar */}
-      <div className="fixed inset-y-16 left-0 w-1 bg-white/20 z-40" />
+      <div
+        className="absolute inset-y-0 left-0 w-1 bg-white/20"
+        style={{ touchAction: 'none' }}
+      />
 
-      {/* Toggle Button */}
-      <button
-        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-        className={cn(
-          "fixed z-50 left-0 top-1/2 -translate-y-1/2",
-          "transition-transform duration-300",
-          isSidebarOpen && "translate-x-64"
-        )}
+      {/* Toggle Button Container */}
+      <div
+        className="absolute inset-y-0 left-0 flex items-center"
+        style={{ touchAction: 'manipulation' }}
       >
-        <div className="relative flex items-center">
+        <button
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          className={cn(
+            "transform transition-transform duration-300",
+            "touch-manipulation pointer-events-auto",
+            isSidebarOpen && "translate-x-64"
+          )}
+        >
           <div className={cn(
             "flex items-center justify-center",
             "w-7 h-16",
@@ -69,20 +75,22 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
           )}>
             {isSidebarOpen ? <X size={16} /> : <Menu size={16} />}
           </div>
-        </div>
-      </button>
+        </button>
+      </div>
 
       {/* Navigation Panel */}
       <div
         className={cn(
-          "fixed top-16 left-0 w-64 h-[calc(100vh-4rem)]",
+          "absolute top-0 left-0 w-64 h-full",
           "bg-black/80 backdrop-blur-md",
           "border-r border-white/10",
-          "z-40 transition-transform duration-300",
+          "transition-transform duration-300",
+          "touch-manipulation pointer-events-auto",
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}
+        style={{ touchAction: 'pan-y' }}
       >
-        <div className="h-full overflow-y-auto">
+        <div className="h-full overflow-y-auto overscroll-contain">
           {children}
         </div>
       </div>
@@ -90,11 +98,12 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
       {/* Backdrop */}
       {isSidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-30"
+          className="absolute inset-0 bg-black/50 pointer-events-auto"
           onClick={() => setIsSidebarOpen(false)}
+          style={{ touchAction: 'none' }}
         />
       )}
-    </>
+    </div>
   );
 };
 
